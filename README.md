@@ -2,19 +2,76 @@
 
 Version 0.9 — public beta, progressing toward feature-complete 1.0.
 
-A portable C++ reconstruction of Llamasoft's nine Minotaur Project games over
-a shared Neon engine: Minotaur Rescue, Minotron: 2112, GoatUp, Caverns of Minos,
-Gridrunner, Five a Day, Super Ox Wars, Deflex and GoatUp 2. Gridrunner Classic
-has its own launcher entry.
+OpenMinotaur seeks to document and preserve the nine classic iOS titles released
+by Llamasoft between 2011 and 2013. Dubbed "The Minotaur Project," these titles
+were loved by fans, but enjoyed an unusually short period of official support, as 
+the need for constant updates on the platform was considered too high of a burden. 
+This project seeks to offload the burden of ongoing support to the community with
+three initiatives:
 
-OpenMinotaur is the source project. The Android app is named **Minotaur Project**;
-its planned Play Store title is **Minotaur Project: Llamasoft iOS Archive**.
+###Games
+OpenMinotaur provides an open-source, portable C++ reconstruction of all nine titles, 
+along with native controller support, support for a broader range of display 
+configurations, updated menus to allow all features to be accessed end-to-end with 
+controller or touch input, as well as minor bugfixes and UX improvements. These 
+updates serve the projects goal of allowing these games to be supported natively on 
+a wide range of platforms, now and in the future. Presently, Windows, Android, and 
+Linux  builds will be provided officially, but the source is built to accommodate 
+porting to a wide range of platforms, with OpenGL ES 3.0 and SDL3 being the primary
+dependencies.
 
-The collection includes the iOX launcher with animated app opening, native controller input, touch and
-mouse input, local scores, achievement tracking and configurable presentation.
-Original game assets are bundled with Llamasoft's permission; no import step is
-required. Runtime code uses C++17, SDL3 and OpenGL/OpenGL ES, without emulation
-or a binary-translation runtime.
+Because these titles used the now-discontinued OpenFeint service  for high scores
+and achievements, these features have been replaced with local high score tables
+and achievement tracking through the provided iOX launcher experience.
+
+The nine supported titles are:
+Minotaur Rescue
+Minotron: 2112
+Deflex
+GoatUp 
+Caverns of Minos
+Gridrunner
+Five a Day
+Super Ox Wars
+GoatUp 2. 
+
+Gridrunner Classic, once accessible by changing orientations in Gridrunner is now a
+separate module. 
+
+###Engine
+OpenMinotaur also attempts to reconstruct and document the lightweight iOS  version
+of the Neon Engine that drives  these games with a unified and reusable architecture,
+potentially enabling community development.
+
+Over the course of these games, various changes were made to the shared engine services.
+These are documented and made explicit where they occur.
+
+A future goal of this project is to develop an SDK supporting homebrew development with
+this engine.
+
+###Unified presentation and enhanced features.
+In addition to build files for individual games, OpenMinotaur also provides a unified
+launcher experience called iOX. This launcher compiles all titles into a single package,
+and aims to provide users with the kind of polished presentation and robust feature set
+found in a premium retro compilation. 
+
+iOX presents users with a clean graphical interface in the form of a cheeky parody of
+the early version of iOS. This serves as a hub for launching games, tracking achievement
+progress, and configuring advanced options and features not available in the base titles.
+
+Additional features available through iOX:
+*Original title sequence demonstrating light synth and vector modules
+*Screen settings for resolution, fullscreen/windowed, aspect ratio and orientation
+*Screen modes and filters for enhanced resolution, native res, scanlines, and CRT. 
+*Tilt control calibration/recentering
+*Controller remapping
+*Control orientation rotation
+
+In addition, an ambitious Live Bezel system is being built for the full release, which
+will fill letterboxed regions with responsive light synth graphics in the style of 
+classic Llamasoft titles, and realtime gameplay information widgets. The engine powering
+these features is implemented and powers the title sequence, but the scenes, rigs, and
+widgets are still being built and tested.
 
 ## Build
 
