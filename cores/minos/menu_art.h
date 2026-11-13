@@ -1,0 +1,23 @@
+// Embedded pixel-letter menu artwork.
+#pragma once
+#include <cstdint>
+namespace minos {
+inline constexpr uint8_t MenuAtlas[] = {
+#include "baked_assets/cores/minos/menu_art/MenuAtlas.inc"
+};
+inline constexpr char MenuCatalog[] = R"xml(<NeonResources>
+ <Literals><Literal index="2">__minos_menu.png</Literal></Literals>
+ <SpritePages><Spritepage>512,128,</Spritepage></SpritePages>
+ <Spritemaps><Spritemap entries="105">
+  <Spentry index="96">2,0,0,122,23,</Spentry>
+  <Spentry index="97">2,128,0,136,23,</Spentry>
+  <Spentry index="98">2,272,0,122,23,</Spentry>
+  <Spentry index="99">2,0,32,108,23,</Spentry>
+  <Spentry index="100">2,128,32,108,23,</Spentry>
+  <Spentry index="101">2,256,32,108,23,</Spentry>
+  <Spentry index="102">2,0,64,136,23,</Spentry>
+  <Spentry index="103">2,160,64,108,23,</Spentry>
+  <Spentry index="104">2,288,64,122,23,</Spentry>
+ </Spritemap></Spritemaps>
+</NeonResources>)xml";
+} // namespace minos

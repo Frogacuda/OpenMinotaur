@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='2' fonts='1' spritemaps='1' spritepages='2' >
+  <Literals>
+    <Literal index='0'>gridrunner.png</Literal>  
+    <Literal>gridrunner_chars.png</Literal>  
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='98'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+	<Spentry>0,0,0,512,512, </Spentry>
+	
+	<Spentry> 0,1,1,1,1,	<!-- White pixel for colour fills. 0. --> </Spentry>
+	<Spentry> 0,10,0,66,64,	<!-- pause button 1--> </Spentry>
+	<Spentry> 0,78,0,31,32,	<!-- star 2--> </Spentry>
+	<Spentry> 0,120,2,98,15,	<!-- LAMBCO 3--> </Spentry>
+	<Spentry> 0,0,64,34,34,	<!-- Player ship 4--> </Spentry>
+	<Spentry> 0,34,64,34,34,	<!-- Player ship outline 5--> </Spentry>
+	<Spentry> 0,76,320,10,17,	<!-- Player shot 6--> </Spentry>
+	<Spentry> 0,76,37,34,34,	<!-- Side zapper 7--> </Spentry>	
+	<Spentry> 0,76,72,34,34,	<!-- Side zapper outline 8--> </Spentry>	
+	<Spentry> 0,111,19,26,34,	<!-- Vert laser bolt 1 9--> </Spentry>		
+	<Spentry> 0,137,19,26,34,	<!-- Vert laser bolt 1 outline 10--> </Spentry>			
+	<Spentry> 0,111,53,26,34,	<!-- Vert laser bolt 2 11--> </Spentry>		
+	<Spentry> 0,137,53,26,34,	<!-- Vert laser bolt 2 outline 12--> </Spentry>		
+	<Spentry> 0,221,0,34,34,	<!-- Pod 1 13--> </Spentry>	
+	<Spentry> 0,257,0,34,34,	<!-- Pod 2 14--> </Spentry>	
+	<Spentry> 0,293,0,34,34,	<!-- Pod 3 15--> </Spentry>	
+	<Spentry> 0,329,0,34,34,	<!-- Pod 4 16--> </Spentry>	
+	<Spentry> 0,365,0,34,34,	<!-- Pod 5 17--> </Spentry>	
+	<Spentry> 0,401,0,34,34,	<!-- Pod 6 18--> </Spentry>		
+	<Spentry> 0,165,19,26,34,	<!-- Bomb 19--> </Spentry>		
+	<Spentry> 0,192,36,34,34,	<!-- Segment 1 20--> </Spentry>	
+	<Spentry> 0,230,36,34,34,	<!-- Segment 2 21--> </Spentry>	
+	<Spentry> 0,268,36,34,34,	<!-- Segment 3 22--> </Spentry>	
+	<Spentry> 0,306,36,34,34,	<!-- Segment 4 23--> </Spentry>	
+	<Spentry> 0,44,152,16,12,	<!-- 10pts 24--> </Spentry>	
+	<Spentry> 0,44,164,16,12,	<!-- 30pts 25--> </Spentry>		
+	<Spentry> 0,0,121,14,14,	<!-- Powerup ring 1 26--> </Spentry>	
+	<Spentry> 0,0,135,14,14,	<!-- Powerup ring 2 27--> </Spentry>	
+	<Spentry> 0,0,149,14,14,	<!-- Powerup ring 3 28--> </Spentry>	
+	<Spentry> 0,0,163,14,14,	<!-- Powerup ring 4 29--> </Spentry>	
+	<Spentry> 0,0,177,14,14,	<!-- Powerup ring 5 30--> </Spentry>	
+	<Spentry> 0,0,191,14,14,	<!-- Powerup ring 6 31--> </Spentry>	
+	<Spentry> 0,0,205,14,14,	<!-- Powerup ring 7 32--> </Spentry>	
+	<Spentry> 0,19,101,33,30,	<!-- Burst 33--> </Spentry>		
+	<Spentry> 0,16,132,18,17,	<!-- Star 34--> </Spentry>		
+	<Spentry> 0,16,132,18,17,	<!-- Star 35--> </Spentry>	
+	<Spentry> 0,485,39,18,18,	<!-- Cube 36--> </Spentry>	
+	<Spentry> 0,448,0,18,18,	<!-- Cube 37--> </Spentry>	
+	<Spentry> 0,466,0,18,18,	<!-- Cube 38--> </Spentry>	
+	<Spentry> 0,484,0,18,18,	<!-- Cube 39--> </Spentry>	
+	<Spentry> 0,484,21,18,18,	<!-- Frag bomb 40--> </Spentry>	
+	<Spentry> 0,466,21,18,18,	<!-- Frag bomb 41--> </Spentry>	
+	<Spentry> 0,448,21,18,18,	<!-- Frag bomb 42--> </Spentry>	
+	<Spentry> 0,485,60,18,18,	<!-- Frag bomb 43--> </Spentry>		
+	<Spentry> 0,430,39,18,18,	<!-- Frag bomb bullet 44--> </Spentry>	
+	<Spentry> 0,44,176,16,12,	<!-- 50 point bonus 45--> </Spentry>	
+	<Spentry> 0,342,36,16,16,	<!-- Pod 1 46--> </Spentry>	
+	<Spentry> 0,358,36,16,16,	<!-- Pod 2 47--> </Spentry>	
+	<Spentry> 0,374,36,16,16,	<!-- Pod 3 48--> </Spentry>	
+	<Spentry> 0,390,36,16,16,	<!-- Pod 4 49--> </Spentry>	
+	<Spentry> 0,406,36,16,16,	<!-- Pod 5 50--> </Spentry>		
+	<Spentry> 0,342,52,16,16,	<!-- Pod 6 51--> </Spentry>	
+	<Spentry> 0,358,52,16,16,	<!-- Pod 7 52--> </Spentry>	
+	<Spentry> 0,374,52,16,16,	<!-- Pod 8 53--> </Spentry>		
+	<Spentry> 0,392,52,12,10,	<!-- Swarmer 54--> </Spentry>	
+	<Spentry> 0,406,52,12,10,	<!-- Swarmer 55--> </Spentry>
+	<Spentry> 0,165,72,18,19,	<!-- Anal Surprise 1 56--> </Spentry>	
+	<Spentry> 0,184,72,18,19,	<!-- Anal Surprise 2 57--> </Spentry>	
+	<Spentry> 0,203,72,18,19,	<!-- Anal Surprise 3 58--> </Spentry>	
+	<Spentry> 0,222,72,18,19,	<!-- Anal Surprise 4 59--> </Spentry>	
+	<Spentry> 0,241,72,18,19,	<!-- Anal Surprise 5 60--> </Spentry>	
+	<Spentry> 0,260,72,18,19,	<!-- Anal Surprise 6 61--> </Spentry>	
+	<Spentry> 0,279,72,18,19,	<!-- Anal Surprise 7 62--> </Spentry>	
+	<Spentry> 0,17,152,24,12,	<!-- 500 bonus 63 --> </Spentry>	
+	<Spentry> 0,17,164,24,12,	<!-- 500 bonus 64 --> </Spentry>	
+	<Spentry> 0,17,176,24,12,	<!-- 500 bonus 65 --> </Spentry>		
+	<Spentry> 0,55,106,128,20,	<!-- GRID 66 --> </Spentry>		
+	<Spentry> 0,55,126,192,20,	<!-- RUNNER 67 --> </Spentry>	
+	<Spentry> 0,63,152,20,12,	<!-- 100 bonus 68 --> </Spentry>	
+	<Spentry> 0,63,164,20,12,	<!-- 100 bonus 69 --> </Spentry>	
+	<Spentry> 0,63,176,20,12,	<!-- 100 bonus 70 --> </Spentry>
+	<Spentry> 0,300,73,18,18,	<!-- ZAKATO 1 71 --> </Spentry>		
+	<Spentry> 0,318,73,18,18,	<!-- ZAKATO 2 72 --> </Spentry>		
+	<Spentry> 0,338,71,30,30,	<!-- pod 2 73 --> </Spentry>	
+	<Spentry> 0,368,71,30,30,	<!-- pod 2 74 --> </Spentry>	
+	<Spentry> 0,398,71,30,30,	<!-- pod 2 75 --> </Spentry>	
+	<Spentry> 0,428,71,30,30,	<!-- pod 2 76 --> </Spentry>	
+	<Spentry> 0,85,152,10,17,	<!-- ebull 77 --> </Spentry>	
+	<Spentry> 0,96,151,97,24,	<!-- start button 78 --> </Spentry>		
+	<Spentry> 0,193,151,22,24,	<!-- + button 79 --> </Spentry>		
+	<Spentry> 0,215,151,22,24,	<!-- - button 80 --> </Spentry>		
+	<Spentry> 0,17,190,98,53,	<!-- - exit button 81 --> </Spentry>		
+	<Spentry> 0,300,91,18,18,	<!-- ZAKATO 3 82 --> </Spentry>		
+	<Spentry> 0,318,91,18,18,	<!-- ZAKATO 4 83 --> </Spentry>	
+	<Spentry> 0,119,177,34,34,	<!-- Barrel 1 84 --> </Spentry>	
+	<Spentry> 0,154,177,34,34,	<!-- Barrel 2 85 --> </Spentry>	
+	<Spentry> 0,192,177,30,16,	<!-- Saucer 1 86 --> </Spentry>	
+	<Spentry> 0,192,193,30,16,	<!-- Saucer 2 87 --> </Spentry>	
+	<Spentry> 0,255,114,40,49,	<!-- Novice 88 --> </Spentry>	
+	<Spentry> 0,255,164,40,49,	<!-- Expert 89 --> </Spentry>	
+	<Spentry> 0,300,115,33,34,	<!-- Openfeint 90 --> </Spentry>
+    <Spentry> 0,338,113,66,66,	<!-- Shop 91 --> </Spentry>
+    <Spentry> 0,117,214,97,24,	<!-- survival button 92 --> </Spentry>
+    <Spentry> 0,117,238,97,24,	<!-- pure button 93 --> </Spentry>
+    <Spentry> 0,117,262,97,24,	<!-- casual button 94 --> </Spentry>
+    <Spentry> 0,409,112,66,69,	<!-- sheep button 95 --> </Spentry>
+	
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+ <Sample maxinstance='1' >yay0.wav</Sample>
+ <Sample maxinstance='1' >yay1.wav</Sample>
+ <Sample maxinstance='1' >yay2.wav</Sample>
+ <Sample maxinstance='1' >yay3.wav</Sample>
+  <Sample maxinstance='1' >yay4.wav</Sample>
+   <Sample maxinstance='1' >woohoo.wav</Sample>
+ <Sample maxinstance='1' >waytogo.wav</Sample>      
+  <Sample maxinstance='1' >yourock.wav</Sample>   
+  <Sample maxinstance='1' >c64_eol.wav</Sample>  
+  <Sample maxinstance='1' >c64_fire.wav</Sample>  
+  <Sample maxinstance='1' >c64_hit.wav</Sample>  
+  <Sample maxinstance='1' >c64_killed.wav</Sample>  
+  <Sample maxinstance='1' >c64_zap.wav</Sample>  
+  <Sample maxinstance='1' >c64h2.wav</Sample>  
+  <Sample maxinstance='1' >vic_eol.wav</Sample>  
+  <Sample maxinstance='1' >vic_fire.wav</Sample>
+  <Sample maxinstance='1' >vic_hit_1.wav</Sample>
+  <Sample maxinstance='1' >vic_hit_3.wav</Sample>
+  <Sample maxinstance='1' >vic_hit2.wav</Sample>
+  <Sample maxinstance='1' >vic_hit4.wav</Sample>
+  <Sample maxinstance='1' >vic_killed.wav</Sample>   
+  <Sample maxinstance='1' >vic_long_zap.wav</Sample> 
+  <Sample maxinstance='1' >vic_short_zap.wav</Sample>   
+  <Sample maxinstance='1' >vich2.wav</Sample>       
+   <Sample maxinstance='1' >aczap.wav</Sample>   
+   <Sample maxinstance='1' >acshoot.wav</Sample>    
+   <Sample maxinstance='1' >achitpod.wav</Sample>     
+   <Sample maxinstance='1' >ackillpod.wav</Sample>   
+   <Sample maxinstance='1' >acshoot2.wav</Sample>  
+   <Sample maxinstance='1' >pip.wav</Sample>  
+	<Sample maxinstance='1' >zap2.wav</Sample>  	
+	<Sample maxinstance='1' >zap3.wav</Sample>  	
+	<Sample maxinstance='1' >acstart.wav</Sample>  	
+	<Sample maxinstance='1' >ac_die.wav</Sample> 
+	<Sample maxinstance='1' >powerup.wav</Sample>  	
+	<Sample maxinstance='1' >powerup2.wav</Sample> 
+	<Sample maxinstance='1' >powerup3.wav</Sample> 
+	<Sample maxinstance='1' >powerup4.wav</Sample> 
+	<Sample maxinstance='1' >pup_4.wav</Sample> 
+	<Sample maxinstance='1' >pup_5.wav</Sample> 
+	<Sample maxinstance='1' >pup_6.wav</Sample> 
+	<Sample maxinstance='1' >pup_7.wav</Sample> 
+	<Sample maxinstance='1' >powerupget.wav</Sample>  	
+	<Sample maxinstance='1' >dtmf9.wav</Sample>
+	<Sample maxinstance='1' >thanksdude.wav</Sample>    
+	<Sample maxinstance='1' >eol.wav</Sample>  	
+	<Sample maxinstance='1' >eol2.wav</Sample>
+	<Sample maxinstance='1' >spinner_hit.wav</Sample>  	  	
+	<Sample maxinstance='1' >warpcount.wav</Sample>  	
+	<Sample maxinstance='1' >extralife.wav</Sample>  
+	<Sample maxinstance='1' >openpod.wav</Sample>
+	<Sample maxinstance='1' >swarmhit.wav</Sample>   
+	<Sample maxinstance='1' >analhit.wav</Sample>   
+	<Sample maxinstance='1' >coinin.wav</Sample>     
+	<Sample maxinstance='1' >pause.wav</Sample>   	
+	<Sample maxinstance='1' >hsget.wav</Sample>   
+	<Sample maxinstance='1' >shihit.wav</Sample>   
+	<Sample maxinstance='1' >cheevo.wav</Sample>
+      <Sample maxinstance='1' >range.wav</Sample>
+   </Sounds>
+</NeonResources>

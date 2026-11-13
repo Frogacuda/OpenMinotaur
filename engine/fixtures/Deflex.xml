@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='2' fonts='1' spritemaps='1' spritepages='2' >
+  <Literals>
+    <Literal index='0'>deflex.png</Literal>  
+    <Literal>chars.png</Literal>  
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='113'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+	<Spentry>0,0,0,512,512, </Spentry>
+	
+	<Spentry> 0,1,1,1,1,	<!-- White pixel for colour fills. 0. --> </Spentry>
+	<Spentry> 0,65,0,63,37,		<!-- OK button. 0. --></Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	<Spentry> 0,480,468,1,1, </Spentry>
+	
+	<Spentry> 0,0,388,66,66,			<!-- Deflector button. 10. --> </Spentry>
+	<Spentry> 0,0,70,16,16,			<!-- Ball. 11. --> </Spentry>
+	<Spentry> 0,17,70,29,28,		<!-- c64 ball. 12. --> </Spentry>
+	<Spentry> 0,48,70,48,42,		<!-- camel 1. 13 --> </Spentry>
+	<Spentry> 0,97,38,46,36,		<!-- camel 2. 14 --> </Spentry>
+	<Spentry> 0,145,0,45,42,		<!-- Cippy 15 --> </Spentry>
+	<Spentry> 0,192,0,32,42,		<!-- Jumper minotaur 16 --> </Spentry>			
+	<Spentry> 0,226,0,12,14,		<!-- Digit 0 17--> </Spentry>	
+	<Spentry> 0,238,0,12,14,		<!-- Digit 1 18--> </Spentry>	
+	<Spentry> 0,250,0,12,14,		<!-- Digit 2 19--> </Spentry>	
+	<Spentry> 0,262,0,12,14,		<!-- Digit 3 20--> </Spentry>	
+	<Spentry> 0,274,0,12,14,		<!-- Digit 4 21--> </Spentry>	
+	<Spentry> 0,286,0,12,14,		<!-- Digit 5 22--> </Spentry>	
+	<Spentry> 0,298,0,12,14,		<!-- Digit 6 23--> </Spentry>	
+	<Spentry> 0,310,0,12,14,		<!-- Digit 7 24--> </Spentry>	
+	<Spentry> 0,322,0,12,14,		<!-- Digit 8 25--> </Spentry>	
+	<Spentry> 0,334,0,12,14,		<!-- Digit 9 26--> </Spentry>	
+	<Spentry> 0,227,17,125,37,		<!-- DEFLEX 27--> </Spentry>
+	<Spentry> 0,0,100,32,32,		<!-- Ball core 28--> </Spentry>		
+
+	<Spentry> 0,156,45,5,5,			<!-- confetti diamond 29--> </Spentry>	
+	<Spentry> 0,163,45,7,7,			<!-- confetti heart 30--> </Spentry>
+	<Spentry> 0,171,45,10,10,		<!-- confetti smily 31--> </Spentry>	
+	<Spentry> 0,182,45,14,14,		<!-- confetti star 32--> </Spentry>
+	<Spentry> 0,197,45,26,12,		<!-- confetti baa 33--> </Spentry>
+	<Spentry> 0,152,56,26,10,		<!-- confetti yes 34--> </Spentry>
+	<Spentry> 0,179,60,14,14,		<!-- confetti star2 35--> </Spentry>
+	<Spentry> 0,197,58,14,14,		<!-- confetti star3 36--> </Spentry>
+
+	<Spentry> 0,95,76,50,48,		<!-- confetti star3 37--> </Spentry>
+	<Spentry> 0,355,1,63,63,		<!-- cloud 38--> </Spentry>
+	<Spentry> 0,256,57,64,37,		<!-- RETRY button 39--> </Spentry>
+	<Spentry> 0,256,96,64,37,		<!-- NEXT button 40--> </Spentry>
+	<Spentry> 0,256,135,64,37,		<!-- BACK button 41--> </Spentry>
+	<Spentry> 0,323,59,20,22,		<!-- strawberry 42--> </Spentry>	
+	<Spentry> 0,321,84,22,22,		<!-- cherry 43--> </Spentry>		
+	<Spentry> 0,321,109,20,22,		<!-- peach 44--> </Spentry>	
+	<Spentry> 0,321,134,20,22,		<!-- apple 45--> </Spentry>
+	<Spentry> 0,321,158,30,32,		<!-- banana 46--> </Spentry>	
+	<Spentry> 0,352,66,68,100,		<!-- lrh 47--> </Spentry>		
+	<Spentry> 0,427,0,64,63,		<!-- bomb 48--> </Spentry>		
+	<Spentry> 0,424,68,64,60,		<!-- derpy 49--> </Spentry>		
+	<Spentry> 0,149,76,64,48,		<!-- caprichoso 50--> </Spentry>		
+	<Spentry> 0,41,116,14,14,		<!-- spaceship 51--> </Spentry>		
+	<Spentry> 0,0,135,6,14,		<!-- pong bat 52--> </Spentry>	
+	<Spentry> 0,8,135,4,4,		<!-- pong ball 53--> </Spentry>	
+	<Spentry> 0,14,135,48,35,		<!-- cake 54--> </Spentry>	
+	<Spentry> 0,65,124,48,47,		<!-- H cow 55--> </Spentry>		
+	<Spentry> 0,184,128,32,42,		<!-- Gumby 56--> </Spentry>	
+	<Spentry> 0,119,128,64,44,		<!-- 16 tons 57--> </Spentry>		
+	<Spentry> 0,0,174,46,35,		<!-- croissant 58--> </Spentry>		
+	<Spentry> 0,49,173,42,46,		<!-- lamb 59--> </Spentry>			
+	<Spentry> 0,93,174,48,62,		<!-- pink bull 60--> </Spentry>	
+	<Spentry> 0,145,175,49,40,		<!-- RD 61--> </Spentry>	
+	<Spentry> 0,198,174,32,44,		<!-- Cup cake 62--> </Spentry>	
+	<Spentry> 0,233,174,48,48,		<!-- Osborne 63--> </Spentry>	
+	<Spentry> 0,285,176,30,50,		<!-- Cuddly mino 64--> </Spentry>	
+	<Spentry> 0,318,193,48,48,		<!-- Goat 65--> </Spentry>	
+	<Spentry> 0,367,169,39,35,		<!-- Fox 66--> </Spentry>			
+	<Spentry> 0,370,207,45,45,		<!-- Butterfly 67--> </Spentry>		
+	<Spentry> 0,416,169,48,48,		<!-- Floppy 68--> </Spentry>	
+	<Spentry> 0,0,224,64,56,		<!-- Cow sign 69--> </Spentry>		
+	<Spentry> 0,0,282,64,56,		<!-- Deer sign 70--> </Spentry>			
+	<Spentry> 0,65,239,48,46,		<!-- Star 71--> </Spentry>	
+	<Spentry> 0,114,240,48,54,		<!-- Tea 72--> </Spentry>	
+	<Spentry> 0,66,294,48,54,		<!-- Coffee 73--> </Spentry>	
+	<Spentry> 0,116,295,46,46,		<!-- Apollo CSM 74--> </Spentry>	
+	<Spentry> 0,164,221,48,48,		<!-- Moo-n 75--> </Spentry>		
+	<Spentry> 0,218,225,48,48,		<!-- Cake 76--> </Spentry>										
+	<Spentry> 0,166,276,47,48,		<!-- Cow 77--> </Spentry>			
+	<Spentry> 0,218,276,48,38,		<!-- E meter 78--> </Spentry>		
+	<Spentry> 0,269,228,32,28,		<!-- asteroid 79--> </Spentry>		
+	<Spentry> 0,269,259,32,28,		<!-- lift 80--> </Spentry>		
+	<Spentry> 0,302,240,48,47,		<!-- laughing cow 81--> </Spentry>																										
+	<Spentry> 0,269,290,48,48,		<!-- MLPNews 82--> </Spentry>		
+	<Spentry> 0,351,253,48,45,		<!-- Sun 83--> </Spentry>		
+	<Spentry> 0,322,297,48,43,		<!-- rose 84--> </Spentry>	
+	<Spentry> 0,433,134,23,17,		<!-- invader 85--> </Spentry>		
+	<Spentry> 0,416,222,48,30,		<!-- cow 86--> </Spentry>		
+	<Spentry> 0,402,254,48,37,		<!-- sheep 87--> </Spentry>			
+	<Spentry> 0,463,130,48,46,		<!-- egg 88--> </Spentry>	
+	<Spentry> 0,374,298,48,62,		<!-- beast 89--> </Spentry>		
+	<Spentry> 0,424,295,68,42,		<!-- c64 90--> </Spentry>		
+	<Spentry> 0,0,340,48,48,		<!-- giraffe 91--> </Spentry>		
+	<Spentry> 0,69,350,48,48,		<!-- bread 92--> </Spentry>			
+	<Spentry> 0,73,403,48,48,		<!-- giraffe 93--> </Spentry>		
+	<Spentry> 0,121,344,48,53,		<!-- bunny 94--> </Spentry>		
+	<Spentry> 0,125,402,52,39,		<!-- ST disk 95--> </Spentry>	
+	<Spentry> 0,171,329,11,16,		<!-- ST nouse arrow 96--> </Spentry>	
+	<Spentry> 0,187,329,50,50,		<!-- zx80 97--> </Spentry>		
+	<Spentry> 0,246,342,64,108,		<!-- uncle Clive 98--> </Spentry>			
+	<Spentry> 0,314,364,64,78,		<!-- pink unicorn 99--> </Spentry>	
+	<Spentry> 0,382,362,48,70,		<!-- level selector panel 100--> </Spentry>				
+	<Spentry> 0,383,435,2,24,		<!-- graph sliver 101--> </Spentry>		
+	<Spentry> 0,1,465,82,38,		<!-- RESUME button 102--> </Spentry>	
+	<Spentry> 0,87,465,64,38,		<!-- QUIT button 103--> </Spentry>	
+	<Spentry> 0,154,465,64,38,		<!-- PLAY button 104--> </Spentry>		
+	<Spentry> 0,221,465,64,38,		<!-- PAUSE button 105--> </Spentry>	
+	<Spentry> 0,188,388,10,14,		<!-- ? 106--> </Spentry>	
+	<Spentry> 0,436,340,64,49,		<!-- musk ox 107--> </Spentry>			
+	<Spentry> 0,291,461,48,48,		<!-- smily 108--> </Spentry>		
+	<Spentry> 0,341,473,48,34,		<!-- phone 109--> </Spentry>	
+	<Spentry> 0,413,447,98,56,		<!-- OpenFeint button 110--> </Spentry>																									
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+ <Sample maxinstance='1' >yay0.wav</Sample>
+ <Sample maxinstance='1' >yay1.wav</Sample>
+ <Sample maxinstance='1' >yay2.wav</Sample>
+ <Sample maxinstance='1' >yay3.wav</Sample>
+  <Sample maxinstance='1' >yay4.wav</Sample>
+   <Sample maxinstance='1' >woohoo.wav</Sample>
+ <Sample maxinstance='1' >waytogo.wav</Sample>      
+  <Sample maxinstance='1' >yourock.wav</Sample>   
+  <Sample maxinstance='64' >ttone_1.wav</Sample>
+  <Sample maxinstance='64' >ttone_2.wav</Sample>
+  <Sample maxinstance='64' >ttone_3.wav</Sample>
+  <Sample maxinstance='64' >ttone_4.wav</Sample>
+  <Sample maxinstance='64' >ttone_5.wav</Sample>
+  <Sample maxinstance='64' >ttone_6.wav</Sample>
+  <Sample maxinstance='64' >ttone_7.wav</Sample>
+  <Sample maxinstance='64' >ttone_8.wav</Sample>  	
+  <Sample maxinstance='64' >ttone_9.wav</Sample>
+  <Sample maxinstance='64' >ttone_10.wav</Sample>
+  <Sample maxinstance='64' >ttone_11.wav</Sample>
+  <Sample maxinstance='64' >ttone_12.wav</Sample>  	  
+  <Sample maxinstance='64' >tone_1.wav</Sample>
+  <Sample maxinstance='64' >tone_2.wav</Sample>
+  <Sample maxinstance='64' >tone_3.wav</Sample>
+  <Sample maxinstance='64' >tone_4.wav</Sample>
+  <Sample maxinstance='64' >tone_5.wav</Sample>
+  <Sample maxinstance='64' >tone_6.wav</Sample>
+  <Sample maxinstance='64' >tone_7.wav</Sample>
+  <Sample maxinstance='64' >tone_8.wav</Sample>  	
+  <Sample maxinstance='64' >tone_9.wav</Sample>
+  <Sample maxinstance='64' >tone_10.wav</Sample>
+  <Sample maxinstance='64' >tone_11.wav</Sample>
+  <Sample maxinstance='64' >tone_12.wav</Sample>  	
+  <Sample maxinstance='64' >tone0.wav</Sample>
+  <Sample maxinstance='64' >tone1.wav</Sample>
+  <Sample maxinstance='64' >tone2.wav</Sample>
+  <Sample maxinstance='64' >tone3.wav</Sample>
+  <Sample maxinstance='64' >tone4.wav</Sample>
+  <Sample maxinstance='64' >tone5.wav</Sample>
+  <Sample maxinstance='64' >tone6.wav</Sample>
+  <Sample maxinstance='64' >tone7.wav</Sample>
+  <Sample maxinstance='64' >tone8.wav</Sample>  	
+  <Sample maxinstance='64' >tone9.wav</Sample>
+  <Sample maxinstance='64' >tone10.wav</Sample>
+  <Sample maxinstance='64' >tone11.wav</Sample>
+  <Sample maxinstance='64' >tone12.wav</Sample>
+  <Sample maxinstance='64' >tone13.wav</Sample>
+  <Sample maxinstance='64' >tone14.wav</Sample>
+  <Sample maxinstance='64' >tone15.wav</Sample>
+  <Sample maxinstance='64' >tone16.wav</Sample>
+  <Sample maxinstance='64' >tone17.wav</Sample>
+  <Sample maxinstance='64' >tone18.wav</Sample>
+  <Sample maxinstance='64' >tone19.wav</Sample>
+  <Sample maxinstance='64' >tone20.wav</Sample>
+  <Sample maxinstance='64' >tone21.wav</Sample>
+  <Sample maxinstance='64' >tone22.wav</Sample>
+  <Sample maxinstance='64' >tone23.wav</Sample>
+  <Sample maxinstance='64' >tone24.wav</Sample>
+  <Sample maxinstance='64' >tone25.wav</Sample>
+  <Sample maxinstance='64' >tone26.wav</Sample>
+  <Sample maxinstance='64' >tone27.wav</Sample>
+  <Sample maxinstance='64' >tone28.wav</Sample>
+  <Sample maxinstance='64' >tone29.wav</Sample>
+  <Sample maxinstance='64' >tone30.wav</Sample>
+  <Sample maxinstance='64' >tone31.wav</Sample>
+  <Sample maxinstance='64' >tone32.wav</Sample>
+  <Sample maxinstance='64' >tone33.wav</Sample>
+  <Sample maxinstance='64' >tone34.wav</Sample>    
+  <Sample maxinstance='64' >tone35.wav</Sample>      	  		 					 		 		 							 	 	 	 				 				  							  		  			  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								  			  													
+  </Sounds>
+</NeonResources>

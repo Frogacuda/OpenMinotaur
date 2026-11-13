@@ -1,0 +1,173 @@
+// Minotaur Project Android app, built from OpenMinotaur. Native code uses the same
+// CMake project as the desktop build (../../CMakeLists.txt); SDL3 is built
+// from source and its Java glue is compiled from the same checkout.
+plugins {
+    id 'com.android.application'
+}
+
+def standaloneGame = providers.gradleProperty('standaloneGame').getOrElse('')
+def pythonExecutable = providers.gradleProperty('pythonExecutable')
+def standaloneTitles = [minotron:'Minotron: 2112', minorescue:'Minotaur Rescue',
+    goatup:'GoatUp', minos:'Caverns of Minos', gridrunner:'Gridrunner',
+    'gridrunner-classic':'Gridrunner Classic', fiveaday:'Five A Day',
+    superoxwars:'Super Ox Wars', deflex:'Deflex', goatup2:'GoatUp 2']
+if (standaloneGame && !standaloneTitles.containsKey(standaloneGame)) {
+    throw new GradleException("Unknown standaloneGame: ${standaloneGame}")
+}
+def assetGame = standaloneGame == 'gridrunner-classic' ? 'gridrunner' : standaloneGame
+def standaloneFlavor = standaloneGame.replace('-', '')
+if (standaloneGame) layout.buildDirectory.set(file("build-standalone/${standaloneGame}"))
+
+def sdlDir = file(providers.gradleProperty('sdlSourceDir').getOrElse("${rootDir}/../third_party/SDL3"))
+def sdlCmakePath = sdlDir.absolutePath.replace('\\', '/')
+if (!file("${sdlDir}/CMakeLists.txt").exists()) {
+    throw new GradleException("SDL3 source not found at ${sdlDir}.\n" +
+        "Run: git clone --depth 1 --branch release-3.2.24 https://github.com/libsdl-org/SDL.git third_party/SDL3")
+}
+
+// Private signing settings live outside the checkout. Environment variables can
+// override individual fields for CI; credentials are never written to the project.
+def privateSigningFile = file(providers.gradleProperty('androidSigningFile')
+    .orElse(providers.environmentVariable('OPENMINOTAUR_SIGNING_FILE'))
+    .getOrElse("${System.getProperty('user.home')}/AndroidSigning/openminotaur-signing.json"))
+def privateSigning = [:]
+if (privateSigningFile.isFile()) {
+    try {
+        privateSigning = new groovy.json.JsonSlurper().parseText(privateSigningFile.getText('UTF-8').replaceFirst('^\uFEFF', ''))
+        if (!(privateSigning instanceof Map)) throw new IllegalArgumentException()
+    } catch (Exception ignored) {
+        throw new GradleException("Private Android signing settings are not valid JSON. Check ${privateSigningFile}.")
+    }
+}
+def signingValue = { String name, String field, String fallback = '' ->
+    providers.environmentVariable("OPENMINOTAUR_SIGNING_${name}").getOrElse(privateSigning[field]?.toString() ?: fallback)
+}
+def releaseStorePath = signingValue('STORE_FILE', 'storeFile')
+def releaseStoreFile = releaseStorePath ? file(releaseStorePath) : null
+def releaseStorePassword = signingValue('STORE_PASSWORD', 'storePassword')
+def releaseKeyAlias = signingValue('KEY_ALIAS', 'keyAlias', 'openminotaur')
+def releaseKeyPassword = signingValue('KEY_PASSWORD', 'keyPassword', releaseStorePassword)
+def releaseStoreType = signingValue('STORE_TYPE', 'storeType', 'PKCS12')
+def checkReleaseSigning = tasks.register('checkReleaseSigning') {
+    group = 'verification'
+    description = 'Require private release signing settings without displaying credentials.'
+    doLast {
+        if (!releaseStoreFile || !releaseStoreFile.isFile() || !releaseStorePassword || !releaseKeyAlias || !releaseKeyPassword) {
+            throw new GradleException("Release signing is incomplete. Configure ${privateSigningFile} or OPENMINOTAUR_SIGNING_* environment variables. See README.md. Use assembleDebug for a development-key build.")
+        }
+    }
+}
+tasks.configureEach {
+    if (name ==~ /pre.*ReleaseBuild/) dependsOn(checkReleaseSigning)
+}
+
+android {
+    namespace = "org.minotaurport.collection"
+    compileSdk 35
+    ndkVersion "27.2.12479018"
+
+    if (standaloneGame) {
+        flavorDimensions += 'game'
+        productFlavors {
+            create(standaloneFlavor) { dimension 'game' }
+        }
+    }
+
+    defaultConfig {
+        applicationId "org.minotaurport.collection"
+        if (standaloneGame) applicationId "org.openminotaur.${standaloneGame.replace('-', '')}"
+        manifestPlaceholders = [appLabel: standaloneGame ? standaloneTitles[standaloneGame] : '@string/app_name',
+            appIcon: standaloneGame ? '@drawable/standalone_icon' : '@drawable/ic_launcher']
+        minSdk 24
+        targetSdk 35
+        versionCode providers.gradleProperty('appVersionCode').getOrElse('144').toInteger()
+        versionName providers.gradleProperty('appVersionName').getOrElse('0.9')
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_static", "-DMINO_STANDALONE_GAME=${standaloneGame}",
+                          "-DBUILD_TESTING=OFF", "-DNEON_BUILD_CHECKS=OFF",
+                          "-DGRR_BUILD_CHECKS=OFF", "-DMINOS_BUILD_CHECKS=OFF", "-DDEFLEX_BUILD_CHECKS=OFF",
+                          "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                          "-DSDL3_SOURCE_DIR=${sdlCmakePath}",
+                          "-DMINO_CORE_MINOTRON=ON"
+                if (!standaloneGame) arguments "-DMINO_LIVE_WIDGETS=ON", "-DMINO_WIDGET_RENDERER=ON"
+                if (pythonExecutable.isPresent()) {
+                    arguments "-DPython3_EXECUTABLE=${pythonExecutable.get().replace('\\', '/')}"
+                }
+                targets "main"
+                // Direct-download APKs target ARM64. Store bundles and custom
+                // builds select additional architectures through targetAbis.
+                abiFilters.addAll(providers.gradleProperty('targetAbis').getOrElse('arm64-v8a').tokenize(','))
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file("../../CMakeLists.txt")
+            version "3.22.1+"
+        }
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs += "${sdlDir}/android-project/app/src/main/java"
+            assets.srcDirs = ["$buildDir/generated/game-assets", "$buildDir/generated/license-notices"]
+            res.srcDirs = standaloneGame ? ["$buildDir/generated/standalone-res"] : ['src/main/res']
+        }
+    }
+
+    signingConfigs {
+        permanentRelease {
+            if (releaseStoreFile) storeFile releaseStoreFile
+            storePassword releaseStorePassword ?: null
+            keyAlias releaseKeyAlias
+            keyPassword releaseKeyPassword ?: null
+            storeType releaseStoreType
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.permanentRelease
+        }
+    }
+
+    lint {
+        abortOnError = false
+    }
+}
+
+// Build the same deterministic archive that desktop applications embed.
+tasks.register('bundleGameAssets', Exec) {
+    def output = file("$buildDir/generated/game-assets/game-assets.zip")
+    inputs.dir(file('../../assets/games'))
+    inputs.file(file('../../assets/GAME-ASSETS.json'))
+    inputs.file(file('../../tools/bundle_game_assets.py'))
+    inputs.property('standaloneGame', standaloneGame)
+    outputs.file(output)
+    commandLine pythonExecutable.getOrElse('python'),
+        file('../../tools/bundle_game_assets.py'), '--source', file('../../assets/games'),
+        '--archive', output
+    if (assetGame) args '--game', assetGame
+}
+tasks.named('preBuild').configure { dependsOn 'bundleGameAssets' }
+
+if (standaloneGame) {
+    tasks.register('standaloneIcon', Sync) {
+        def icon = file("../../assets/games/${assetGame}/Icon@2x.png")
+        if (!icon.exists()) icon = file("../../assets/games/${assetGame}/Icon.png")
+        from(icon) { rename { 'standalone_icon.png' } }
+        into "$buildDir/generated/standalone-res/drawable-nodpi"
+    }
+    tasks.named('preBuild').configure { dependsOn 'standaloneIcon' }
+}
+
+tasks.register('bundleLicenseNotices', Sync) {
+    from('../../LICENSES') { into 'licenses' }
+    from('../../THIRD-PARTY-NOTICES.txt')
+    from('../../LICENSE.txt')
+    into "$buildDir/generated/license-notices"
+}
+tasks.named('preBuild').configure { dependsOn 'bundleLicenseNotices' }

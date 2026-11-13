@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<UiTheme name="BlueTheme" language="#000411">
+<!-- UiTheme name="BlueTheme" language="#000411" -->
+    <!-- The numbers are sprite numbers relative to LITBASE -->
+  <!-- Remember colours are in #RRGGBB format -->
+  <Background>88</Background>
+  <Logo>31</Logo>
+  <StartButton xpos="0" ypos="0">81</StartButton><!-- normal -->
+  <StartButton>82</StartButton><!-- selected -->
+  <!-- Primary Menu -->
+  <PrimaryMenu items="8" xpos="0" ypos="160" >
+    <ButtonSpacing spacing="-12" button_height="0" />
+    <Title font="0" padding-leftright="5" padding-topbottom="0" colour="#ffffff" />
+    <Description font="1" padding-leftright="5" padding-bottom="6" colour="#369d95" />
+    <TileDescSpacing spacing="15" />
+    <MenuItem>Product 糠漬け</MenuItem>
+    <MenuItem>Search for systems, codes and parts number</MenuItem>
+    <MenuItem>Quick Start - Build Server</MenuItem>
+    <MenuItem>Choose the server that you wish to build  </MenuItem>
+    <MenuItem>Your Solutions</MenuItem>
+    <MenuItem>All of your previous saved solutions</MenuItem>
+    <MenuItem>Reference &amp; Education</MenuItem>
+    <MenuItem>Product data, references and educational material</MenuItem>
+  </PrimaryMenu>
+  <!-- Secondary Menu -->
+  <SecondaryMenu xpos="190" ypos="80" >
+    <ButtonSpacing spacing="-14" button_height="0" />
+    <Title font="0" padding-leftright="5" padding-topbottom="5" colour="#ffffff" />
+  </SecondaryMenu>
+  <ContentNavigation font="0" items="3" colour="#ffffff" padding-leftright="14" padding-topbottom="15"  tabfont="0" tabcolour="#ffffffff" >
+    <!-- <MenuItem> vs. Fujitsu PRIMERCY </MenuItem> -->
+    <MenuItem>Models</MenuItem>
+    <MenuItem>Selling Points</MenuItem>
+    <MenuItem>Documents</MenuItem>
+  <!--  <MenuItem> Extended Specifications </MenuItem> -->
+  <!--  <MenuItem> vs. Dell Power Edge </MenuItem> -->
+  <!-- <MenuItem> vs. Fujitsu PRIMERCY </MenuItem> -->
+  </ContentNavigation>
+  <Literature xpos="390" ypos="30" width="0" >
+    <Models_Title>IBM Family -</Models_Title>
+    <ExtraSpecs_Title>IBM Family -</ExtraSpecs_Title>
+    <Default_Title>Nothing here yet</Default_Title>
+    <SubTitle font="2" colour="#ffffff" />
+    <FirstParagraph font="3" colour="#0fe3d6" />
+    <ParagraphText font="4" padding-leftright="14" padding-top="5" padding-bottom="15" />
+  </Literature>
+  <!-- Parameters for the system builder menu -->
+  <SysBuilder>
+    <IconsList width="90+15+30" selcol="#ffffff" unselcol="#0fe3d6" border="4" />
+    <RewievSummaryIcon xpos="0" ypos="118" />
+    <SummaryTextBox width="0" height="0" />
+  </SysBuilder>
+</UiTheme>
+

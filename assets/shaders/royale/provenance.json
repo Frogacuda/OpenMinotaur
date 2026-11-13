@@ -1,0 +1,261 @@
+{
+  "presetSha256": "0171c49664cd4d89bf01371c5f19fc0e449a0de19cf47d6dbc617d1f34d630f2",
+  "passes": [
+    {
+      "source": "pass-00.glsl",
+      "linear": false,
+      "srgb": false,
+      "floating": true,
+      "mipmap": false,
+      "xType": "absolute",
+      "yType": "source",
+      "xScale": 1920.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-01.glsl",
+      "linear": false,
+      "srgb": false,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 0.5,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-02.glsl",
+      "linear": false,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-03.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "viewport",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-04.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "absolute",
+      "yType": "absolute",
+      "xScale": 320.0,
+      "yScale": 240.0
+    },
+    {
+      "source": "pass-05.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-06.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-07.glsl",
+      "linear": true,
+      "srgb": false,
+      "floating": false,
+      "mipmap": false,
+      "xType": "absolute",
+      "yType": "viewport",
+      "xScale": 64.0,
+      "yScale": 0.0625
+    },
+    {
+      "source": "pass-08.glsl",
+      "linear": false,
+      "srgb": false,
+      "floating": false,
+      "mipmap": false,
+      "xType": "viewport",
+      "yType": "source",
+      "xScale": 0.0625,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-09.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "viewport",
+      "yType": "viewport",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-10.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "viewport",
+      "yType": "viewport",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-11.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-12.glsl",
+      "linear": true,
+      "srgb": true,
+      "floating": false,
+      "mipmap": false,
+      "xType": "source",
+      "yType": "source",
+      "xScale": 1.0,
+      "yScale": 1.0
+    },
+    {
+      "source": "pass-13.glsl",
+      "linear": true,
+      "srgb": false,
+      "floating": false,
+      "mipmap": true,
+      "xType": "viewport",
+      "yType": "viewport",
+      "xScale": 1.0,
+      "yScale": 1.0
+    }
+  ],
+  "files": [
+    {
+      "asset": "pass-00.glsl",
+      "source": "shaders_glsl/ntsc/shaders/ntsc-pass1-svideo-2phase.glsl",
+      "sha256": "4e15ca58d163e626a5bf32b5bb97ad0fc336103c9d29e7d502d9c443085d1db0"
+    },
+    {
+      "asset": "pass-01.glsl",
+      "source": "shaders_glsl/ntsc/shaders/ntsc-pass2-2phase.glsl",
+      "sha256": "45bd8a61a4385c3c3401b30244566ec63c4b97753958b72a307aec61c4672578"
+    },
+    {
+      "asset": "pass-02.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-first-pass-linearize-crt-gamma-bob-fields.glsl",
+      "sha256": "ece014b2b994346a44fedb6c03c57662ae1d16e5abd7ce79105dbd7c364bf7ff"
+    },
+    {
+      "asset": "pass-03.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-scanlines-vertical-interlacing.glsl",
+      "sha256": "621d81c694d92fced7510560cfdbb5aa97bdcbb4cc5c8120453039a783fbe064"
+    },
+    {
+      "asset": "pass-04.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-bloom-approx.glsl",
+      "sha256": "803a53490628142a8e95a3f06dc0c7febce3457bda70b8f0b855f4d19102260b"
+    },
+    {
+      "asset": "pass-05.glsl",
+      "source": "shaders_glsl/blurs/shaders/royale/blur9fast-vertical.glsl",
+      "sha256": "eb37d685b238573444dd0b25b362c51a1a06fc8a54c1e758908b6e8b9d37233c"
+    },
+    {
+      "asset": "pass-06.glsl",
+      "source": "shaders_glsl/blurs/shaders/royale/blur9fast-horizontal.glsl",
+      "sha256": "4bce1de8798c52637fbbd74702c14bbde3ac6dcd16e269d511ab96d3c9494fc7"
+    },
+    {
+      "asset": "pass-07.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-mask-resize-vertical.glsl",
+      "sha256": "5dd65d249edd6460ae0dfbdbac12bb49d2cd40d3962f28f29f217fc107ccc5a8"
+    },
+    {
+      "asset": "pass-08.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-mask-resize-horizontal.glsl",
+      "sha256": "1d98dee81b53765e31775cb00035b40b585e050c9606d8e80f3882ee83bf35de"
+    },
+    {
+      "asset": "pass-09.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-scanlines-horizontal-apply-mask.glsl",
+      "sha256": "1f301b83052ab84d68c716050ff3823ecba9bc3152e0f1633cb4fe8a528f93da"
+    },
+    {
+      "asset": "pass-10.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-brightpass.glsl",
+      "sha256": "6d09cb5d760ee092000da62d81960c615f69b98bc3160e9718fd6719c604a45b"
+    },
+    {
+      "asset": "pass-11.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-bloom-vertical.glsl",
+      "sha256": "00d5521c4c6037a6a0715cfdeb7728df4f296e26670ccc2065fd404cd1a996ca"
+    },
+    {
+      "asset": "pass-12.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-bloom-horizontal-reconstitute.glsl",
+      "sha256": "6a57bacdee4510b861ff55b5f7fd6c95aa4276c5747ab7b98d44ef89948e21ad"
+    },
+    {
+      "asset": "pass-13.glsl",
+      "source": "shaders_glsl/crt/shaders/crt-royale/src/crt-royale-geometry-aa-last-pass.glsl",
+      "sha256": "ae473412b567c28d1ffc5d81e958f5f508c3b4b26482c43bdbebcfabc098f7f8"
+    },
+    {
+      "asset": "mask_grille_texture_small.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearApertureGrille15Wide8And5d5SpacingResizeTo64.png",
+      "sha256": "3ba708dba5989741c58d9b7a1d1e38499bb6dabeb6787da523c9ca6e06159215"
+    },
+    {
+      "asset": "mask_grille_texture_large.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearApertureGrille15Wide8And5d5Spacing.png",
+      "sha256": "4b46103e20567b99e9525ce521438573f49609452d142438088fa6309902aef2"
+    },
+    {
+      "asset": "mask_slot_texture_small.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearSlotMaskTall15Wide9And4d5Horizontal9d14VerticalSpacingResizeTo64.png",
+      "sha256": "b3ab2c1d9205e167c44fc86aeb5a031a4fe7199de728d52f94e11635a467ab6d"
+    },
+    {
+      "asset": "mask_slot_texture_large.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearSlotMaskTall15Wide9And4d5Horizontal9d14VerticalSpacing.png",
+      "sha256": "4d4385d8476faaaebc6c4f6540b73c28bf3b643a6efb93866e58050f3d0f6567"
+    },
+    {
+      "asset": "mask_shadow_texture_small.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearShadowMaskEDPResizeTo64.png",
+      "sha256": "d68808ef5c819555c6001ea2d0627c18e64a7d0a7a6ebb3af4a09261a4c23713"
+    },
+    {
+      "asset": "mask_shadow_texture_large.png",
+      "source": "shaders_glsl/crt/shaders/crt-royale/TileableLinearShadowMaskEDP.png",
+      "sha256": "637e567fe5180ba53af5a185ceef24b4a44b86d74d802fb33df6a2d02d3bcf49"
+    }
+  ]
+}

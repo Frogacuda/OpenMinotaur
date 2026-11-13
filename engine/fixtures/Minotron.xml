@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='1' fonts='1' spritemaps='1' spritepages='1' >
+  <Literals>
+    <Literal index='0'>minotron.png</Literal>  
+    <!-- Literal index='0'>iconpage0.png</Literal>
+   <Literal>neon0.jpg</Literal>
+   <Literal>testimages.png</Literal>
+   <Literal>mercatoicons.png</Literal>
+   <Literal>bars.png</Literal>
+   <Literal>spritepage.png</Literal>
+   <Literal>banana2.jpg</Literal>
+   <Literal>cherries2.jpg</Literal>
+   <Literal>strawberry2.jpg</Literal>
+   <Literal>bull.png</Literal>
+   <Literal>happyox2.png</Literal>
+   <Literal>mercatoicons2.png</Literal>
+    <Literal>spacewars.png</Literal>
+    <Literal>llamasoft_s.png</Literal>
+    <Literal>llamasoft_s_plus.png</Literal>
+    <Literal>osborne.png</Literal -->
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='225'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+     <!--Spentry> 1,0,0,912,1424, </Spentry>
+	<Spentry> 2,0,0,512,512, </Spentry>
+     <Spentry> 3,0,0,512,512, </Spentry>
+	<Spentry> 4,0,0,256,256, </Spentry>
+	<Spentry> 5,0,0,512,512, </Spentry>
+	<Spentry> 6,0,0,300,300, </Spentry>
+	<Spentry> 7,0,0,300,400, </Spentry>
+	<Spentry> 8,0,0,347,346, </Spentry>
+	<Spentry> 9,0,0,256,256, </Spentry>
+	<Spentry> 10,0,0,300,225, </Spentry>
+	<Spentry> 11,0,0,512,512, </Spentry>
+  <Spentry> 12,0,0,512,512, </Spentry>
+     <Spentry> 13,0,0,256,256, </Spentry>
+     <Spentry> 14,0,0,256,256, </Spentry>
+     <Spentry> 15,0,0,512,512, </Spentry-->
+ <Spentry> 0,0,0,23,35,		<!-- dummy to allow litbase always be 2. --> </Spentry>    
+<Spentry> 0,0,0,23,35,		<!-- 0-15 - Minotaur walking left. --> </Spentry>
+<Spentry> 0,24,0,23,35,		<!-- 1 --> </Spentry>
+<Spentry> 0,48,0,23,35,		<!-- 2 --> </Spentry>
+<Spentry> 0,72,0,23,35,		<!-- 3 --> </Spentry>
+<Spentry> 0,96,0,23,35,		<!-- 4 --> </Spentry>
+<Spentry> 0,120,0,23,35,	<!-- 5 --> </Spentry>
+<Spentry> 0,144,0,23,35,	<!-- 6 --> </Spentry>
+<Spentry> 0,168,0,23,35,	<!-- 7 --> </Spentry>
+<Spentry> 0,192,0,23,35,	<!-- 8 --> </Spentry>
+<Spentry> 0,216,0,23,35,	<!-- 9 --> </Spentry>
+<Spentry> 0,240,0,23,35,	<!-- 10 --> </Spentry>
+<Spentry> 0,264,0,23,35,	<!-- 11 --> </Spentry>
+<Spentry> 0,288,0,23,35,	<!-- 12 --> </Spentry>
+<Spentry> 0,312,0,23,35,	<!-- 13 --> </Spentry>
+<Spentry> 0,336,0,23,35,	<!-- 14 --> </Spentry>
+<Spentry> 0,360,0,23,35,	<!-- 15 --> </Spentry>
+
+<Spentry> 0,384,0,27,35,	<!-- 16-31 - Minotaur walking towards. --> </Spentry>
+<Spentry> 0,412,0,27,35,	<!-- 17 --> </Spentry>
+<Spentry> 0,440,0,27,35,	<!-- 18 --> </Spentry>
+<Spentry> 0,468,0,27,35,	<!-- 19 --> </Spentry>
+<Spentry> 0,0,36,27,35,		<!-- 20 --> </Spentry>
+<Spentry> 0,28,36,27,35,	<!-- 21 --> </Spentry>
+<Spentry> 0,56,36,27,35,	<!-- 22 --> </Spentry>
+<Spentry> 0,84,36,27,35,	<!-- 23 --> </Spentry>
+<Spentry> 0,112,36,27,35,	<!-- 24 --> </Spentry>
+<Spentry> 0,140,36,27,35,	<!-- 25 --> </Spentry>
+<Spentry> 0,168,36,27,35,	<!-- 26 --> </Spentry>
+<Spentry> 0,196,36,27,35,	<!-- 27 --> </Spentry>
+<Spentry> 0,224,36,27,35,	<!-- 28 --> </Spentry>
+<Spentry> 0,252,36,27,35,	<!-- 29 --> </Spentry>
+<Spentry> 0,280,36,27,35,	<!-- 30 --> </Spentry>
+<Spentry> 0,308,36,27,35,	<!-- 31 --> </Spentry>
+
+<Spentry> 0,336,36,23,35,	<!-- 32-47 - Minotaur walking away. --> </Spentry>
+<Spentry> 0,360,36,23,35,	<!-- 33 --> </Spentry>
+<Spentry> 0,384,36,23,35,	<!-- 34 --> </Spentry>
+<Spentry> 0,408,36,23,35,	<!-- 35 --> </Spentry>
+<Spentry> 0,432,36,23,35,	<!-- 36 --> </Spentry>
+<Spentry> 0,456,36,23,35,	<!-- 37 --> </Spentry>
+<Spentry> 0,480,36,23,35,	<!-- 38 --> </Spentry>
+<Spentry> 0,0,72,23,35,		<!-- 39 --> </Spentry>
+<Spentry> 0,24,72,23,35,	<!-- 40 --> </Spentry>
+<Spentry> 0,48,72,23,35,	<!-- 41 --> </Spentry>
+<Spentry> 0,72,72,23,35,	<!-- 42 --> </Spentry>
+<Spentry> 0,96,72,23,35,	<!-- 43 --> </Spentry>
+<Spentry> 0,120,72,23,35,	<!-- 44 --> </Spentry>
+<Spentry> 0,144,72,23,35,	<!-- 45 --> </Spentry>
+<Spentry> 0,168,72,23,35,	<!-- 46 --> </Spentry>
+<Spentry> 0,192,72,23,35,	<!-- 47 --> </Spentry>
+
+	<Spentry> 0,484,468,1,1,		<!-- White pixel for colour fills. 48. --> </Spentry>
+
+	<Spentry> 0,496,0,8,8, <!-- 49 Bullet \ --> </Spentry>
+	<Spentry> 0,506,0,3,9, <!-- 50 Bullet | --> </Spentry>
+	<Spentry> 0,496,9,9,3, <!-- 51 Bullet - --> </Spentry>
+	<Spentry> 0,496,13,10,10, <!-- 52 Static obstacle - -->  </Spentry>
+	<Spentry> 0,0,108,18,24, <!-- 53 Roby grunt - -->  </Spentry>
+	<Spentry> 0,19,108,26,20, <!-- 54 Camel left facing - --> </Spentry>
+	<Spentry> 0,46,108,26,20, <!-- 55 Camel left facing - --> </Spentry>
+	<Spentry> 0,217,73,32,32, <!-- 56 Powerup bubble --> </Spentry>
+	<Spentry> 0,250,73,18,18, <!-- 57 Love heart --> </Spentry>
+	<Spentry> 0,271,73,32,32, <!-- 58 Bomb 1 --> </Spentry>
+	<Spentry> 0,302,73,32,32, <!-- 59 Bomb 2 --> </Spentry>
+	<Spentry> 0,332,73,16,16, <!-- 60 3way icon --> </Spentry>
+	<Spentry> 0,333,90,26,18, <!-- 61 Reflect arrow 1 --> </Spentry>
+	<Spentry> 0,366,72,28,18, <!-- 62 Reflect arrow 2 --> </Spentry>
+	
+	<Spentry> 0,0,187,12,5,	<!-- 63 Little bonus 100 --> </Spentry>
+	<Spentry> 0,0,181,12,5,	<!-- 64 Little bonus 200 --> </Spentry>
+	<Spentry> 0,0,175,12,5,	<!-- 65 Little bonus 300 --> </Spentry>
+	<Spentry> 0,0,169,12,5,	<!-- 66 Little bonus 400 --> </Spentry>
+	<Spentry> 0,0,163,12,5,	<!-- 67 Little bonus 500 --> </Spentry>
+	<Spentry> 0,0,157,12,5,	<!-- 68 Little bonus 600 --> </Spentry>
+	<Spentry> 0,0,151,12,5,	<!-- 69 Little bonus 700 --> </Spentry>
+	<Spentry> 0,0,145,12,5,	<!-- 70 Little bonus 800 --> </Spentry>
+	<Spentry> 0,0,139,12,5,	<!-- 71 Little bonus 900 --> </Spentry>
+	<Spentry> 0,0,133,16,5,	<!-- 72 Little bonus 1000 --> </Spentry>
+								
+	<Spentry> 0,401,72,32,13,		<!-- Floyd bonus 73 --> </Spentry>
+	<Spentry> 0,361,91,22,28,		<!-- Horned cow 1 74 --> </Spentry>
+	<Spentry> 0,384,91,22,28,		<!-- Horned cow 2 75 --> </Spentry>
+
+	<Spentry> 0,408,91,21,24,		<!-- coke can 1 76 --> </Spentry>
+	<Spentry> 0,429,91,21,24,		<!-- coke can 2 77 --> </Spentry>
+	<Spentry> 0,450,72,22,34,		<!-- telly 1 78 -->  </Spentry>
+	<Spentry> 0,473,72,22,34,		<!-- telly 2 79 --> </Spentry>
+
+	<Spentry> 0,72,108,22,30,		<!-- bulb 1 80 --> </Spentry>
+	<Spentry> 0,96,108,22,30,		<!-- bulb 2 81 --> </Spentry>
+	<Spentry> 0,119,108,30,22,		<!-- invaser 1 82 --> </Spentry>
+	<Spentry> 0,150,108,30,22,		<!-- invader 2 83 --> </Spentry>
+	<Spentry> 0,181,108,20,24,		<!-- original grunt 1 84 --> </Spentry>
+	<Spentry> 0,202,108,20,24,		<!-- original grunt 2 85 --> </Spentry>
+	<Spentry> 0,223,108,26,46,		<!-- Zippy 1 86 --> </Spentry>
+	<Spentry> 0,250,108,26,46,		<!-- Zippy 2 87 --> </Spentry>
+	<Spentry> 0,16,132,20,20,		<!-- Hydrant generator 1 88 --> </Spentry>
+	<Spentry> 0,16,153,20,20,		<!-- Hydrant generator 2 89 --> </Spentry>
+	<Spentry> 0,16,174,20,20,       <!-- Hydrant generator 3 90 --> </Spentry>
+	<Spentry> 0,37,175,26,22,		<!-- Hydrant 1 91 --> </Spentry>
+	<Spentry> 0,71,141,26,22,		<!-- Hydrant 2 92 --> </Spentry>
+	<Spentry> 0,70,163,16,16,		<!-- Rotatey hydrant bullet 93 --> </Spentry>
+	<Spentry> 0,37,132,32,20,		<!-- Spiny 94 --> </Spentry>
+	<Spentry> 0,37,153,32,20,		<!-- Spiny 95 --></Spentry>
+	<Spentry> 0,97,140,14,24,		<!-- Spike 96  --></Spentry>
+	<Spentry> 0,87,165,20,20,		<!-- Hydrant generator shadow 97 --> </Spentry>
+	<Spentry> 0,112,131,64,58,		<!-- Mandy 98  --></Spentry>
+	<Spentry> 0,277,109,64,58,		<!-- Mandy inside 99  --></Spentry>
+	<Spentry> 0,178,155,64,44,		<!-- 16 TONS 100  --></Spentry>
+	<Spentry> 0,242,155,14,38,		<!-- Brolly closed 101 --></Spentry>
+	<Spentry> 0,257,169,32,38,		<!-- Brolly open 102 --></Spentry>
+	<Spentry> 0,291,169,15,31,		<!-- Rain drop 103 --></Spentry>
+	<Spentry> 0,192,133,28,16,		<!-- Horizontal laser 104 --> </Spentry>
+	<Spentry> 0,197,139,2,2,		<!-- V. laser beam component 105 --></Spentry>
+	<Spentry> 0,254,96,2,2,			<!-- H. laser beam component 106 --></Spentry>
+	<Spentry> 0,342,142,28,26,		<!-- Big globby 1 107 --></Spentry>
+	<Spentry> 0,372,142,28,26,		<!-- Big globby 2 108 --></Spentry>
+	<Spentry> 0,342,169,28,26,		<!-- Big globby 3 109 --></Spentry>
+	<Spentry> 0,362,121,18,20,		<!-- Small globby 1 110 --></Spentry> 
+	<Spentry> 0,342,121,18,20,		<!-- Small globby 2 111 --></Spentry>
+	<Spentry> 0,372,171,32,30,		<!-- Spinny shielded thing 112 --></Spentry>
+	<Spentry> 0,402,121,14,24,		<!-- Bad robot 1 113 --></Spentry>
+	<Spentry> 0,417,121,14,24,		<!-- Bad robor 2 114 --></Spentry>
+	<Spentry> 0,402,146,32,30,		<!-- Pointy arrow 115 --></Spentry>
+	
+	<Spentry> 0,74,201,16,32,		<!-- Running man 1 116 --></Spentry>
+	<Spentry> 0,91,201,16,32,		<!-- Running man 2 117 --></Spentry>
+	<Spentry> 0,108,201,16,32,		<!-- Running man 3 118 --></Spentry>
+	<Spentry> 0,125,201,16,32,		<!-- Running man 4 119 --></Spentry>
+	<Spentry> 0,74,234,16,32,		<!-- Running man 5 120 --></Spentry>
+	<Spentry> 0,91,234,16,32,		<!-- Running man 6 121 --></Spentry>
+	<Spentry> 0,108,234,16,32,		<!-- Running man 7 122 --></Spentry>
+	<Spentry> 0,125,234,16,32,		<!-- Running man 8 123 --></Spentry>
+
+	<Spentry> 0,142,201,18,18,		<!-- Spark 1 124 --></Spentry>
+	<Spentry> 0,161,201,18,18,		<!-- Spark 2 125 --></Spentry>
+	<Spentry> 0,142,220,18,18,		<!-- Spark 3 126 --></Spentry>
+	<Spentry> 0,161,220,18,18,		<!-- Spark 4 127 --></Spentry>
+	
+	<Spentry> 0,142,239,18,16,		<!-- Zombeast 1 128 --></Spentry>
+	<Spentry> 0,161,239,18,16,		<!-- Zombeast 2 129 --></Spentry>
+	<Spentry> 0,480,470,16,16,		<!-- Shootable pixel 130 --></Spentry>	
+
+	<Spentry> 0,451,108,44,66,		<!-- Loo 1 131 --></Spentry>	
+	<Spentry> 0,182,203,44,66,		<!-- Loo 2 132 --></Spentry>	
+	<Spentry> 0,228,211,44,66,		<!-- Loo 3 133 --></Spentry>	
+	
+	<Spentry> 0,405,177,20,20,		<!-- Loo roll 1 134 --></Spentry>		
+	<Spentry> 0,426,177,20,20,		<!-- Loo roll 2 135 --></Spentry>	
+	<Spentry> 0,275,211,29,28,		<!-- Turd 136 --></Spentry>			
+	<Spentry> 0,274,241,32,36,		<!-- Asterisk 137 --></Spentry>	
+	<Spentry> 0,308,169,14,16,		<!-- Astrosmash cannon 138 --></Spentry>	
+	<Spentry> 0,308,186,28,16,		<!-- Astrosmash cannon 139 --></Spentry>	
+
+	<Spentry> 0,2,193,8,5,			<!-- 140 Little bonus x3 --> </Spentry>
+	<Spentry> 0,2,199,8,5,			<!-- 141 Little bonus x6 --> </Spentry>
+	<Spentry> 0,307,205,53,49,		<!-- 142 Extra life powerup --> </Spentry>	
+	<Spentry> 0,362,203,25,25,		<!-- 143 Yinyang --> </Spentry>		
+	<Spentry> 0,363,230,26,26,		<!-- 144 Yinyang Mine --> </Spentry>		
+	<Spentry> 0,72,268,25,24,		<!-- 145 Expandabull --> </Spentry>	
+	<Spentry> 0,0,205,12,5,			<!-- 146 Little bonus 1UP --> </Spentry>
+	<Spentry> 0,389,203,48,39,		<!-- 147 bullhead --> </Spentry>
+	<Spentry> 0,309,255,36,44,		<!-- 148 TDD recogniser --> </Spentry>
+	<Spentry> 0,346,257,64,56,		<!-- 149 sheepipede --> </Spentry>
+	<Spentry> 0,449,176,48,33,		<!-- 150 angry teapot --> </Spentry>
+	<Spentry> 0,449,210,48,30,		<!-- 151 happy teapot --> </Spentry>	
+	<Spentry> 0,412,244,14,56,		<!-- 152 arrow --> </Spentry>	
+	<Spentry> 0,102,268,12,12,		<!-- 153 spinner --> </Spentry>	
+	<Spentry> 0,102,281,8,8,		<!-- 154 blobber 1 --> </Spentry>	
+	<Spentry> 0,102,290,8,8,		<!-- 155 blobber 2 --> </Spentry>		
+	<Spentry> 0,115,268,16,22,		<!-- 156 skier --> </Spentry>		
+	<Spentry> 0,132,268,20,22,		<!-- 157 fallen skier --> </Spentry>	
+	<Spentry> 0,156,270,28,22,		<!-- 158 ram 1 --> </Spentry>		
+	<Spentry> 0,186,271,28,22,		<!-- 159 ram 2 --> </Spentry>	
+	<Spentry> 0,217,279,28,28,		<!-- 160 ast ship --> </Spentry>		
+	<Spentry> 0,247,279,19,19,		<!-- 161 licker1 --> </Spentry>	
+	<Spentry> 0,267,279,19,19,		<!-- 162 licker2 --> </Spentry>	
+	<Spentry> 0,247,299,19,19,		<!-- 163 licker3 --> </Spentry>	
+	<Spentry> 0,267,299,19,19,		<!-- 164 licker4 --> </Spentry>	
+	<Spentry> 0,288,300,28,28,		<!-- 165 biscuit --> </Spentry>	
+	<Spentry> 0,431,243,48,48,		<!-- 166 beachball --> </Spentry>	
+	<Spentry> 0,117,291,10,8,		<!-- 167 swarmer --> </Spentry>	
+	<Spentry> 0,487,243,20,20,		<!-- Blue Hydrant generator 1 168 --> </Spentry>
+	<Spentry> 0,487,264,20,20,		<!-- Blue Hydrant generator 2 169 --> </Spentry>
+	<Spentry> 0,487,285,20,20,       <!-- Blue Hydrant generator 3 170 --> </Spentry>
+	<Spentry> 0,318,300,14,24,		<!-- Bad yellow robot 1 171 --></Spentry>
+	<Spentry> 0,333,300,14,24,		<!-- Bad yellow robor 2 172 --></Spentry>
+	<Spentry> 0,441,302,29,36,		<!-- TFHOKT1 173 --></Spentry>
+	<Spentry> 0,411,302,29,36,		<!-- TFHOKT1 174 --></Spentry>
+	<Spentry> 0,475,309,32,32,		<!-- Foopball 175 --></Spentry>
+	<Spentry> 0,0,304,64,41,		<!-- Guide sheep 176 --></Spentry>
+	<Spentry> 0,66,304,32,42,		<!-- jumper minotaur 177 --></Spentry>
+	<Spentry> 0,99,304,63,53,		<!-- "simplified" plushie 178 --></Spentry>
+	<Spentry> 0,163,296,22,29,		<!-- droid 179 --></Spentry>
+	<Spentry> 0,165,327,32,53,		<!-- angry minotaur 180 --></Spentry>
+	<Spentry> 0,187,296,24,22,		<!-- goat 1 181 --></Spentry>
+	<Spentry> 0,212,309,24,22,		<!-- goat 2 182 --></Spentry>
+	<Spentry> 0,199,332,22,24,		<!-- llama 1 183 --></Spentry>	
+	<Spentry> 0,199,357,22,24,		<!-- llama 2 184 --></Spentry>		
+	<Spentry> 0,222,332,30,54,		<!-- giraffe 1 185 --></Spentry>	
+	<Spentry> 0,253,320,30,54,		<!-- giraffe 2 186 --></Spentry>		
+	<Spentry> 0,0,347,64,66,		<!-- 187 Openfeint logo --></Spentry>  	 
+	<Spentry> 0,66,357,32,41,		<!-- 188 Wales --></Spentry>  	  	
+	<Spentry> 0,101,359,31,36,		<!-- 189 Stamp --></Spentry>  	   	 
+	<Spentry> 0,133,359,30,37,		<!-- 190 Saints --></Spentry>
+	<Spentry> 0,67,399,30,27,		<!-- 191 Floss --></Spentry>  	 
+	<Spentry> 0,101,398,32,32,		<!-- 192 sheep --></Spentry>
+	<Spentry> 0,134,399,32,25,		<!-- 193 Tube --></Spentry>
+	<Spentry> 0,169,384,30,30,		<!-- 194 Devil --></Spentry>  
+	<Spentry> 0,200,387,30,30,		<!-- 195 Peace thing --></Spentry>
+	<Spentry> 0,232,389,32,32,		<!-- 196 berzerk robo --></Spentry>	
+	<Spentry> 0,267,376,28,22,		<!-- 197 cup of tea --></Spentry>	
+	<Spentry> 0,283,329,61,30,		<!-- 198 utah teapot --></Spentry>	
+	<Spentry> 0,297,361,23,21,		<!-- 199 llama electrode --></Spentry>	
+	<Spentry> 0,298,383,26,14,		<!-- 200 2112 electrode --></Spentry>	
+	<Spentry> 0,266,399,48,24,		<!-- 201 Union Jack electrode --></Spentry>
+	<Spentry> 0,325,361,22,22,		<!-- 202 Cherries--></Spentry>	
+	<Spentry> 0,325,384,20,22,		<!-- 203 aoo--></Spentry>								  						  
+	<Spentry> 0,316,408,20,22,		<!-- 204 peach--></Spentry>			
+	<Spentry> 0,337,408,20,22,		<!-- 205 Cherries--></Spentry>		
+	<Spentry> 0,358,400,30,30,		<!-- 206 BANANA--></Spentry>
+
+	<Spentry> 0,353,317,32,36,		<!-- 207 Apple--></Spentry>
+	<Spentry> 0,353,357,32,20,		<!-- 208 Welsh flag--></Spentry>
+	<Spentry> 0,355,379,26,14,		<!-- 209 OX--></Spentry>
+	<Spentry> 0,388,318,16,16,		<!-- 210 Trode--></Spentry>																															  
+	<Spentry> 0,388,336,15,18,		<!-- 211 Chips--></Spentry>
+	<Spentry> 0,388,356,40,40,		<!-- 212 Egg --></Spentry>
+	<Spentry> 0,390,398,30,32,		<!-- 213 Phone--></Spentry>	
+	<Spentry> 0,422,398,16,32,		<!-- 214 Miner Willy--></Spentry>
+	<Spentry> 0,440,414,14,16,		<!-- 215 Key--></Spentry>
+	<Spentry> 0,429,342,47,44,		<!-- 216 Pony--></Spentry>
+	<Spentry> 0,481,344,26,14,		<!-- 217 invader--></Spentry>
+	<Spentry> 0,478,362,32,32,		<!-- 218 big smily--></Spentry>
+	<Spentry> 0,457,397,32,32,		<!-- 219 Osborne--></Spentry>
+	<Spentry> 0,4,211,66,89,		<!-- 220 back button--></Spentry>		
+	<Spentry> 0,191,492,56,10,		<!-- 221 move--></Spentry>		
+	<Spentry> 0,263,488,40,14,		<!-- 222 aim--></Spentry>																																																																	  																				    	  	    	    	     	  	  
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+    <!-- Spritepage>912,1424, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>256,256, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>300,300, </Spritepage>
+  	<Spritepage>300,400, </Spritepage>
+  	<Spritepage>347,346, </Spritepage>
+  	<Spritepage>256,256, </Spritepage>
+  	<Spritepage>300,225, </Spritepage>
+	<Spritepage>512,512, </Spritepage>
+  <Spritepage>512,512, </Spritepage>
+    <Spritepage>256,256, </Spritepage>
+    <Spritepage>256,256, </Spritepage>
+    <Spritepage>512,512, </Spritepage -->
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  	
+    <Sample maxinstance='2' >grunthit.wav</Sample>  
+    <Sample maxinstance='2' >obstaclehit.wav</Sample>  
+    <Sample maxinstance='2' >ooh.wav</Sample>  
+    <Sample maxinstance='1' >baa.wav</Sample>  
+    <Sample maxinstance='2' >boom1.wav</Sample>  
+    <Sample maxinstance='2' >iloveyou.wav</Sample>  
+    <Sample maxinstance='2' >ooh2.wav</Sample>  
+    <Sample maxinstance='1' >scream.wav</Sample>  
+    <Sample maxinstance='1' >scream2.wav</Sample>  		
+    <Sample maxinstance='1' >ohyeah2.wav</Sample>
+    <Sample maxinstance='1' >ohyeah.wav</Sample>
+	<Sample maxinstance='1' >moo.wav</Sample>  		
+    <Sample maxinstance='1' >ltshot.wav</Sample>  																			
+    <Sample maxinstance='1' >laser.wav</Sample>  																																			
+    <Sample maxinstance='1' >kung.wav</Sample>  																																																			
+    <Sample maxinstance='1' >fhshot.wav</Sample>  		
+    <Sample maxinstance='1' >fhgopen.wav</Sample>  			
+    <Sample maxinstance='1' >fbomb.wav</Sample>  		
+	<Sample maxinstance='1' >fart.wav</Sample>  		
+	<Sample maxinstance='1' >bomb.wav</Sample>  		
+    <Sample maxinstance='1' >blobby.wav</Sample>  				
+    <Sample maxinstance='1' >biscuithit.wav</Sample>  																																																																																																																																																																																																																																																																																																																																										
+    <Sample maxinstance='1' >baa2.wav</Sample>  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+    <Sample maxinstance='1' >weight.wav</Sample>  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																						
+    <Sample maxinstance='1' >warpoutstart.wav</Sample>  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																												
+    <Sample maxinstance='1' >warpin_normal.wav</Sample>
+    <Sample maxinstance='1' >warpin_brain.wav</Sample>
+	<Sample maxinstance='1' >split.wav</Sample>
+    <Sample maxinstance='1' >shielded.wav</Sample>  
+    <Sample maxinstance='1' >sheepipede.wav</Sample>
+    <Sample maxinstance='1' >ooh3.wav</Sample>  	
+    <Sample maxinstance='1' >excellent.wav</Sample> 
+    <Sample maxinstance='4' >lookout.wav</Sample> 
+    <Sample maxinstance='4' >uho.wav</Sample> 	
+    <Sample maxinstance='1' >boooom.wav</Sample> 
+    <Sample maxinstance='1' >tddshield.wav</Sample>
+    <Sample maxinstance='1' >tddfire.wav</Sample>
+    <Sample maxinstance='1' >tdddoor.wav</Sample>
+    <Sample maxinstance='1' >tddderez.wav</Sample>
+    <Sample maxinstance='1' >tddbreak.wav</Sample> 	
+    <Sample maxinstance='1' >watchem.wav</Sample> 
+	<Sample maxinstance='1' >ontarget.wav</Sample> 	
+    <Sample maxinstance='1' >goodshot.wav</Sample> 		
+    <Sample maxinstance='1' >bombsaway.wav</Sample> 
+    <Sample maxinstance='1' >wywh.wav</Sample> 	
+    <Sample maxinstance='1' >firewire.wav</Sample> 	
+    <Sample maxinstance='1' >splosh.wav</Sample>
+    <Sample maxinstance='1' >splat.wav</Sample>
+    <Sample maxinstance='1' >cool.wav</Sample>
+    <Sample maxinstance='1' >bull.wav</Sample> 
+    <Sample maxinstance='1' >hashoom.wav</Sample>
+    <Sample maxinstance='1' >arrowscream.wav</Sample> 	 
+    <Sample maxinstance='1' >moretea.wav</Sample> 	 
+    <Sample maxinstance='1' >bigboom.wav</Sample> 	
+    <Sample maxinstance='1' >fanfare.wav</Sample> 	
+    <Sample maxinstance='1' >gotit.wav</Sample> 			 					 		 		 							 	 	 	 				 				  							  		  			  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								  			  													
+  </Sounds>
+</NeonResources>

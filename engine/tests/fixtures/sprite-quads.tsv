@@ -1,0 +1,25 @@
+# Source worksheet: Minotron iOS sprite::setupSimple 0x11ae4,
+# Rescue 0x1129c; Gridrunner named Android setupSimple and iOS _global.c.
+# Rescue confirms base geometry, centres, corner order, flips, aspect and exact
+# height. Region/supplied-corner rows exercise later Minotron/Gridrunner
+# capabilities, not a claim that Rescue's original implements those flags.
+# width=8 height=6 pos=(10,20), angle=0, page=(128,256), entry=(8,16,32,64).
+# Exact-height rule. Region=(8,16,16,32). Corner order refers to A B C D before
+# position offset. Supplied corners=(1,2),(3,4),(5,6),(7,8) receive no offset.
+# name flags order u0 v0 u1 v1
+ordinary 0 0123 .0625 .0625 .3125 .3125
+centreX 1 0123 .0625 .0625 .3125 .3125
+centreY 2 0123 .0625 .0625 .3125 .3125
+centred 3 0123 .0625 .0625 .3125 .3125
+clockwise 4 1230 .0625 .0625 .3125 .3125
+counterclockwise 8 3012 .0625 .0625 .3125 .3125
+bothOrders 12 0123 .0625 .0625 .3125 .3125
+flipX 16 0123 .3125 .0625 .0625 .3125
+flipY 32 0123 .0625 .3125 .3125 .0625
+flipBoth 48 0123 .3125 .3125 .0625 .0625
+areaFlag 128 0123 .0625 .0625 .3125 .3125
+aspect 256 0123 .0625 .0625 .3125 .3125
+region 1024 0123 .125 .125 .25 .25
+supplied 2048 0123 .0625 .0625 .3125 .3125
+suppliedCW 2052 1230 .0625 .0625 .3125 .3125
+suppliedCCW 2056 3012 .0625 .0625 .3125 .3125

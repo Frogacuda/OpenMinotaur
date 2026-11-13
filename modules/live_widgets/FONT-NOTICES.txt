@@ -1,0 +1,19 @@
+# Font sources
+
+`neon-hud` is a project-authored single-stroke alphabet on a 4×6 grid. Lowercase
+text uses uppercase forms; punctuation is part of the same project alphabet.
+
+`vectrex-menu` reproduces the Vectrex system character forms as horizontal scan
+strokes. Reference tables: https://www.playvectrex.com/designit/chrissalo/appendixe.htm
+and the menu appearance at https://sadenby.com/games/llamatron/play.html.
+Character data is separate from the independently implemented parser, layout and
+beam renderer. No BIOS routines or emulator implementation are included.
+ASCII lowercase aliases uppercase; additional punctuation is project-authored.
+
+The title's raster atlas is generated from HAMMRF, supplied at
+https://atariage.com/2600/archives/AtariFonts/HAMMRF.zip. Only the generated atlas
+is a runtime asset; the font archive is not bundled in this module.
+
+The logo vector data is supplied project artwork. Original game trademarks and
+materials retain their respective rights. These attributions do not assign a
+project-wide license or extend permission beyond the supplied material.

@@ -1,0 +1,28 @@
+# Original-source worksheet; set bits select offRGB, all mask bits zero select onRGB.
+# Minotron iOS getDynamicColour 0x10078; Rescue 0xf900; Gridrunner iOS 0x9068.
+# Decisive type10 ARM words: Rescue 0xfc48 e3130008; Minotron 0x103dc e3130004.
+# recipe type mask offRGB onRGB
+rainbow 1 3 ff0000 ffff00
+rainbow 2 3 0000ff ff00ff
+rainbow 3 3 00ff00 ffff00
+rainbow 4 c ff00ff ffffff
+rainbow 5 18 00ff00 00ffff
+rainbow 7 6 00ff00 ffff00
+rainbow 8 e ff0000 ffff00
+rainbow 9 e 0000ff ffff00
+rainbow 10 4 ff0000 ffff00
+rainbow 11 8 ffff00 0000ff
+rainbow 12 8 ffff00 00ff00
+rainbow 13 8 ffff00 ff00ff
+pastel 1 3 ff0000 ffff00
+pastel 2 3 0000ff ff00ff
+pastel 3 3 00ff00 ffff00
+pastel 4 3 ff00ff ffffff
+pastel 5 18 00ff00 00ffff
+pastel 7 6 00ff00 ffff00
+pastel 8 e ff0000 ffff00
+pastel 9 e 0000ff ffff00
+pastel 10 8 ff0000 ffff00
+pastel 11 8 ffff00 0000ff
+pastel 12 8 ffff00 00ff00
+pastel 13 8 ffff00 ff00ff

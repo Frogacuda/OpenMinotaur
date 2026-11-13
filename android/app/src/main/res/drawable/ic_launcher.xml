@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Deflex loading-screen sheep, exported through the iOX About icon renderer. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/minotaur_icon" android:gravity="fill" />

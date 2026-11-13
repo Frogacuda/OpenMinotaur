@@ -1,0 +1,92 @@
+0	Modulate
+1	unresolved-name-2
+2	Crossfade
+3	Overlay
+4	Burnthru
+5	Displace
+6	Merge 2
+7	unresolved-name-8
+8	Spinlerp
+9	Disp blur
+10	Radial blur
+11	Burnthru 2
+12	RGB-GRB
+13	RGB-BGR
+14	RGB-RBG
+15	RGB-GBR
+16	RGB-BRG
+17	RGB-INV
+18	G Blend
+19	Copydrive
+20	Radial_fix
+21	3tex-mask
+22	3tex-mul
+23	3tex-warp
+24	3tex-ripple
+25	3tex-rmerge
+26	Copy Pure
+27	Conv3x3
+28	Channel select
+29	Inv G Blend
+30	3tex-zeromask
+31	unresolved-name-32
+32	Overbright
+33	White_cut
+34	Giles Modulate
+35	Giles PPL1
+36	HLSL test (Text Shader)
+37	Text Shader
+38	Radial feedback sm3
+39	Ripplewarp 1 sm3
+40	Ripplewarp 2 sm3
+41	Ripplewarp 3 sm3
+42	Cgen 1 sm3
+43	Cgen 2 sm3
+44	ThingyDisplace sm3
+45	ThingyDisplace2 sm3
+46	RadialColourise sm3
+47	WobblyWarp sm3
+48	Fluffinator sm3
+49	Bifluffinator sm3
+50	Fluff3 sm3
+51	Marbler sm3
+52	Colour Mixer 3 sm3
+53	Clipscale sm3
+54	The Wages of SIN() sm3
+55	Disturbed SIN() sm3
+56	SoftMix3 sm3
+57	SoftMix3Glow sm3
+58	SoftMix3Thru sm3
+59	RGBSplit sm3
+60	RGBSplitA sm3
+61	RGBSplit2 sm3
+62	RGBSplit2A sm3
+63	HVDisplace2 sm3
+64	Rotwarp sm3
+65	Precision rotate sm3
+66	Vertical planes sm3
+67	Round tunnel sm3
+68	Round tunnel 2 sm3
+69	Round tunnel 2A sm3
+70	Ribbed tunnel sm3
+71	Pointfield sm3
+72	Outline Merge 0 sm3
+73	Outline Merge 1 sm3
+74	zomg sm3
+75	zomg2 sm3
+76	Joined vfield sm3
+77	Frag vfield sm3
+78	Lissvect
+79	Lisspoint
+80	Galactica sm3
+81	GalacticaAlt sm3
+82	Glargle2 sm3
+83	Glargle3 sm3
+84	Planet
+85	Planet2
+86	Planet3
+87	Planet3a
+88	wibblesphere
+89	shinyblob
+90	globglob
+91	Vector field test

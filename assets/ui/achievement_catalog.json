@@ -1,0 +1,555 @@
+[
+  {
+    "game": "minos",
+    "id": 0,
+    "name": "Batty",
+    "description": "Land the pointy ship on the ceiling.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 1,
+    "name": "Clear",
+    "description": "Complete any cavern above level 1 without getting damaged.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 2,
+    "name": "Tone 40",
+    "description": "Reach the goal at the bottom of cavern 5 without taking any damage, and using the pointy ship.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 3,
+    "name": "Ayyyyyup",
+    "description": "Do a perfect rescue landing that is enough to impress a pony.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 4,
+    "name": "Super Pony",
+    "description": "Execute 5 pony-impressing rescue landings one after another.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 5,
+    "name": "Ultra Pony",
+    "description": "Execute 10 pony-impressing rescue landings one after another.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 6,
+    "name": "Mino Master",
+    "description": "Rescue 25 minotaurs in one cavern.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 7,
+    "name": "Minotaur Lover",
+    "description": "Rescue 100 minotaurs in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 8,
+    "name": "Minotaur Lord",
+    "description": "Rescue 200 minotaurs in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minos",
+    "id": 9,
+    "name": "Awesometastic",
+    "description": "Finish cavern 21.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 0,
+    "name": "Minimalist",
+    "description": "Complete the first 4 levels using one bat per level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 1,
+    "name": "Zen",
+    "description": "Complete any level using 1 bat.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 2,
+    "name": "On Source",
+    "description": "Get more than 30 chain heads in a level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 3,
+    "name": "Golden Age of Deflex",
+    "description": "Get more than 50 chain heads on a level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 4,
+    "name": "Nice Multiplier",
+    "description": "Get 10x bonus multiplier.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 5,
+    "name": "Super Multiplier",
+    "description": "Get 20x bonus multiplier.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 6,
+    "name": "Three Bat Bulls",
+    "description": "Get all the bulls in the bull level with 3 bats.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 7,
+    "name": "Disappointed Minotaur",
+    "description": "Avoid being cuddled at all by the minotaur on the Labyrinth level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 8,
+    "name": "Unlocky",
+    "description": "Unlock every game level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "deflex",
+    "id": 9,
+    "name": "Ravished",
+    "description": "Get quickly cuddled to death by the minotaur on the Labyrinth level.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 0,
+    "name": "Fresh!",
+    "description": "Survive a level without being damaged.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 1,
+    "name": "Five A Day",
+    "description": "Get your five a day!",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 2,
+    "name": "Boanthrope Bonanza",
+    "description": "Rescue more than 20 minotaurs in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 3,
+    "name": "You so fruity!",
+    "description": "Collect more than 200 fruits in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 4,
+    "name": "Perfect Day",
+    "description": "Survive one entire day without losing a life.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 5,
+    "name": "Tilt-tastic!",
+    "description": "Get your 5 a day using the tilt controls.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 6,
+    "name": "Amen Breaker",
+    "description": "Shoot 100 percussion ships.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 7,
+    "name": "Galactic Greengrocer",
+    "description": "Collect over 10,000 fruits.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 8,
+    "name": "Taury Party",
+    "description": "Rescue over 1,000 minotaurs.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "fiveaday",
+    "id": 9,
+    "name": "Ultra Fruiterer",
+    "description": "Get 5 consecutive 5 A Days without ever losing your way.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 0,
+    "name": "Fecundity",
+    "description": "Get a chain of 10 kids following you.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 1,
+    "name": "Ultra-Fecundity",
+    "description": "Get a chain of 20 kids following you.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 2,
+    "name": "Mountain Goat",
+    "description": "Is it possible to get to the top?",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 3,
+    "name": "Homecoming",
+    "description": "Is it possible to come home again?",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 4,
+    "name": "Bop the Ox",
+    "description": "Knock off the big musk ox in level 1 without getting hurt.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 5,
+    "name": "Super Mother",
+    "description": "Can you kiss enough billy goats?",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 6,
+    "name": "Revenge",
+    "description": "Blow up a bridge while Canyon Climber Guy is crossing it.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 7,
+    "name": "Collector",
+    "description": "Collect 100 unique items.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 8,
+    "name": "Hoarder",
+    "description": "Collect 250 unique items.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "goatup",
+    "id": 9,
+    "name": "Compulsive",
+    "description": "Collect 500 unique items.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 0,
+    "name": "Sociabull",
+    "description": "Rescue 100 beasties in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 1,
+    "name": "Companiabull",
+    "description": "Rescue 500 beasties in one game.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 2,
+    "name": "Innumerabull",
+    "description": "Rack up 20 or more lives.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 3,
+    "name": "You killed Kevin!",
+    "description": "Destroy the FLOATING HEAD OF KEVIN TOMS.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 4,
+    "name": "Flushed the bog!",
+    "description": "Destroy the angry toilet!",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 5,
+    "name": "Irrepressabull",
+    "description": "Get over a million points.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 6,
+    "name": "Durabull",
+    "description": "Get past level 5 without losing a minotaur in Standard or Hard.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 9,
+    "name": "Invincibull",
+    "description": "Get past level 20 without losing a minotaur in Hard.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 7,
+    "name": "Dependabull",
+    "description": "Rescue every beastie on 5 consecutive levels.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minotron",
+    "id": 8,
+    "name": "Powerupabull",
+    "description": "Get 50 sequential powerups without missing one.",
+    "source": "Original bundled OpenFeint offline configuration"
+  },
+  {
+    "game": "minorescue",
+    "id": 0,
+    "name": "Loveabull",
+    "description": "Rescue 100 minotaurs in one game.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 1,
+    "name": "Manic Miner",
+    "description": "Shoot 20 mines in one level.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 2,
+    "name": "Valuabull",
+    "description": "Get over 10,000 points for rescuing a minotaur.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 3,
+    "name": "Responsabull",
+    "description": "Complete 3 levels without losing a ship in Standard mode.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 4,
+    "name": "Irresistabull",
+    "description": "Rescue 20 minotaurs in one level.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 5,
+    "name": "Matador",
+    "description": "Complete 3 levels without rescuing a minotaur.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 6,
+    "name": "Millionaire",
+    "description": "Score a million points in one game.",
+    "source": "User-approved display description, 2026-11-10"
+  },
+  {
+    "game": "minorescue",
+    "id": 7,
+    "name": "Warped",
+    "description": "Complete a level with a black hole.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 8,
+    "name": "Horns Exalted",
+    "description": "Complete level 26.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "minorescue",
+    "id": 9,
+    "name": "Maxotaur",
+    "description": "Max out your life count.",
+    "source": "User-approved display description, 2026-11-10"
+  },
+  {
+    "game": "gridrunner",
+    "id": 2,
+    "name": "Bull!",
+    "description": "Survive more than 500 deflections.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 3,
+    "name": "Virgin!",
+    "description": "Complete 5 grids without dying.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 4,
+    "name": "Welcome to Blobbytown",
+    "description": "Reach Grid 9",
+    "source": "User-approved display description, 2026-11-10"
+  },
+  {
+    "game": "gridrunner",
+    "id": 5,
+    "name": "Dark Side of the Blob",
+    "description": "Discover the dark side of the blob.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 6,
+    "name": "Saucerer",
+    "description": "Shoot a smart bomb.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 7,
+    "name": "Life Machine",
+    "description": "Get 10 lives.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 8,
+    "name": "Glory, Glory, Glory",
+    "description": "Unleash glorious firepower.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 9,
+    "name": "Blessings of Jarvis Be Upon Thee!",
+    "description": "Shoot 50 swarmers.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "gridrunner",
+    "id": 0,
+    "name": "More Tea Vicar!",
+    "description": "Score over 50,000 in Classic Mode",
+    "source": "User-approved display description, 2026-11-10"
+  },
+  {
+    "game": "superoxwars",
+    "id": 0,
+    "name": "Foxtrot",
+    "description": "Find the hidden fox.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 1,
+    "name": "Torcedor Apaixonado",
+    "description": "Collect over 1,000 pickups of one allegiance, with the opposite total no greater than 10% of it.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 2,
+    "name": "Champion!",
+    "description": "Collect every red tile and miss every blue tile.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 3,
+    "name": "Pip Pip Hooray!",
+    "description": "Chain more than 12 flying groups while polarized.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 4,
+    "name": "Maximum Firepower",
+    "description": "Get 5 weapon followers.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 5,
+    "name": "Good Good",
+    "description": "Get more than 6 lives.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 6,
+    "name": "Journey",
+    "description": "Reach the next loop.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 7,
+    "name": "Neutral",
+    "description": "Complete an area with no polarity and no score.",
+    "source": "Editorial summary of reviewed original award rule; original service description not recovered"
+  },
+  {
+    "game": "superoxwars",
+    "id": 8,
+    "name": "Caprichoso 4 Life",
+    "description": "Get 10,000 stars, with less than 1,000 hearts.",
+    "source": "User-approved display description, 2026-11-10"
+  },
+  {
+    "game": "superoxwars",
+    "id": 9,
+    "name": "Garantido 4 Life",
+    "description": "Get 10,000 hearts, with less than 1000 stars",
+    "source": "User-approved display description, 2026-11-10"
+  }
+]

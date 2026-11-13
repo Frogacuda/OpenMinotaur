@@ -1,0 +1,92 @@
+{
+  "authority": "iOS GoatUp2_armv7",
+  "binarySha256": "c17852a2803d533fc73c03511c22946d4991f57328a73f21b5c592ac4334c394",
+  "inputs": [
+    {
+      "file": "DEFAULT_0",
+      "bytes": 98786,
+      "decoderFinalState": 1398078657,
+      "sha256": "6b25f87f3263ba6f8ed529bba8444ae7981987fc61f3ef6c1d7a3b4ce05c167c"
+    },
+    {
+      "file": "DEFAULT_1",
+      "bytes": 99978,
+      "decoderFinalState": 1129744019,
+      "sha256": "2ace2a0ec8b52034cb4acf0509e3e6dd2d2999de126356c8b1a6b772b6ef67f5"
+    },
+    {
+      "file": "DEFAULT_2",
+      "bytes": 104593,
+      "decoderFinalState": 193147076,
+      "sha256": "353b500197f8bef5408ce918c5b0f894dca0defd5ba83e53ed3420e60cdd7c33"
+    },
+    {
+      "file": "DEFAULT_3",
+      "bytes": 62950,
+      "decoderFinalState": 1555783949,
+      "sha256": "de672eb2f7fa5bf617741cd776dd57343ff56e358fd48594f55da079478849c3"
+    }
+  ],
+  "placementDescriptors": [
+    {
+      "type": 0,
+      "descriptor": "0x7df98",
+      "limit": 1
+    },
+    {
+      "type": 1,
+      "descriptor": "0x7e018",
+      "limit": 10
+    },
+    {
+      "type": 2,
+      "descriptor": "0x7e098",
+      "limit": 99
+    },
+    {
+      "type": 3,
+      "descriptor": "0x7e118",
+      "limit": 99
+    },
+    {
+      "type": 4,
+      "descriptor": "0x7e198",
+      "limit": 99
+    },
+    {
+      "type": 5,
+      "descriptor": "0x7e218",
+      "limit": 99
+    },
+    {
+      "type": 6,
+      "descriptor": "0x7e298",
+      "limit": 99
+    },
+    {
+      "type": 7,
+      "descriptor": "0x7e318",
+      "limit": 99
+    },
+    {
+      "type": 8,
+      "descriptor": "0x7e398",
+      "limit": 99
+    },
+    {
+      "type": 9,
+      "descriptor": "0x7e418",
+      "limit": 1
+    }
+  ],
+  "levels": 80,
+  "serializedObjects": 5300,
+  "coordinatesDifferingFromNormalFloatParsing": 4910,
+  "fixtureOrigin": "Independent grammar parser and source-derived arithmetic; not original execution traces",
+  "coordinateReader": "0xab00 digit-wise float32; reader 0x491b8 widens to double",
+  "overflowDestination": "0xc80 + 10000*4 = 0xa8c0; first backup cell; copy 0x46f70 replaces backup",
+  "coordinateExample": {
+    "text": "0.109023",
+    "bits": "0x3ddf4773"
+  }
+}

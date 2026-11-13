@@ -1,0 +1,77 @@
+name: Build and checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install clang-format==22.1.3
+      - run: python tools/format_sources.py --check
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            compiler: msvc
+          - os: ubuntu-24.04
+            compiler: gcc
+          - os: ubuntu-24.04
+            compiler: clang
+    runs-on: ${{ matrix.os }}
+    env:
+      SDL_AUDIODRIVER: dummy
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: libsdl-org/SDL
+          ref: release-3.2.0
+          path: _deps/SDL
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libudev-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libwayland-dev libxkbcommon-dev libgl1-mesa-dev libegl1-mesa-dev
+      - name: Configure Linux collection
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          if [ '${{ matrix.compiler }}' = clang ]; then export CC=clang CXX=clang++; else export CC=gcc CXX=g++; fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSDL3_SOURCE_DIR="$PWD/_deps/SDL" -DMINO_GRAPHICS_CHECKS=OFF
+      - name: Configure Windows collection
+        if: runner.os == 'Windows'
+        run: cmake -S . -B build -DSDL3_SOURCE_DIR="$env:GITHUB_WORKSPACE/_deps/SDL" -DMINO_GRAPHICS_CHECKS=OFF
+      - name: Build collection
+        run: cmake --build build --config Release --parallel 2
+      - name: Build and run checks
+        run: cmake --build build --config Release --target check --parallel 2
+      - name: Standalone rule suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ '${{ runner.os }}' = Linux ]; then
+            if [ '${{ matrix.compiler }}' = clang ]; then export CC=clang CXX=clang++; else export CC=gcc CXX=g++; fi
+          fi
+          for module in engine reconstruction/gridrunner reconstruction/minos reconstruction/deflex cores/goatup2; do
+            name="${module//\//-}"
+            cmake -S "$module" -B "build-$name" -DCMAKE_BUILD_TYPE=Release
+            cmake --build "build-$name" --config Release --parallel 2
+            ctest --test-dir "build-$name" -C Release --output-on-failure
+          done

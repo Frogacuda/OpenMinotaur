@@ -1,0 +1,347 @@
+[
+  {
+    "id": 0,
+    "recoveredSource": "sm3-00-Modulate_HLSL.hlsl",
+    "sourceSha256": "cb423b90e0d598ec5b84c886aa68caadc02da2d765b9b6bdf4abce1141636733",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 1,
+    "recoveredSource": "sm3-01-Default_HLSL.hlsl",
+    "sourceSha256": "9a884a84ba78c4f9afb749dda932423e1e7237d7cbda6cbd47faa2ec22b863c8",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 2,
+    "recoveredSource": "sm3-02-Crossfade_HLSL.hlsl",
+    "sourceSha256": "dd264b4522f7d5b0bd0a255e883aaa5e6d60e00f291588d772f961f7c1d3401a",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 3,
+    "recoveredSource": "sm3-03-Overlay_HLSL.hlsl",
+    "sourceSha256": "d89d630957131442121f2384c5bda793adb332488c9634bd111da2331cf928ba",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 4,
+    "recoveredSource": "sm3-04-Burnthru_HLSL.hlsl",
+    "sourceSha256": "0cd9ccc1fa080838f5129b41b38b3a6dec08747dadc4205df70a2f487b9316ba",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 5,
+    "recoveredSource": "sm3-05-Displace_HLSL.hlsl",
+    "sourceSha256": "a38c5898b61cdb99a51b67f88148225034f2dd444f4788e43ee6e4d05a8b874b",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 6,
+    "recoveredSource": "sm3-06-Merge2_HLSL.hlsl",
+    "sourceSha256": "4fe8324fe0955c7a70d012b92580586c3cc4e17e1de996e512a178e70b71de72",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 8,
+    "recoveredSource": "sm3-08-Spinlerp_HLSL.hlsl",
+    "sourceSha256": "cc301ca43a869088da737867ba7346880760a42324c46e9dfff249020298abfb",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 11,
+    "recoveredSource": "sm3-11-Burnthru2_HLSL.hlsl",
+    "sourceSha256": "2af6eb106f36659599d4c9094fb17bb6d6d23068f81312474bd6f4c482c7f1fb",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 12,
+    "recoveredSource": "sm3-12-RGBGRB_HLSL.hlsl",
+    "sourceSha256": "2a790082bf628d5b85644918ebec8e66c33a7ef87e53c7b4bf4781d68fa39c29",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 13,
+    "recoveredSource": "sm3-13-RGBBGR_HLSL.hlsl",
+    "sourceSha256": "420059f9b9f2d96f638dbf40ee3f1d45b19ba2bd2961f485129a1c0622fc2146",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 14,
+    "recoveredSource": "sm3-14-RGBRBG_HLSL.hlsl",
+    "sourceSha256": "a0ffe4c5b60969df00386db60b5d3acddf99d6ba6a09c301377b9265d16060ee",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 15,
+    "recoveredSource": "sm3-15-RGBGBR_HLSL.hlsl",
+    "sourceSha256": "81261528809ae2169ef935386666b9b800fd4b9235caf02eb68de53a72596119",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 16,
+    "recoveredSource": "sm3-16-RGBBRG_HLSL.hlsl",
+    "sourceSha256": "1883a62609969d44f780b54c92966d8ca769ac9ee42953b018e1e1b9945ad131",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 18,
+    "recoveredSource": "sm3-18-Gblend_HLSL.hlsl",
+    "sourceSha256": "c8e610b6aa0f6ea736ce489e53598ed7d413ce685ed2e2fd7a4e0cdbe877ded8",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 26,
+    "recoveredSource": "sm3-26-Default_HLSL.hlsl",
+    "sourceSha256": "9a884a84ba78c4f9afb749dda932423e1e7237d7cbda6cbd47faa2ec22b863c8",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 29,
+    "recoveredSource": "sm3-29-Inv_gblend_HLSL.hlsl",
+    "sourceSha256": "13042490e128e5c9102191ca7cc12bab19b77be6b974a7c7e55801f7c68283d3",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 34,
+    "recoveredSource": "sm3-34-Vertex_Colour_Tweaked_HLSL.hlsl",
+    "sourceSha256": "fb070d6156f11895708f15a85bb567ddf654887854ca53224f050198643afabd",
+    "samplers": []
+  },
+  {
+    "id": 39,
+    "recoveredSource": "sm3-39-Ripplewarp1_HLSL3.hlsl",
+    "sourceSha256": "cf36dd1363a091457e01fb1ec10c5bbac7e1c2e8d18fe708a2ef657a6c60cba2",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 40,
+    "recoveredSource": "sm3-40-Ripplewarp2_HLSL3.hlsl",
+    "sourceSha256": "1d5665b7f06b7b26e47a8d0af404fa1f0ecad22c2470dad6cf228ade46258495",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 46,
+    "recoveredSource": "sm3-46-RadialColourise_HLSL3.hlsl",
+    "sourceSha256": "6ecb26285f6fc7665dcc65c8971329e646a65d0c30a033f25cec01d5c7378c8f",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 47,
+    "recoveredSource": "sm3-47-WobblyWarp_HLSL3.hlsl",
+    "sourceSha256": "7a9470691c0e76b90186483295c5a604f7173ef18d72e602fd57d8f48d381180",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 48,
+    "recoveredSource": "sm3-48-Fluffinator_HLSL3.hlsl",
+    "sourceSha256": "d8000fbecb8efd01420e627496ffb041eb6ff835647ecddb98c8c96335cb80f1",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 49,
+    "recoveredSource": "sm3-49-Bifluffinator_HLSL3.hlsl",
+    "sourceSha256": "89fd43c2a15e74c40c0534d4f7bb294e2aecd0871e04b2d7de1d116afcef58fb",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 57,
+    "recoveredSource": "sm3-57-SoftMix3Glow_HLSL3.hlsl",
+    "sourceSha256": "57267d77c2cb54b34f2dd8777898039452708247e91f2d0a7c6d429608753b29",
+    "samplers": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "id": 59,
+    "recoveredSource": "sm3-59-RGBSplit_HLSL3.hlsl",
+    "sourceSha256": "c65de8bb84f4bd4d9263651286110a6673e7652ac3b2d73c55298284264e6342",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 61,
+    "recoveredSource": "sm3-61-RGBSplit2_HLSL3.hlsl",
+    "sourceSha256": "253ee233d67618504aca3e7e9a76edb231886ff5e754bc0abb2d481f5cbb9066",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 69,
+    "recoveredSource": "sm3-69-RoundTunnel2A_HLSL3.hlsl",
+    "sourceSha256": "7b58016534ccc7a9a3bce63a4f8aaf8ed6b893793c87cedac8459b7b0c4061e2",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 70,
+    "recoveredSource": "sm3-70-RibbedTunnel_HLSL3.hlsl",
+    "sourceSha256": "3ed198aae306b2ce32946444533832ad40baafc8639e005f4e0d62b0fb16c9e4",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 71,
+    "recoveredSource": "sm3-71-PointField_HLSL3.hlsl",
+    "sourceSha256": "846c6a701346e724e4d2c55d228176d3b31b45a223ddd1c577b54ce6ae1705ea",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 72,
+    "recoveredSource": "sm3-72-OutlineMerge0_HLSL3.hlsl",
+    "sourceSha256": "2fa718ecbbd69860159e25d020fc693411c2eabf6e2a6df6e984d3fdbb5e49fc",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 73,
+    "recoveredSource": "sm3-73-OutlineMerge1_HLSL3.hlsl",
+    "sourceSha256": "066fa2bc725e47e6e1182bf02a56ab8ca9f4908f2e38b4990e2bc2d3e753e3e3",
+    "samplers": [
+      0,
+      1
+    ]
+  },
+  {
+    "id": 74,
+    "recoveredSource": "sm3-74-zomg_HLSL3.hlsl",
+    "sourceSha256": "cac75661ea94b6c31b7e05089143e3417aa452684cff134924b3d44c1aa40a49",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 79,
+    "recoveredSource": "sm3-79-Lisspoint_HLSL3.hlsl",
+    "sourceSha256": "2a322666dd759d1e3eaa09ad9b6a930afe2d3454613c2d1bc3f27bb3bc88b93d",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 80,
+    "recoveredSource": "sm3-80-Galactica_HLSL3.hlsl",
+    "sourceSha256": "42627a615b89534db082767a01ca032a1ef908d578f432ac16ce3332be6510df",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 81,
+    "recoveredSource": "sm3-81-GalacticaAlt_HLSL3.hlsl",
+    "sourceSha256": "436170611e934d65fe5ea95ec5739e07f75df1a03ae16adf3af6b3436eb6f426",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 83,
+    "recoveredSource": "sm3-83-glargle3_HLSL3.hlsl",
+    "sourceSha256": "88ef534e8b8ee0981baeb5adb502250dcf9535f36ba97f40a21c7aa7c2ea8cd2",
+    "samplers": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "id": 84,
+    "recoveredSource": "sm3-84-Planet_HLSL3.hlsl",
+    "sourceSha256": "89c18fdd6281cbceccfebc7debdae690a460e38371c0b03b008748656b797d26",
+    "samplers": [
+      0
+    ]
+  },
+  {
+    "id": 85,
+    "recoveredSource": "sm3-85-Planet2_HLSL3.hlsl",
+    "sourceSha256": "aeee5c0643f5420980cb3f9b5f08ac5977af5f3664d7f6d7272e38d009c69947",
+    "samplers": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "id": 1079,
+    "recoveredSource": "Lisspoint_HLSL-004e0380.hlsl",
+    "sourceSha256": "c5973090736c9f00f7412c749ad8f076a2bbaacad6151ea9aeecaf3ab6127f6c",
+    "samplers": [
+      0
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+OpenMinotaur — third-party notices
+
+Original Minotaur Project games, engine material, artwork and audio: Llamasoft
+and the original contributors. Jeff Minter has authorized publication of this
+project as open source. Assets are included with Llamasoft's permission;
+copyright and other IP rights remain with their respective owners. Re-use of
+original game assets requires explicit permission from the relevant copyright
+holder unless already authorized or permitted by law. No general reuse license
+for that material is granted by this notice. See LICENSE.txt for scope.
+
+SDL3: zlib license; see LICENSES/SDL3.txt. SDL source is supplied separately
+when building, and retains its own notices.
+
+miniz: see LICENSES/MINIZ.txt and third_party/miniz/LICENSE.
+pugixml: see LICENSES/PUGIXML.txt and third_party/pugixml/LICENSE.md.
+stb libraries: see LICENSES/STB.txt and the notices in third_party/stb.
+glad and Khronos headers: see LICENSES/GLAD-KHRONOS-NOTICES.txt and the
+unchanged generated/header notices in third_party/glad.
+
+Liberation fonts: SIL Open Font License 1.1; see LICENSES/FONTS.txt.
+
+CRT Royale: copyright 2014 TroggleMonkey, GPL version 2 or later as stated
+in the shader headers. See LICENSES/CRT-ROYALE.txt, SHADER-NOTICES.txt and
+CRT-ROYALE-ACKNOWLEDGMENTS.txt. Original GLSL sources, masks and preset are
+in assets/shaders/royale in the source distribution. The host prepares
+compatible headers and disables curvature; original filter kernels remain.
+
+CRT Consumer / NTSC module: upstream libretro glsl-shaders sources in
+assets/shaders/consumer. NTSC module by DariusG (2025). The linear and NTSC
+shader headers specify GPL version 2 or later; see LICENSES/CRT-CONSUMER.txt.
+The source distribution preserves upstream files and records the pinned revision
+and fixed parameter settings. CRT 2 uses S-Video without curvature or vignette.
+
+Collection title: project title artwork and the Vaporwave Neon scene, using
+original Llamasoft materials. The HAMMRF raster atlas and vector font sources
+are attributed in modules/live_widgets/FONT-NOTICES.txt. The title and its
+background remain separate from game code and game resource archives.
+
+Project contributors' own original contributions are offered under 0BSD to the
+extent they hold the necessary rights; see LICENSES/0BSD.txt and LICENSE.txt.
+Existing component terms and attribution are preserved. This grant does not
+relicense Llamasoft material or replace any third-party license.

@@ -1,0 +1,13 @@
+7	float	9	6	-6.2831855	6.2831855
+7	float	0	0	-1	1
+7	float	1	0	-1	1
+7	float	5	1	-1	1
+7	float	6	1	-1	1
+8	float	4	9	0	1
+8	float	5	4	0	1
+8	float	6	8	0	1
+16	float	7	6	-1	1
+19	float	1	29	100	600
+19	float	2	31	200	600
+19	integer	1	25	0	16383
+19	integer	7	27	0	255

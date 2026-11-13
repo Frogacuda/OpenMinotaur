@@ -1,0 +1,19 @@
+build/
+build-*/
+*.ipa
+third_party/SDL3/
+
+# Private Android signing material
+*.p12
+*.jks
+*.keystore
+*signing-private*.json
+openminotaur-signing.json
+
+# Local dependency and tool caches
+_deps/
+.venv/
+__pycache__/
+.gradle/
+.cxx/
+local.properties

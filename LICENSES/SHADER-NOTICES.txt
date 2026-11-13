@@ -1,0 +1,1046 @@
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+// compatibility macros for transparently converting HLSLisms into GLSLisms
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "../include/user-settings.h"
+/***************** BEGIN user-settings.h ******************/
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  These macros and constants can be used across the whole codebase.
+//  Unlike the values in user-settings.cgh, end users shouldn't modify these.
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "../include/user-settings.h"
+//#include "../include/user-cgp-constants.h"
+/***************** BEGIN user-cgp-constants.h ******************/
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//  
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file provides gamma-aware tex*D*() and encode_output() functions.
+//  Requires:   Before #include-ing this file, the including file must #define
+//              the following macros when applicable and follow their rules:
+//              1.) #define FIRST_PASS if this is the first pass.
+//              2.) #define LAST_PASS if this is the last pass.
+//              3.) If sRGB is available, set srgb_framebufferN = "true" for
+//                  every pass except the last in your .cgp preset.
+//              4.) If sRGB isn't available but you want gamma-correctness with
+//                  no banding, #define GAMMA_ENCODE_EVERY_FBO each pass.
+//              5.) #define SIMULATE_CRT_ON_LCD if desired (precedence over 5-7)
+//              6.) #define SIMULATE_GBA_ON_LCD if desired (precedence over 6-7)
+//              7.) #define SIMULATE_LCD_ON_CRT if desired (precedence over 7)
+//              8.) #define SIMULATE_GBA_ON_CRT if desired (precedence over -)
+//              If an option in [5, 8] is #defined in the first or last pass, it
+//              should be #defined for both.  It shouldn't make a difference
+//              whether it's #defined for intermediate passes or not.
+//  Optional:   The including file (or an earlier included file) may optionally
+//              #define a number of macros indicating it will override certain
+//              macros and associated constants are as follows:
+//              static constants with either static or uniform constants.  The
+//              1.) OVERRIDE_STANDARD_GAMMA: The user must first define:
+//                  static const float ntsc_gamma
+//                  static const float pal_gamma
+//                  static const float crt_reference_gamma_high
+//                  static const float crt_reference_gamma_low
+//                  static const float lcd_reference_gamma
+//                  static const float crt_office_gamma
+//                  static const float lcd_office_gamma
+//              2.) OVERRIDE_DEVICE_GAMMA: The user must first define:
+//                  static const float crt_gamma
+//                  static const float gba_gamma
+//                  static const float lcd_gamma
+//              3.) OVERRIDE_FINAL_GAMMA: The user must first define:
+//                  static const float input_gamma
+//                  static const float intermediate_gamma
+//                  static const float output_gamma
+//                  (intermediate_gamma is for GAMMA_ENCODE_EVERY_FBO.)
+//              4.) OVERRIDE_ALPHA_ASSUMPTIONS: The user must first define:
+//                  static const bool assume_opaque_alpha
+//              The gamma constant overrides must be used in every pass or none,
+//              and OVERRIDE_FINAL_GAMMA bypasses all of the SIMULATE* macros.
+//              OVERRIDE_ALPHA_ASSUMPTIONS may be set on a per-pass basis.
+//  Usage:      After setting macros appropriately, ignore gamma correction and
+//              replace all tex*D*() calls with equivalent gamma-aware
+//              tex*D*_linearize calls, except:
+//              1.) When you read an LUT, use regular tex*D or a gamma-specified
+//                  function, depending on its gamma encoding:
+//                      tex*D*_linearize_gamma (takes a runtime gamma parameter)
+//              2.) If you must read pass0's original input in a later pass, use
+//                  tex2D_linearize_ntsc_gamma.  If you want to read pass0's
+//                  input with gamma-corrected bilinear filtering, consider
+//                  creating a first linearizing pass and reading from the input
+//                  of pass1 later.
+//              Then, return encode_output(color) from every fragment shader.
+//              Finally, use the global gamma_aware_bilinear boolean if you want
+//              to statically branch based on whether bilinear filtering is
+//              gamma-correct or not (e.g. for placing Gaussian blur samples).
+//
+//  Detailed Policy:
+//  tex*D*_linearize() functions enforce a consistent gamma-management policy
+//  based on the FIRST_PASS and GAMMA_ENCODE_EVERY_FBO settings.  They assume
+//  their input texture has the same encoding characteristics as the input for
+//  the current pass (which doesn't apply to the exceptions listed above).
+//  Similarly, encode_output() enforces a policy based on the LAST_PASS and
+//  GAMMA_ENCODE_EVERY_FBO settings.  Together, they result in one of the
+//  following two pipelines.
+//  Typical pipeline with intermediate sRGB framebuffers:
+//      linear_color = pow(pass0_encoded_color, input_gamma);
+//      intermediate_output = linear_color;     //  Automatic sRGB encoding
+//      linear_color = intermediate_output;     //  Automatic sRGB decoding
+//      final_output = pow(intermediate_output, 1.0/output_gamma);
+//  Typical pipeline without intermediate sRGB framebuffers:
+//      linear_color = pow(pass0_encoded_color, input_gamma);
+//      intermediate_output = pow(linear_color, 1.0/intermediate_gamma);
+//      linear_color = pow(intermediate_output, intermediate_gamma);
+//      final_output = pow(intermediate_output, 1.0/output_gamma);
+//  Using GAMMA_ENCODE_EVERY_FBO is much slower, but it's provided as a way to
+//  easily get gamma-correctness without banding on devices where sRGB isn't
+//  supported.
+//
+//  Use This Header to Maximize Code Reuse:
+//  The purpose of this header is to provide a consistent interface for texture
+//  reads and output gamma-encoding that localizes and abstracts away all the
+//  annoying details.  This greatly reduces the amount of code in each shader
+//  pass that depends on the pass number in the .cgp preset or whether sRGB
+//  FBO's are being used: You can trivially change the gamma behavior of your
+//  whole pass by commenting or uncommenting 1-3 #defines.  To reuse the same
+//  code in your first, Nth, and last passes, you can even put it all in another
+//  header file and #include it from skeleton .cg files that #define the
+//  appropriate pass-specific settings.
+//
+//  Rationale for Using Three Macros:
+//  This file uses GAMMA_ENCODE_EVERY_FBO instead of an opposite macro like
+//  SRGB_PIPELINE to ensure sRGB is assumed by default, which hopefully imposes
+//  a lower maintenance burden on each pass.  At first glance it seems we could
+//  accomplish everything with two macros: GAMMA_CORRECT_IN / GAMMA_CORRECT_OUT.
+//  This works for simple use cases where input_gamma == output_gamma, but it
+//  breaks down for more complex scenarios like CRT simulation, where the pass
+//  number determines the gamma encoding of the input and output.
+///////////////////////////////  BASE CONSTANTS  ///////////////////////////////
+//  Set standard gamma constants, but allow users to override them:
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "../include/user-settings.h"
+//#include "../include/derived-settings-and-constants.h"
+//#include "../include/special-functions.h"
+/***************** BEGIN special-functions.h ******************/
+///////////////////////////  BEGIN SPECIAL-FUNCTIONS  //////////////////////////
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file implements the following mathematical special functions:
+//  1.) erf() = 2/sqrt(pi) * indefinite_integral(e**(-x**2))
+//  2.) gamma(s), a real-numbered extension of the integer factorial function
+//  It also implements normalized_ligamma(s, z), a normalized lower incomplete
+//  gamma function for s < 0.5 only.  Both gamma() and normalized_ligamma() can
+//  be called with an _impl suffix to use an implementation version with a few
+//  extra precomputed parameters (which may be useful for the caller to reuse).
+//  See below for details.
+//
+//  Design Rationale:
+//  Pretty much every line of code in this file is duplicated four times for
+//  different input types (float4/float3/float2/float).  This is unfortunate,
+//  but Cg doesn't allow function templates.  Macros would be far less verbose,
+//  but they would make the code harder to document and read.  I don't expect
+//  these functions will require a whole lot of maintenance changes unless
+//  someone ever has need for more robust incomplete gamma functions, so code
+//  duplication seems to be the lesser evil in this case.
+///////////////////////////  GAUSSIAN ERROR FUNCTION  //////////////////////////
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "../include/user-settings.h"
+//#include "../include/derived-settings-and-constants.h"
+////////////////////////////////  END INCLUDES  ////////////////////////////////
+//  Override some parameters for gamma-management.h and tex2Dantialias.h:
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "../include/user-settings.h"
+//#include "../include/derived-settings-and-constants.h"
+/***************** BEGIN derived-settings-and-constants.h ******************/
+////////////////////  BEGIN DERIVED-SETTINGS-AND-CONSTANTS  ////////////////////
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file provides reusable one-pass and separable (two-pass) blurs.
+//  Requires:   All blurs share these requirements (dxdy requirement is split):
+//              1.) All requirements of gamma-management.h must be satisfied!
+//              2.) filter_linearN must == "true" in your .cgp preset unless
+//                  you're using tex2DblurNresize at 1x scale.
+//              3.) mipmap_inputN must == "true" in your .cgp preset if
+//                  IN.output_size < IN.video_size.
+//              4.) IN.output_size == IN.video_size / pow(2, M), where M is some
+//                  positive integer.  tex2Dblur*resize can resize arbitrarily
+//                  (and the blur will be done after resizing), but arbitrary
+//                  resizes "fail" with other blurs due to the way they mix
+//                  static weights with bilinear sample exploitation.
+//              5.) In general, dxdy should contain the uv pixel spacing:
+//                      dxdy = (IN.video_size/IN.output_size)/IN.texture_size
+//              6.) For separable blurs (tex2DblurNresize and tex2DblurNfast),
+//                  zero out the dxdy component in the unblurred dimension:
+//                      dxdy = float2(dxdy.x, 0.0) or float2(0.0, dxdy.y)
+//              Many blurs share these requirements:
+//              1.) One-pass blurs require scale_xN == scale_yN or scales > 1.0,
+//                  or they will blur more in the lower-scaled dimension.
+//              2.) One-pass shared sample blurs require ddx(), ddy(), and
+//                  tex2Dlod() to be supported by the current Cg profile, and
+//                  the drivers must support high-quality derivatives.
+//              3.) One-pass shared sample blurs require:
+//                      tex_uv.w == log2(IN.video_size/IN.output_size).y;
+//              Non-wrapper blurs share this requirement:
+//              1.) sigma is the intended standard deviation of the blur
+//              Wrapper blurs share this requirement, which is automatically
+//              met (unless OVERRIDE_BLUR_STD_DEVS is #defined; see below):
+//              1.) blurN_std_dev must be global static const float values
+//                  specifying standard deviations for Nx blurs in units
+//                  of destination pixels
+//  Optional:   1.) The including file (or an earlier included file) may
+//                  optionally #define USE_BINOMIAL_BLUR_STD_DEVS to replace
+//                  default standard deviations with those matching a binomial
+//                  distribution.  (See below for details/properties.)
+//              2.) The including file (or an earlier included file) may
+//                  optionally #define OVERRIDE_BLUR_STD_DEVS and override:
+//                      static const float blur3_std_dev
+//                      static const float blur4_std_dev
+//                      static const float blur5_std_dev
+//                      static const float blur6_std_dev
+//                      static const float blur7_std_dev
+//                      static const float blur8_std_dev
+//                      static const float blur9_std_dev
+//                      static const float blur10_std_dev
+//                      static const float blur11_std_dev
+//                      static const float blur12_std_dev
+//                      static const float blur17_std_dev
+//                      static const float blur25_std_dev
+//                      static const float blur31_std_dev
+//                      static const float blur43_std_dev
+//              3.) The including file (or an earlier included file) may
+//                  optionally #define OVERRIDE_ERROR_BLURRING and override:
+//                      static const float error_blurring
+//                  This tuning value helps mitigate weighting errors from one-
+//                  pass shared-sample blurs sharing bilinear samples between
+//                  fragments.  Values closer to 0.0 have "correct" blurriness
+//                  but allow more artifacts, and values closer to 1.0 blur away
+//                  artifacts by sampling closer to halfway between texels.
+//              UPDATE 6/21/14: The above static constants may now be overridden
+//              by non-static uniform constants.  This permits exposing blur
+//              standard deviations as runtime GUI shader parameters.  However,
+//              using them keeps weights from being statically computed, and the
+//              speed hit depends on the blur: On my machine, uniforms kill over
+//              53% of the framerate with tex2Dblur12x12shared, but they only
+//              drop the framerate by about 18% with tex2Dblur11fast.
+//  Quality and Performance Comparisons:
+//  For the purposes of the following discussion, "no sRGB" means
+//  GAMMA_ENCODE_EVERY_FBO is #defined, and "sRGB" means it isn't.
+//  1.) tex2DblurNfast is always faster than tex2DblurNresize.
+//  2.) tex2DblurNresize functions are the only ones that can arbitrarily resize
+//      well, because they're the only ones that don't exploit bilinear samples.
+//      This also means they're the only functions which can be truly gamma-
+//      correct without linear (or sRGB FBO) input, but only at 1x scale.
+//  3.) One-pass shared sample blurs only have a speed advantage without sRGB.
+//      They also have some inaccuracies due to their shared-[bilinear-]sample
+//      design, which grow increasingly bothersome for smaller blurs and higher-
+//      frequency source images (relative to their resolution).  I had high
+//      hopes for them, but their most realistic use case is limited to quickly
+//      reblurring an already blurred input at full resolution.  Otherwise:
+//      a.) If you're blurring a low-resolution source, you want a better blur.
+//      b.) If you're blurring a lower mipmap, you want a better blur.
+//      c.) If you're blurring a high-resolution, high-frequency source, you
+//          want a better blur.
+//  4.) The one-pass blurs without shared samples grow slower for larger blurs,
+//      but they're competitive with separable blurs at 5x5 and smaller, and
+//      even tex2Dblur7x7 isn't bad if you're wanting to conserve passes.
+//  Here are some framerates from a GeForce 8800GTS.  The first pass resizes to
+//  viewport size (4x in this test) and linearizes for sRGB codepaths, and the
+//  remaining passes perform 6 full blurs.  Mipmapped tests are performed at the
+//  same scale, so they just measure the cost of mipmapping each FBO (only every
+//  other FBO is mipmapped for separable blurs, to mimic realistic usage).
+//  Mipmap      Neither     sRGB+Mipmap sRGB        Function
+//  76.0        92.3        131.3       193.7       tex2Dblur3fast
+//  63.2        74.4        122.4       175.5       tex2Dblur3resize
+//  93.7        121.2       159.3       263.2       tex2Dblur3x3
+//  59.7        68.7        115.4       162.1       tex2Dblur3x3resize
+//  63.2        74.4        122.4       175.5       tex2Dblur5fast
+//  49.3        54.8        100.0       132.7       tex2Dblur5resize
+//  59.7        68.7        115.4       162.1       tex2Dblur5x5
+//  64.9        77.2        99.1        137.2       tex2Dblur6x6shared
+//  55.8        63.7        110.4       151.8       tex2Dblur7fast
+//  39.8        43.9        83.9        105.8       tex2Dblur7resize
+//  40.0        44.2        83.2        104.9       tex2Dblur7x7
+//  56.4        65.5        71.9        87.9        tex2Dblur8x8shared
+//  49.3        55.1        99.9        132.5       tex2Dblur9fast
+//  33.3        36.2        72.4        88.0        tex2Dblur9resize
+//  27.8        29.7        61.3        72.2        tex2Dblur9x9
+//  37.2        41.1        52.6        60.2        tex2Dblur10x10shared
+//  44.4        49.5        91.3        117.8       tex2Dblur11fast
+//  28.8        30.8        63.6        75.4        tex2Dblur11resize
+//  33.6        36.5        40.9        45.5        tex2Dblur12x12shared
+//  TODO: Fill in benchmarks for new untested blurs.
+//                                                  tex2Dblur17fast
+//                                                  tex2Dblur25fast
+//                                                  tex2Dblur31fast
+//                                                  tex2Dblur43fast
+//                                                  tex2Dblur3x3resize
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+//  Set static standard deviations, but allow users to override them with their
+//  own constants (even non-static uniforms if they're okay with the speed hit):
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey*
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DISCLAIMER  /////////////////////////////////
+//  *This code was inspired by "Shader Amortization using Pixel Quad Message
+//  Passing" by Eric Penner, published in GPU Pro 2, Chapter VI.2.  My intent
+//  is not to plagiarize his fundamentally similar code and assert my own
+//  copyright, but the algorithmic helper functions require so little code that
+//  implementations can't vary by much except bugfixes and conventions.  I just
+//  wanted to license my own particular code here to avoid ambiguity and make it
+//  clear that as far as I'm concerned, people can do as they please with it.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  Given screen pixel numbers, derive a "quad vector" describing a fragment's
+//  position in its 2x2 pixel quad.  Given that vector, obtain the values of any
+//  variable at neighboring fragments.
+//  Requires:   Using this file in general requires:
+//              1.) ddx() and ddy() are present in the current Cg profile.
+//              2.) The GPU driver is using fine/high-quality derivatives.
+//                  Functions will give incorrect results if this is not true,
+//                  so a test function is included.
+/////////////////////  QUAD-PIXEL COMMUNICATION PRIMITIVES  ////////////////////
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  These utility functions and constants help several passes determine the
+//  size and center texel weight of the phosphor bloom in a uniform manner.
+//////////////////////////////////  INCLUDES  //////////////////////////////////
+//  We need to calculate the correct blur sigma using some .cgp constants:
+//#include "../include/user-settings.h"
+//#include "../include/derived-settings-and-constants.h"
+//#include "../include/blur-functions.h"
+///////////////////////////////  BLOOM CONSTANTS  //////////////////////////////
+//  Compute constants with manual inlines of the functions below:
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//  
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file provides reusable one-pass and separable (two-pass) blurs.
+//  Requires:   All blurs share these requirements (dxdy requirement is split):
+//              1.) All requirements of gamma-management.h must be satisfied!
+//              2.) filter_linearN must == "true" in your .cgp preset unless
+//                  you're using tex2DblurNresize at 1x scale.
+//              3.) mipmap_inputN must == "true" in your .cgp preset if
+//                  IN.output_size < IN.video_size.
+//              4.) IN.output_size == IN.video_size / pow(2, M), where M is some
+//                  positive integer.  tex2Dblur*resize can resize arbitrarily
+//                  (and the blur will be done after resizing), but arbitrary
+//                  resizes "fail" with other blurs due to the way they mix
+//                  static weights with bilinear sample exploitation.
+//              5.) In general, dxdy should contain the uv pixel spacing:
+//                      dxdy = (IN.video_size/IN.output_size)/IN.texture_size
+//              6.) For separable blurs (tex2DblurNresize and tex2DblurNfast),
+//                  zero out the dxdy component in the unblurred dimension:
+//                      dxdy = vec2(dxdy.x, 0.0) or vec2(0.0, dxdy.y)
+//              Many blurs share these requirements:
+//              1.) One-pass blurs require scale_xN == scale_yN or scales > 1.0,
+//                  or they will blur more in the lower-scaled dimension.
+//              2.) One-pass shared sample blurs require ddx(), ddy(), and
+//                  tex2Dlod() to be supported by the current Cg profile, and
+//                  the drivers must support high-quality derivatives.
+//              3.) One-pass shared sample blurs require:
+//                      tex_uv.w == log2(IN.video_size/IN.output_size).y;
+//              Non-wrapper blurs share this requirement:
+//              1.) sigma is the intended standard deviation of the blur
+//              Wrapper blurs share this requirement, which is automatically
+//              met (unless OVERRIDE_BLUR_STD_DEVS is #defined; see below):
+//              1.) blurN_std_dev must be global static float values
+//                  specifying standard deviations for Nx blurs in units
+//                  of destination pixels
+//  Optional:   1.) The including file (or an earlier included file) may
+//                  optionally #define USE_BINOMIAL_BLUR_STD_DEVS to replace
+//                  default standard deviations with those matching a binomial
+//                  distribution.  (See below for details/properties.)
+//              2.) The including file (or an earlier included file) may
+//                  optionally #define OVERRIDE_BLUR_STD_DEVS and override:
+//                      static float blur3_std_dev
+//                      static float blur4_std_dev
+//                      static float blur5_std_dev
+//                      static float blur6_std_dev
+//                      static float blur7_std_dev
+//                      static float blur8_std_dev
+//                      static float blur9_std_dev
+//                      static float blur10_std_dev
+//                      static float blur11_std_dev
+//                      static float blur12_std_dev
+//                      static float blur17_std_dev
+//                      static float blur25_std_dev
+//                      static float blur31_std_dev
+//                      static float blur43_std_dev
+//              3.) The including file (or an earlier included file) may
+//                  optionally #define OVERRIDE_ERROR_BLURRING and override:
+//                      static float error_blurring
+//                  This tuning value helps mitigate weighting errors from one-
+//                  pass shared-sample blurs sharing bilinear samples between
+//                  fragments.  Values closer to 0.0 have "correct" blurriness
+//                  but allow more artifacts, and values closer to 1.0 blur away
+//                  artifacts by sampling closer to halfway between texels.
+//              UPDATE 6/21/14: The above static constants may now be overridden
+//              by non-static uniform constants.  This permits exposing blur
+//              standard deviations as runtime GUI shader parameters.  However,
+//              using them keeps weights from being statically computed, and the
+//              speed hit depends on the blur: On my machine, uniforms kill over
+//              53% of the framerate with tex2Dblur12x12shared, but they only
+//              drop the framerate by about 18% with tex2Dblur11fast.
+//  Quality and Performance Comparisons:
+//  For the purposes of the following discussion, "no sRGB" means
+//  GAMMA_ENCODE_EVERY_FBO is #defined, and "sRGB" means it isn't.
+//  1.) tex2DblurNfast is always faster than tex2DblurNresize.
+//  2.) tex2DblurNresize functions are the only ones that can arbitrarily resize
+//      well, because they're the only ones that don't exploit bilinear samples.
+//      This also means they're the only functions which can be truly gamma-
+//      correct without linear (or sRGB FBO) input, but only at 1x scale.
+//  3.) One-pass shared sample blurs only have a speed advantage without sRGB.
+//      They also have some inaccuracies due to their shared-[bilinear-]sample
+//      design, which grow increasingly bothersome for smaller blurs and higher-
+//      frequency source images (relative to their resolution).  I had high
+//      hopes for them, but their most realistic use case is limited to quickly
+//      reblurring an already blurred input at full resolution.  Otherwise:
+//      a.) If you're blurring a low-resolution source, you want a better blur.
+//      b.) If you're blurring a lower mipmap, you want a better blur.
+//      c.) If you're blurring a high-resolution, high-frequency source, you
+//          want a better blur.
+//  4.) The one-pass blurs without shared samples grow slower for larger blurs,
+//      but they're competitive with separable blurs at 5x5 and smaller, and
+//      even tex2Dblur7x7 isn't bad if you're wanting to conserve passes.
+//  Here are some framerates from a GeForce 8800GTS.  The first pass resizes to
+//  viewport size (4x in this test) and linearizes for sRGB codepaths, and the
+//  remaining passes perform 6 full blurs.  Mipmapped tests are performed at the
+//  same scale, so they just measure the cost of mipmapping each FBO (only every
+//  other FBO is mipmapped for separable blurs, to mimic realistic usage).
+//  Mipmap      Neither     sRGB+Mipmap sRGB        Function
+//  76.0        92.3        131.3       193.7       tex2Dblur3fast
+//  63.2        74.4        122.4       175.5       tex2Dblur3resize
+//  93.7        121.2       159.3       263.2       tex2Dblur3x3
+//  59.7        68.7        115.4       162.1       tex2Dblur3x3resize
+//  63.2        74.4        122.4       175.5       tex2Dblur5fast
+//  49.3        54.8        100.0       132.7       tex2Dblur5resize
+//  59.7        68.7        115.4       162.1       tex2Dblur5x5
+//  64.9        77.2        99.1        137.2       tex2Dblur6x6shared
+//  55.8        63.7        110.4       151.8       tex2Dblur7fast
+//  39.8        43.9        83.9        105.8       tex2Dblur7resize
+//  40.0        44.2        83.2        104.9       tex2Dblur7x7
+//  56.4        65.5        71.9        87.9        tex2Dblur8x8shared
+//  49.3        55.1        99.9        132.5       tex2Dblur9fast
+//  33.3        36.2        72.4        88.0        tex2Dblur9resize
+//  27.8        29.7        61.3        72.2        tex2Dblur9x9
+//  37.2        41.1        52.6        60.2        tex2Dblur10x10shared
+//  44.4        49.5        91.3        117.8       tex2Dblur11fast
+//  28.8        30.8        63.6        75.4        tex2Dblur11resize
+//  33.6        36.5        40.9        45.5        tex2Dblur12x12shared
+//  TODO: Fill in benchmarks for new untested blurs.
+//                                                  tex2Dblur17fast
+//                                                  tex2Dblur25fast
+//                                                  tex2Dblur31fast
+//                                                  tex2Dblur43fast
+//                                                  tex2Dblur3x3resize
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+//  Set static standard deviations, but allow users to override them with their
+//  own constants (even non-static uniforms if they're okay with the speed hit):
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file implements the following mathematical special functions:
+//  1.) erf() = 2/sqrt(pi) * indefinite_integral(e**(-x**2))
+//  2.) gamma(s), a real-numbered extension of the integer factorial function
+//  It also implements normalized_ligamma(s, z), a normalized lower incomplete
+//  gamma function for s < 0.5 only.  Both gamma() and normalized_ligamma() can
+//  be called with an _impl suffix to use an implementation version with a few
+//  extra precomputed parameters (which may be useful for the caller to reuse).
+//  See below for details.
+//
+//  Design Rationale:
+//  Pretty much every line of code in this file is duplicated four times for
+//  different input types (vec4/vec3/vec2/float).  This is unfortunate,
+//  but Cg doesn't allow function templates.  Macros would be far less verbose,
+//  but they would make the code harder to document and read.  I don't expect
+//  these functions will require a whole lot of maintenance changes unless
+//  someone ever has need for more robust incomplete gamma functions, so code
+//  duplication seems to be the lesser evil in this case.
+///////////////////////////  GAUSSIAN ERROR FUNCTION  //////////////////////////
+
+/////////////////////////////////  MIT LICENSE  ////////////////////////////////
+//  Copyright (C) 2014 TroggleMonkey
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to
+//  deal in the Software without restriction, including without limitation the
+//  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+//  IN THE SOFTWARE.
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+//////////////////////////////////  INCLUDES  //////////////////////////////////
+//#include "../user-settings.h"
+//#include "derived-settings-and-constants.h"
+/////////////////////////////  CODEPATH SELECTION  /////////////////////////////
+//  Choose a looping strategy based on what's allowed:
+//  Dynamic loops not allowed: Use a flat static loop.
+//  Dynamic loops accomodated: Coarsely branch around static loops.
+//  Dynamic loops assumed allowed: Use a flat dynamic loop.
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  These utility functions and constants help several passes determine the
+//  size and center texel weight of the phosphor bloom in a uniform manner.
+//////////////////////////////////  INCLUDES  //////////////////////////////////
+//  We need to calculate the correct blur sigma using some .cgp constants:
+//#include "../include/user-settings.h"
+//#include "../include/derived-settings-and-constants.h"
+//#include "../include/blur-functions.h"
+/***************** BEGIN blur-functions.h ******************/
+////////////////////////////  BEGIN BLUR-FUNCTIONS  ///////////////////////////
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+// compatibility macros for transparently converting HLSLisms into GLSLisms
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  These macros and constants can be used across the whole codebase.
+//  Unlike the values in user-settings.cgh, end users shouldn't modify these.
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+//#include "user-cgp-constants.h"
+/////////////////////////   BEGIN USER-CGP-CONSTANTS   /////////////////////////
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+///////////////////////////////  BEGIN INCLUDES  ///////////////////////////////
+////////////////////////////////  END INCLUDES  ////////////////////////////////
+//  Override some parameters for gamma-management.h and tex2Dantialias.h:
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+/////////////////////////////////  DESCRIPTION  ////////////////////////////////
+//  This file provides antialiased and subpixel-aware tex2D lookups.
+//  Requires:   All functions share these requirements:
+//              1.) All requirements of gamma-management.h must be satisfied!
+//              2.) pixel_to_tex_uv must be a 2x2 matrix that transforms pixe-
+//                  space offsets to texture uv offsets.  You can get this with:
+//                      const float2 duv_dx = ddx(tex_uv);
+//                      const float2 duv_dy = ddy(tex_uv);
+//                      const float2x2 pixel_to_tex_uv = float2x2(
+//                          duv_dx.x, duv_dy.x,
+//                          duv_dx.y, duv_dy.y);
+//                  This is left to the user in case the current Cg profile
+//                  doesn't support ddx()/ddy().  Ideally, the user could find
+//                  calculate a distorted tangent-space mapping analytically.
+//                  If not, a simple flat mapping can be obtained with:
+//                      const float2 xy_to_uv_scale = output_size *
+//                          video_size/texture_size;
+//                      const float2x2 pixel_to_tex_uv = float2x2(
+//                          xy_to_uv_scale.x, 0.0,
+//                          0.0, xy_to_uv_scale.y);
+//  Optional:   To set basic AA settings, #define ANTIALIAS_OVERRIDE_BASICS and:
+//              1.) Set an antialiasing level:
+//                      static const float aa_level = {0 (none),
+//                          1 (sample subpixels), 4, 5, 6, 7, 8, 12, 16, 20, 24}
+//              2.) Set a filter type:
+//                      static const float aa_filter = {
+//                          0 (Box, Separable), 1 (Box, Cylindrical),
+//                          2 (Tent, Separable), 3 (Tent, Cylindrical)
+//                          4 (Gaussian, Separable), 5 (Gaussian, Cylindrical)
+//                          6 (Cubic, Separable), 7 (Cubic, Cylindrical)
+//                          8 (Lanczos Sinc, Separable),
+//                          9 (Lanczos Jinc, Cylindrical)}
+//                  If the input is unknown, a separable box filter is used.
+//                  Note: Lanczos Jinc is terrible for sparse sampling, and
+//                  using aa_axis_importance (see below) defeats the purpose.
+//              3.) Mirror the sample pattern on odd frames?
+//                      static const bool aa_temporal = {true, false]
+//                  This helps rotational invariance but can look "fluttery."
+//              The user may #define ANTIALIAS_OVERRIDE_PARAMETERS to override
+//              (all of) the following default parameters with static or uniform
+//              constants (or an accessor function for subpixel offsets):
+//              1.) Cubic parameters:
+//                      static const float aa_cubic_c = 0.5;
+//                  See http://www.imagemagick.org/Usage/filter/#mitchell
+//              2.) Gaussian parameters:
+//                      static const float aa_gauss_sigma =
+//                          0.5/aa_pixel_diameter;
+//              3.) Set subpixel offsets.  This requires an accessor function
+//                  for compatibility with scalar runtime shader   Return
+//                  a float2 pixel offset in [-0.5, 0.5] for the red subpixel:
+//                      float2 get_aa_subpixel_r_offset()
+//              The user may also #define ANTIALIAS_OVERRIDE_STATIC_CONSTANTS to
+//              override (all of) the following default static values.  However,
+//              the file's structure requires them to be declared static const:
+//              1.) static const float aa_lanczos_lobes = 3.0;
+//              2.) static const float aa_gauss_support = 1.0/aa_pixel_diameter;
+//                  Note the default tent/Gaussian support radii may appear
+//                  arbitrary, but extensive testing found them nearly optimal
+//                  for tough cases like strong distortion at low AA levels.
+//                  (The Gaussian default is only best for practical gauss_sigma
+//                  values; much larger gauss_sigmas ironically prefer slightly
+//                  smaller support given sparse sampling, and vice versa.)
+//              3.) static const float aa_tent_support = 1.0 / aa_pixel_diameter;
+//              4.) static const float2 aa_xy_axis_importance:
+//                  The sparse N-queens sampling grid interacts poorly with
+//                  negative-lobed 2D filters.  However, if aliasing is much
+//                  stronger in one direction (e.g. horizontally with a phosphor
+//                  mask), it can be useful to downplay sample offsets along the
+//                  other axis.  The support radius in each direction scales with
+//                  aa_xy_axis_importance down to a minimum of 0.5 (box support),
+//                  after which point only the offsets used for calculating
+//                  weights continue to scale downward.  This works as follows:
+//                  If aa_xy_axis_importance = float2(1.0, 1.0/support_radius),
+//                  the vertical support radius will drop to 1.0, and we'll just
+//                  filter vertical offsets with the first filter lobe, while
+//                  horizontal offsets go through the full multi-lobe filter.
+//                  If aa_xy_axis_importance = float2(1.0, 0.0), the vertical
+//                  support radius will drop to box support, and the vertical
+//                  offsets will be ignored entirely (essentially giving us a
+//                  box filter vertically).  The former is potentially smoother
+//                  (but less predictable) and the default behavior of Lanczos
+//                  jinc, whereas the latter is sharper and the default behavior
+//                  of cubics and Lanczos sinc.
+//              5.) static const float aa_pixel_diameter: You can expand the
+//                  pixel diameter to e.g. sqrt(2.0), which may be a better
+//                  support range for cylindrical filters (they don't
+//                  currently discard out-of-circle samples though).
+//              Finally, there are two miscellaneous options:
+//              1.) If you want to antialias a manually tiled texture, you can
+//                  #define ANTIALIAS_DISABLE_ANISOTROPIC to use tex2Dlod() to
+//                  fix incompatibilities with anisotropic filtering.  This is
+//                  slower, and the Cg profile must support tex2Dlod().
+//              2.) If aa_cubic_c is a runtime uniform, you can #define
+//                  RUNTIME_ANTIALIAS_WEIGHTS to evaluate cubic weights once per
+//                  fragment instead of at the usage site (which is used by
+//                  default, because it enables static evaluation).
+//  Description:
+//  Each antialiased lookup follows these steps:
+//  1.) Define a sample pattern of pixel offsets in the range of [-0.5, 0.5]
+//      pixels, spanning the diameter of a rectangular box filter.
+//  2.) Scale these offsets by the support diameter of the user's chosen filter.
+//  3.) Using these pixel offsets from the pixel center, compute the offsets to
+//      predefined subpixel locations.
+//  4.) Compute filter weights based on subpixel offsets.
+//  Much of that can often be done at compile-time.  At runtime:
+//  1.) Project pixel-space offsets into uv-space with a matrix multiplication
+//      to get the uv offsets for each sample.  Rectangular pixels have a
+//      diameter of 1.0.  Circular pixels are not currently supported, but they
+//      might be better with a diameter of sqrt(2.0) to ensure there are no gaps
+//      between them.
+//  2.) Load, weight, and sum samples.
+//  We use a sparse bilinear sampling grid, so there are two major implications:
+//  1.) We can directly project the pixel-space support box into uv-space even
+//      if we're upsizing.  This wouldn't be the case for nearest neighbor,
+//      where we'd have to expand the uv-space diameter to at least the support
+//      size to ensure sufficient filter support.  In our case, this allows us
+//      to treat upsizing the same as downsizing and use static weighting. :)
+//  2.) For decent results, negative-lobed filters must be computed based on
+//      separable weights, not radial distances, because the sparse sampling
+//      makes no guarantees about radial distributions.  Even then, it's much
+//      better to set aa_xy_axis_importance to e.g. float2(1.0, 0.0) to use e.g.
+//      Lanczos2 horizontally and a box filter vertically.  This is mainly due
+//      to the sparse N-queens sampling and a statistically enormous positive or
+//      negative covariance between horizontal and vertical weights.
+//
+//  Design Decision Comments:
+//  "aa_temporal" mirrors the sample pattern on odd frames along the axis that
+//  keeps subpixel weights constant.  This helps with rotational invariance, but
+//  it can cause distracting fluctuations, and horizontal and vertical edges
+//  will look the same.  Using a different pattern on a shifted grid would
+//  exploit temporal AA better, but it would require a dynamic branch or a lot
+//  of conditional moves, so it's prohibitively slow for the minor benefit.
+/////////////////////////////  SETTINGS MANAGEMENT  ////////////////////////////
+
+/////////////////////////////  GPL LICENSE NOTICE  /////////////////////////////
+//  crt-royale: A full-featured CRT shader, with cheese.
+//  Copyright (C) 2014 TroggleMonkey <trogglemonkey@gmx.com>
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//  Place, Suite 330, Boston, MA 02111-1307 USA
+//////////////////////////////////  INCLUDES  //////////////////////////////////
+// already included elsewhere
+//#include "../user-settings.h"
+//#include "derived-settings-and-constants.h"
+//#include "bind-shader-h"
+////////////////////////////  MACROS AND CONSTANTS  ////////////////////////////
+//  Curvature-related constants:
+
+//  COPYRIGHT NOTE FOR THIS FUNCTION:
+//  Copyright (C) 2010-2012 cgwg, 2014 TroggleMonkey
+//  This function uses an algorithm first coded in several of cgwg's GPL-
+//  licensed lines in crt-geom-curved.cg and its ancestors.  The line
+//  between algorithm and code is nearly indistinguishable here, so it's
+//  unclear whether I could even release this project under a non-GPL
+//  license with this function included.
+//  Calculate border_dim_factor from the proximity to uv-space image
+//  borders; geom_aspect/border_size/border/darkness/border_compress are globals:

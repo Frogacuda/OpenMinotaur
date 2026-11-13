@@ -1,0 +1,491 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='1' fonts='1' spritemaps='1' spritepages='1' >
+  <Literals>
+    <Literal index='0'>spacewars.png</Literal>
+    <!-- Literal index='0'>iconpage0.png</Literal>
+   <Literal>neon0.jpg</Literal>
+   <Literal>testimages.png</Literal>
+   <Literal>mercatoicons.png</Literal>
+   <Literal>bars.png</Literal>
+   <Literal>spritepage.png</Literal>
+   <Literal>banana2.jpg</Literal>
+   <Literal>cherries2.jpg</Literal>
+   <Literal>strawberry2.jpg</Literal>
+   <Literal>bull.png</Literal>
+   <Literal>happyox2.png</Literal>
+   <Literal>mercatoicons2.png</Literal>
+    <Literal>spacewars.png</Literal>
+    <Literal>llamasoft_s.png</Literal>
+    <Literal>llamasoft_s_plus.png</Literal>
+    <Literal>osborne.png</Literal -->
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='190'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+     <!--Spentry> 1,0,0,912,1424, </Spentry>
+	<Spentry> 2,0,0,512,512, </Spentry>
+     <Spentry> 3,0,0,512,512, </Spentry>
+	<Spentry> 4,0,0,256,256, </Spentry>
+	<Spentry> 5,0,0,512,512, </Spentry>
+	<Spentry> 6,0,0,300,300, </Spentry>
+	<Spentry> 7,0,0,300,400, </Spentry>
+	<Spentry> 8,0,0,347,346, </Spentry>
+	<Spentry> 9,0,0,256,256, </Spentry>
+	<Spentry> 10,0,0,300,225, </Spentry>
+	<Spentry> 11,0,0,512,512, </Spentry>
+  <Spentry> 12,0,0,512,512, </Spentry>
+     <Spentry> 13,0,0,256,256, </Spentry>
+     <Spentry> 14,0,0,256,256, </Spentry>
+     <Spentry> 15,0,0,512,512, </Spentry-->
+     
+	<Spentry> 2,194,295,96,96,		<!-- Camera icon. 0. --> </Spentry>
+	<Spentry> 5,0,62,65,123-62,	<!-- A test deer. --> </Spentry>
+	<Spentry> 5,67,0,96,96,		<!-- Icon #1 --> </Spentry>
+	<Spentry> 5,166,0,96,96,	<!-- Icon #2 --> </Spentry>
+	<Spentry> 5,265,0,96,96,	<!-- icon #3 --> </Spentry>
+	<Spentry> 5,364,0,96,96,	<!-- icon #4 --> </Spentry>
+	<Spentry> 5,67,97,96,96,	<!-- icon #5 --> </Spentry>
+	<Spentry> 5,165,97,96,96,	<!-- icon #6 --> </Spentry>
+	<Spentry> 5,264,97,96,96,	<!-- icon #7 --> </Spentry>
+	<Spentry> 5,363,97,96,96,	<!-- icon #8 --> </Spentry>
+	<Spentry> 5,66,196,96,96,	<!-- icon #9 , spr 10  --> </Spentry>
+	<Spentry> 5,165,196,96,96,	<!-- icon #10  --> </Spentry>
+	<Spentry> 5,264,196,96,96,	<!-- icon #11 --> </Spentry>
+	<Spentry> 5,0,310,76,73, 	<!-- translucent blob --> </Spentry>
+
+
+	<Spentry> 5,165,293,96,96,	<!-- spinlerp disp icon  --> </Spentry>
+	<Spentry> 5,264,293,96,96,	<!-- selected cell table background  --> </Spentry>
+
+	<Spentry> 5,490,157,3,4,		<!-- strip top 16 --> </Spentry>
+	<Spentry> 5,494,157,3,4,	<!-- strip bottom 17--> </Spentry>
+
+	<Spentry> 5,364,196,96,96,	<!-- icon mul3 --> </Spentry>
+	<Spentry> 5,66,293,96,96,	<!-- icon trip3 --> </Spentry>
+	<Spentry> 5,490,160,3,3,		<!-- strip body 20 --> </Spentry>
+	<Spentry> 5,364,293,96,96,		<!-- bit of neon --> </Spentry>
+	<Spentry> 5,0,391,96,96,	<!-- icon tube2 22 --> </Spentry>
+	<Spentry> 2,0,198,96,96,	<!-- icon tube3 23 --> </Spentry>
+	<Spentry> 2,97,198,96,96,	<!-- icon mix3 24 --> </Spentry>
+	<Spentry> 2,194,198,96,96,		<!-- icon mix3glow 25 --> </Spentry>
+	<Spentry> 2,291,198,96,96,		<!-- icon rgbsplit 26 --> </Spentry>
+	<Spentry> 3,0,212,144-1,510-390,	<!-- MSol builder icon --> </Spentry>
+	<Spentry> 3,0,0,34,42,		<!-- MSol power --> </Spentry>
+	<Spentry> 3,35,0,83-35,49,	<!-- MSol network --> </Spentry>
+	<Spentry> 3,85,0,131-85,44,		<!-- MSol support	// 30 --> </Spentry>
+	<Spentry> 3,132,0,168-132,49,		<!-- MSol software --> </Spentry>
+	<Spentry> 3,169,0,195-169,55,		<!-- MSol memory --> </Spentry>
+	<Spentry> 3,196,0,244-196,53,		<!-- MSol tape storage --> </Spentry>
+	<Spentry> 3,245,0,281-245,50,	<!-- MSol hard drive --> </Spentry>
+	<Spentry> 3,283,0,341-283,44,	<!-- MSol I/O --> </Spentry>
+	<Spentry> 3,342,0,389-342,47,	<!-- MSol CPU --> </Spentry>
+	<Spentry> 5,144,390,95,95,	<!-- Caprichoso (Blue) anim button --> </Spentry>
+	<Spentry> 5,346,390,95,95,	<!-- Happy Ox (Green) anim button --> </Spentry>
+	<Spentry> 5,246,391,95,95,		<!-- Garantido (Red) anim button --> </Spentry>
+
+	<Spentry> 5,411,291,95,95,	<!-- Empty transparent icon --> </Spentry>
+	<Spentry> 2,388,198,96,96,		<!-- icon rgbsplit2 41 --> </Spentry>
+	<Spentry> 2,0,295,96,96,		<!-- icon radial fb 42 --> </Spentry>
+	<Spentry> 2,97,295,96,96,		<!-- Cube icon 43 --> </Spentry>
+
+	<Spentry> 3,0,336,23,23,		<!-- Blue theme main button selected parts // 44  --> </Spentry>
+	<Spentry> 3,23,336,3,23,		<!-- In clockwise order from TLC --> </Spentry>
+	<Spentry> 3,26,336,23,23, </Spentry>
+	<Spentry> 3,26,359,23,3, </Spentry>
+	<Spentry> 3,26,362,23,23, </Spentry>
+	<Spentry> 3,23,362,3,23, </Spentry>
+	<Spentry> 3,0,362,23,23, </Spentry>
+	<Spentry> 3,0,359,23,3, </Spentry>
+	<Spentry> 3,23,359,3,3, </Spentry>
+
+	<Spentry> 3,56,338,6,6,		<!-- Blue theme buttons, not selected 53 --> </Spentry>
+	<Spentry> 3,62,338,240,6, </Spentry>
+	<Spentry> 3,302,338,6,6, </Spentry>
+	<Spentry> 3,302,344,6,3, </Spentry>
+	<Spentry> 3,302,347,6,6, </Spentry>
+	<Spentry> 3,62,347,240,6, </Spentry>
+	<Spentry> 3,56,347,6,6, </Spentry>
+	<Spentry> 3,56,344,6,3, </Spentry>
+	<Spentry> 3,62,343,3,3, </Spentry>
+
+	<Spentry> 3,56,355,27,27,		<!-- List head - tlc 62 --> </Spentry>
+	<Spentry> 3,83,355,3,27,		<!-- top --> </Spentry>
+	<Spentry> 3,86,355,27,27,		<!-- trc --> </Spentry>
+	<Spentry> 3,86,382,27,2,		<!-- right edge --> </Spentry>
+	<Spentry> 3,56,382,27,2,		<!--left edge --> </Spentry>
+	<Spentry> 3,83,382,3,2,		<!-- fill --> </Spentry>
+	<Spentry> 3,58,418,57,1,		<!-- divider --> </Spentry>
+
+	<Spentry> 3,141,211,106,58,	<!-- scroll bar left arrow 69 --> </Spentry>
+
+	<Spentry> 3,56,386,27,1,		<!-- content panel left edge --> </Spentry>
+	<Spentry> 3,86,386,27,1,		<!-- content panel right edge --> </Spentry>
+	<Spentry> 3,78,386,1,1,		<!-- fill --> </Spentry>
+
+	<Spentry> 3,56,388,27,27,		<!-- blc, 73 --> </Spentry>
+	<Spentry> 3,83,388,3,27,		<!-- bottom edge --> </Spentry>
+	<Spentry> 3,86,388,27,27,		<!-- brc --> </Spentry>
+
+	<Spentry> 3,56,384,27,2,		<!-- content panel left edge (transition) --> </Spentry>
+	<Spentry> 3,86,384,27,2,		<!-- content panel right edge (transition) --> </Spentry>
+	<Spentry> 3,78,384,1,2,			<!-- fill (transition) --> </Spentry>
+
+	<Spentry> 3,58,422,1,3,			<!-- content body solid->transparent --> </Spentry>
+
+	<Spentry> 3,144,279,1,3,		<!-- black to transparent gradient --> </Spentry>
+
+	<Spentry> 3,350,218,126,126,		<!-- Menu button, not selected --> </Spentry>
+	<Spentry> 3,350,349,126,126,		<!-- Menu button, selected --> </Spentry>
+	<Spentry> 11,0,0,257,398,		<!-- Menu button background --> 83 </Spentry>
+
+	<Spentry> 3,0,400,23,23,		<!-- Blue theme main button selected parts // 84  --> </Spentry>
+	<Spentry> 3,23,400,3,23,		<!-- In clockwise order from TLC, with bright centre --> </Spentry>
+	<Spentry> 3,26,400,23,23, </Spentry>
+	<Spentry> 3,26,423,23,3, </Spentry>
+	<Spentry> 3,26,426,23,23, </Spentry>
+	<Spentry> 3,23,426,3,23, </Spentry>
+	<Spentry> 3,0,426,23,23, </Spentry>
+	<Spentry> 3,0,423,23,3, </Spentry>
+	<Spentry> 3,23,423,3,3, </Spentry>
+
+	<Spentry> 11,2,484,351,25, <!-- 93 Pre Sales Adviser logo --> </Spentry>
+	<Spentry> 11,359,461,50,50, <!-- Help icon --> </Spentry>
+
+  <Spentry>5,390,220,4,4, <!-- 4x4 white pixel --></Spentry>
+
+  <Spentry>3,391,0,440-391,48, <!-- 96 MSol icon tick  --></Spentry>
+  <Spentry>3,441,0,484-441,47, <!-- 97 MSol icon blade  --></Spentry>
+  <Spentry>3,0,46,31,100-46, <!-- 98 MSol icon battery  --></Spentry>
+  <Spentry>3,32,52,88-32,98-52, <!-- 99 MSol icon luggage  --></Spentry>
+  <Spentry>3,90,48,140-90,98-48, <!-- 100 MSol icon optical disk  --></Spentry>
+
+
+  <!-- Added Giles, some icons for the systembuilder -->
+  
+     <Spentry>
+       3,0,110,27,27 <!-- Arrow for the ctabbed with icons 101 -->
+     </Spentry>
+     <Spentry>
+       3,34,114,19,19 <!-- Unselected 'dot' for the menu 102 -->
+     </Spentry>
+     <Spentry>
+       3,55,114,19,19 <!-- Selected 'dot' for the menu 103 -->
+     </Spentry>
+     <Spentry>
+       3,75,112,26,24 <!-- Lock for the menu 104 -->
+     </Spentry>
+     <Spentry>
+       3,106,121,12,10 <!-- Small triangle pointing down 105 -->
+     </Spentry>
+     <Spentry>
+       11,439,432,507-439,507-432, <!-- 106 green + -->
+     </Spentry>
+     <Spentry>
+       11,439,356,507-439,431-356, <!-- 107 red + -->
+     </Spentry>
+     <Spentry>
+       11,440,283,507-440,350-283, <!-- 108 red x -->
+     </Spentry>
+     <Spentry>
+       11,366,211,505-366,261-211, <!-- 109 OUT -->
+     </Spentry>
+     <Spentry>
+       3,120,121,12,10 <!-- Small triangle pointing left 110 -->
+     </Spentry> 
+     <Spentry>
+       11,413,2,96,96, <!-- 110 Overlay -->
+     </Spentry>
+     <Spentry>
+       11,311,2,96,96, <!-- 111 OT -->
+     </Spentry>
+     <Spentry>
+       11,311,267,96,96, <!-- 112 OT -->
+     </Spentry>
+     <Spentry>
+       2,0,0,96,96, <!-- 113 Tile mode Y Clip -->
+     </Spentry>
+     <Spentry>
+       2,98,0,96,96, <!-- 114 Tile mode Y Reflect -->
+     </Spentry>
+     <Spentry>
+       2,196,0,96,96, <!-- 115 Tile mode Y Repeat -->
+     </Spentry>
+     <Spentry>
+       2,98,98,96,96, <!-- 116 Tile mode Y Clamp -->
+     </Spentry>
+     <Spentry>
+       2,392,98,96,96, <!-- 117 Tile mode Y Mirror Once -->
+     </Spentry>
+     
+     <Spentry>
+       2,294,0,96,96, <!-- 118 Tile mode X Clip -->
+     </Spentry>
+     <Spentry>
+       2,392,0,96,96, <!-- 119 Tile mode X Reflect -->
+     </Spentry>
+     <Spentry>
+       2,0,98,96,96, <!-- 120 Tile mode X Repeat -->
+     </Spentry>
+     <Spentry>
+       2,196,98,96,96, <!-- 121 Tile mode X Clamp -->
+     </Spentry>
+     <Spentry>
+       2,294,98,96,96, <!-- 122 Tile mode X Mirror Once -->
+     </Spentry>
+     <Spentry>
+       11,312,99,96,96, <!-- 123 Blend -->
+     </Spentry>
+     <Spentry>
+       11,413,99,96,96, <!-- 124 Xfade -->
+     </Spentry>
+     <Spentry>
+       11,311,364,96,96, <!-- 125 Xfade -->
+     </Spentry>
+     <Spentry>
+       2,291,295,96,96, <!-- 126 LookAt icon -->
+     </Spentry>
+     <Spentry>
+       2,388,295,96,96, <!-- 127 Look Around icon -->
+     </Spentry>
+     <Spentry>
+       2,0,392,96,96, <!-- 128 Replicator Open icon -->
+     </Spentry>
+     <Spentry>
+       2,97,392,96,96, <!-- 129 Replicator Close icon -->
+     </Spentry>
+     <Spentry>
+       2,194,392,96,96, <!-- 131 ReplicatorX -->
+     </Spentry>
+     <Spentry>
+       2,291,392,96,96, <!-- 132 ReplicatorY -->
+     </Spentry>
+     <Spentry>
+       2,388,392,96,96, <!-- 133 ReplicatorZ -->
+     </Spentry>
+     <Spentry>
+       0,0,0,96,96, <!-- 134 MirrorX -->
+     </Spentry>
+     <Spentry>
+       0,97,0,96,96, <!-- 135 MirrorY -->
+     </Spentry>
+     <Spentry>
+       0,194,0,96,96, <!-- 136 MirrorZ -->
+     </Spentry>
+     <Spentry>
+       0,53,59,88-53,105-59, <!-- 137 ast ship -->
+     </Spentry>
+     <Spentry>
+       0,0,57,51,106-57, <!-- 138 ast ship -->
+     </Spentry>
+     <Spentry>
+       0,0,0,64,56, <!-- 139 chunky asteroid 1 -->
+     </Spentry>
+     <Spentry>
+       0,20,20,2,2, <!-- 140 square pixel -->
+     </Spentry>
+     <Spentry>
+       0,66,0,48,20, <!-- 141 score digit 0 -->
+     </Spentry>
+     <Spentry>
+       0,115,0,48,20, <!-- 142 score digit 1 -->
+     </Spentry>
+     <Spentry>
+       0,164,0,48,20, <!-- 143 score digit 2 -->
+     </Spentry>
+     <Spentry>
+       0,213,0,48,20, <!-- 144 score digit 3 -->
+     </Spentry>
+     <Spentry>
+       0,262,0,48,20, <!-- 145 score digit 4 -->
+     </Spentry>
+     <Spentry>
+       0,311,0,48,20, <!-- 146 score digit 5 -->
+     </Spentry>
+     <Spentry>
+       0,360,0,48,20, <!-- 147 score digit 6 -->
+     </Spentry>
+     <Spentry>
+       0,409,0,48,20, <!-- 148 score digit 7 -->
+     </Spentry>
+     <Spentry>
+       0,458,0,48,20, <!-- 149 score digit 8 -->
+     </Spentry>
+     <Spentry>
+       0,66,21,48,20, <!-- 150 score digit 9 -->
+     </Spentry>
+     <Spentry>
+       0,192,80,224-192,122-80, <!-- 151 cow -->
+     </Spentry>
+     <Spentry>
+       0,115,43,151-115,75-43, <!-- 152 heart -->
+     </Spentry>
+     <Spentry>
+       0,0,111,47,151-111, <!-- 153 tank body -->
+     </Spentry>
+     <Spentry>
+       0,50,122,8,151-122, <!-- 154 tank gun -->
+     </Spentry>
+     <Spentry>
+       0,61,119,88-61,151-119, <!-- 155 jet -->
+     </Spentry>
+     <Spentry>
+       0,95,119,123-95,147-119, <!-- 156 blocky player ship -->
+     </Spentry>
+     <Spentry>
+       0,125,119,153-125,135-119, <!-- 157 big saucer -->
+     </Spentry>
+     <Spentry>
+       0,125,136,145-125,148-136, <!-- 158 little saucer -->
+     </Spentry>
+     <Spentry>
+       0,158,118,189-158,149-118, <!-- 159 alpha dot -->
+     </Spentry>
+     <Spentry>
+       0,0,168,31,30, <!-- 160 hollow square -->
+     </Spentry>
+     <Spentry>
+       0,192,22,222-192,34, <!-- 161 A -->
+     </Spentry>
+     <Spentry>
+       0,225,22,243-223,34, <!-- 162 T -->
+     </Spentry>
+     <Spentry>
+       0,249,22,274-247,34, <!-- 163 U -->
+     </Spentry>
+     <Spentry>
+       0,279,22,302-277,34 <!-- 164 R -->
+     </Spentry>
+     <Spentry>
+       0,306,22,327-304,34, <!-- 165 S -->
+     </Spentry>
+     <Spentry>
+       0,0,64,20,12, <!-- 166 mine frame 1 -->
+     </Spentry>
+     <Spentry>
+       0,23,60,20,20, <!-- 167 mine frame 2 -->
+     </Spentry>
+     <Spentry>
+       0,46,60,12,20, <!-- 168 mine frame 3 -->
+     </Spentry>
+     <Spentry>
+       0,33,154,89-33,170-154, <!-- 169 Baiter saucer large -->
+     </Spentry>
+     <Spentry>
+       0,91,154,111-91,170-154, <!-- 170 Baiter saucer small -->
+     </Spentry>
+     <Spentry>
+       0,115,154,139-115,174-154, <!-- 171 Tie fighter -->
+     </Spentry>
+     <Spentry>
+       0,141,154,177-141,186-154, <!-- 172 Plane -->
+     </Spentry>
+     <Spentry>
+       0,59,60,20,20 <!-- 173 mine 2.1 -->
+     </Spentry>
+     <Spentry>
+       0,80,60,20,20 <!-- 174 mine 2.2 -->
+     </Spentry>
+     <Spentry>
+       0,0,82,20,20 <!-- 175 mine 2.3 -->
+     </Spentry>
+     <Spentry>
+       0,21,82,20,20 <!-- 176 mine 2.4 -->
+     </Spentry>
+     <Spentry>
+       0,42,82,20,20 <!-- 177 mine 3.1 -->
+     </Spentry>
+     <Spentry>
+       0,63,82,20,20 <!-- 178 mine 3.2 -->
+     </Spentry>
+     <Spentry>
+       0,84,82,20,20 <!-- 179 mine 3.3 -->
+     </Spentry>
+     <Spentry>
+       0,105,82,20,20 <!-- 180 mine 3.4 -->
+     </Spentry>
+     <Spentry>
+       0,192,58,340-192,20 <!-- 181 1UP -->
+     </Spentry>
+     <Spentry>
+       0,0,199,74,291-199 <!-- 182 Back button -->
+     </Spentry>
+     <Spentry>
+       0,181,156,228-181,192-156 <!-- 183 Tank trail -->
+     </Spentry>
+     <Spentry>
+       0,228,81,253-228,108-81 <!-- 184 Jet trail -->
+     </Spentry>     
+	<Spentry>
+       0,24,12,2,2 <!-- 185 White fill -->
+     </Spentry>  
+	<Spentry>
+       0,0,303,284,377-303, <!-- 186 Openfeint logo -->
+     </Spentry>  	 
+	<Spentry>
+       0,0,303,70,377-303, <!-- 187 OF leaves -->
+     </Spentry>  	
+	<Spentry>
+       0,84,201,152-84,271-201, <!-- 188 pause icon -->
+     </Spentry>  	  
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+    <!-- Spritepage>912,1424, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>256,256, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>300,300, </Spritepage>
+  	<Spritepage>300,400, </Spritepage>
+  	<Spritepage>347,346, </Spritepage>
+  	<Spritepage>256,256, </Spritepage>
+  	<Spritepage>300,225, </Spritepage>
+	<Spritepage>512,512, </Spritepage>
+  <Spritepage>512,512, </Spritepage>
+    <Spritepage>256,256, </Spritepage>
+    <Spritepage>256,256, </Spritepage>
+    <Spritepage>512,512, </Spritepage -->
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >crunchyexplo-11.wav</Sample>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+   <Sample maxinstance='4' >zang.wav</Sample>
+   <Sample maxinstance='1' >gameover.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+	<Sample maxinstance='4' >crunchyexplo2.wav</Sample>
+  <Sample maxinstance='4' >killedsaucer.wav</Sample>	
+  <Sample maxinstance='4' >saucershot.wav</Sample>  
+    <Sample maxinstance='4' >bigblast2.wav</Sample>
+	<Sample maxinstance='1' >bigsaucerloop.wav</Sample>
+  <Sample maxinstance='1' >smallsaucerloop.wav</Sample>	
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+    <Sample maxinstance='4' >zap.wav</Sample>  
+	<Sample maxinstance='1' >defenderhum.wav</Sample>  
+	<Sample maxinstance='4' >bouncebull.wav</Sample>  
+	<Sample maxinstance='1' >cheevo.wav</Sample>  
+	<Sample maxinstance='4' >fanfare.wav</Sample>  
+	<Sample maxinstance='4' >oneup.wav</Sample>  
+	<Sample maxinstance='4' >sunhit.wav</Sample>  
+	<Sample maxinstance='1' >openhole.wav</Sample>  
+	<Sample maxinstance='2' >tankshot.wav</Sample>  
+	<Sample maxinstance='1' >tankexplo.wav</Sample>  
+	<Sample maxinstance='1' >bip.wav</Sample>  
+	<Sample maxinstance='2' >tankmino.wav</Sample>  
+	<Sample maxinstance='4' >jethit.wav</Sample>	
+	<Sample maxinstance='4' >ding1.wav</Sample>		
+	<Sample maxinstance='4' >ding2.wav</Sample>	
+	<Sample maxinstance='4' >ding3.wav</Sample>	
+	<Sample maxinstance='4' >ding4.wav</Sample>	
+	<Sample maxinstance='4' >ding5.wav</Sample>					
+  </Sounds>
+</NeonResources>

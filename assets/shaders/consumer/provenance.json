@@ -1,0 +1,20 @@
+{
+  "upstream": "https://git.libretro.com/libretro-assets/glsl-shaders/-/blob/master/crt/crt-consumer-1w-ntsc.glslp",
+  "mirror": "https://github.com/libretro/glsl-shaders",
+  "revision": "f277bd87e454a68c50e01e61e3588118d56b1365",
+  "sha256": {
+    "crt-consumer-1w.glsl": "79fb767c84d75133d730fb2be8d033899f66b257a3e9b840baa63350c9c1bf1b",
+    "linear.glsl": "163cb49bba4fc0d28b758096b4abbd6ed0283ae1ef4410dae55f8350748e6bdf",
+    "ntsc_module.glsl": "75d236b8d41a594f84dad733994530cc0ef30e5a99593810cde316e2e23e4524",
+    "preset.glslp": "1572286f1a6adcfaf969443eef05e1988036673b2feef70f3b4d309ea22e88da"
+  },
+  "overrides": {
+    "u_svideo": 1.0,
+    "u_warp": 0.0,
+    "u_vignette": 0.0
+  },
+  "defaults": "Remaining parameters use #pragma parameter initial values, matching the RetroArch UI rather than divergent #else macros.",
+  "sampling": "Linear sampling, including filter_linear2 from preset; the first two native-size passes inherit the default linear sampling policy.",
+  "targets": "RGB8 at 480x320 for gamma and S-Video, RGB8 at canonical tube viewport size for CRT.",
+  "feedback": "Preset feedback_pass=0 has no shader sampler consumer and requires no feedback target."
+}

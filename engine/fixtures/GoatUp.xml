@@ -1,0 +1,717 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='2' fonts='1' spritemaps='1' spritepages='2' >
+  <Literals>
+    <Literal index='0'>goat.png</Literal>  
+    <Literal>chars.png</Literal>  
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='609'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,1024,512, </Spentry>
+	<Spentry>0,0,0,512,512, </Spentry>
+	
+	<Spentry> 0,1,1,1,1,	<!-- White pixel for colour fills. 0. --> </Spentry>
+	<Spentry> 0,0,21,29,20,	<!-- Goat. --></Spentry>
+	<Spentry> 0,26,0,7,17,	<!-- Ground. --></Spentry>
+	<Spentry> 0,39,1,18,17,	<!-- Column. --></Spentry>
+	<Spentry> 0,12,0,7,17,	<!-- Ground. with Grass --></Spentry>
+	<Spentry> 0,30,21,29,20,	<!--5 Goat 2. --></Spentry>
+	<Spentry> 0,0,41,28,25,	<!--6 Billy goat --></Spentry>
+	<Spentry> 0,28,41,20,20, <!--7 Love heart --></Spentry>
+	<Spentry> 0,60,21,29,20,	<!-- 8 Goat. preg 1 --></Spentry>
+	<Spentry> 0,90,21,29,20,	<!-- 9 Goat. preg 2 --></Spentry>
+	
+	<Spentry> 0,120,21,29,20,	<!-- 10 Goat. preg 3 --></Spentry>
+	<Spentry> 0,150,21,29,20,	<!-- 11 Goat. preg 4 --></Spentry>
+	<Spentry> 0,180,21,29,20,	<!-- 12 Goat. preg 5 --></Spentry>
+	<Spentry> 0,210,21,29,20,	<!-- 13 Goat. preg 6 --></Spentry>
+	<Spentry> 0,69,1,14,17,		<!-- 14 2049er plat 1 --> </Spentry>
+	<Spentry> 0,87,1,14,17,		<!-- 15 2049er plat 2 --> </Spentry>
+	<Spentry> 0,105,1,14,18,	<!-- 16 Manic Miner platform 1--> </Spentry>			
+	<Spentry> 0,123,1,14,18,	<!-- 17 Manic Miner platform 2--> </Spentry>	
+	<Spentry> 0,141,1,14,18,	<!-- 18 Manic Miner platform 3--> </Spentry>
+	<Spentry> 0,159,1,14,18,	<!-- 19 Manic Miner platform 4--> </Spentry>
+	<Spentry> 0,177,1,14,18,	<!-- 20 Manic Miner platform 5--> </Spentry>	
+	<Spentry> 0,195,1,14,18,	<!-- 21 Manic Miner platform 6--> </Spentry>	
+	<Spentry> 0,213,1,14,18,	<!-- 22 Manic Miner platform 7--> </Spentry>
+	<Spentry> 0,231,1,14,18,	<!-- 23 Manic Miner platform 8--> </Spentry>
+	<Spentry> 0,48,41,19,18,	<!-- Bonus ZX80 24--> </Spentry>	
+	<Spentry> 0,67,41,17,17,	<!-- Bonus ZX81 25--> </Spentry>	
+	<Spentry> 0,84,41,13,13,	<!-- Bonus cherries 26--> </Spentry>	
+	<Spentry> 0,97,41,15,19,	<!-- Bonus Apple apple 27--> </Spentry>
+	<Spentry> 0,112,41,12,13,	<!-- Bonus strawberry 28--> </Spentry>		
+	<Spentry> 0,124,41,12,13,	<!-- Bonus apple 29--> </Spentry>	
+	<Spentry> 0,136,41,17,20,	<!-- Bonus chips 30--> </Spentry>
+	<Spentry> 0,153,41,25,19,	<!-- Bonus cake 31--> </Spentry>	
+	<Spentry> 0,0,497,14,14,		<!-- Speccy 0 32--> </Spentry>
+	<Spentry> 0,16,497,14,14,		<!-- Speccy 1 33--> </Spentry>
+	<Spentry> 0,32,497,14,14,		<!-- Speccy 2 34--> </Spentry>
+	<Spentry> 0,48,497,14,14,		<!-- Speccy 3 35--> </Spentry>
+	<Spentry> 0,64,497,14,14,		<!-- Speccy 4 36--> </Spentry>
+	<Spentry> 0,80,497,14,14,		<!-- Speccy 5 37--> </Spentry>
+	<Spentry> 0,96,497,14,14,		<!-- Speccy 6 38--> </Spentry>
+	<Spentry> 0,112,497,14,14,		<!-- Speccy 7 39--> </Spentry>
+	<Spentry> 0,128,497,14,14,		<!-- Speccy 8 40--> </Spentry>
+	<Spentry> 0,144,497,14,14,		<!-- Speccy 9 41--> </Spentry>
+	<Spentry> 0,178,41,18,18,	<!-- Bonus smily 42--> </Spentry>	
+	<Spentry> 0,197,41,22,22,	<!-- Bonus egg 43--> </Spentry>	
+	<Spentry> 0,219,41,17,17,	<!-- Bonus banana 44--> </Spentry>	
+	<Spentry> 0,236,41,34,22,	<!-- Bonus Welsh flag 45--> </Spentry>
+	<Spentry> 0,270,41,18,20,	<!-- Bonus brolly 46--> </Spentry>		
+	<Spentry> 0,288,41,50,26,	<!-- Bonus Union Jack 47--> </Spentry>	
+	<Spentry> 0,339,41,32,39,	<!-- Bonus Saints 48--> </Spentry>
+	<Spentry> 0,371,41,26,26,	<!-- Bonus disk 49--> </Spentry>		
+	<Spentry> 0,397,41,21,21,	<!-- Bonus bomb 50--> </Spentry>		
+	<Spentry> 0,419,41,25,19,	<!-- Bonus croissant 51--> </Spentry>	
+	<Spentry> 0,444,41,26,25,	<!-- Bonus cake 52--> </Spentry>
+	<Spentry> 0,470,41,25,26,	<!-- Bonus pony 53--> </Spentry>	
+	<Spentry> 0,0,66,18,24,		<!-- Bonus cup cake 54--> </Spentry>	
+	<Spentry> 0,18,66,24,27,	<!-- Bonus cup of tea 55--> </Spentry>		
+	<Spentry> 0,42,66,34,30,	<!-- Bonus cow sign 56--> </Spentry>	
+	<Spentry> 0,75,66,26,19,	<!-- Bonus phone 57--> </Spentry>		
+	<Spentry> 0,102,61,36,23,	<!-- Bonus c64 58--> </Spentry>		
+	<Spentry> 0,138,61,25,19,	<!-- Bonus invader 59--> </Spentry>			
+	<Spentry> 0,163,62,33,21,	<!-- Nonus sheep head 60--> </Spentry>	
+	<Spentry> 0,197,62,31,38,	<!-- Bonus stamp 61--> </Spentry>	
+	<Spentry> 0,229,63,24,35,		<!-- Bonus toilet 62--> </Spentry>	
+	<Spentry> 0,253,63,24,18,		<!-- Bonus donut 63--> </Spentry>	
+	<Spentry> 0,253,81,20,25,		<!-- Bonus choc cake 64--> </Spentry>	
+	<Spentry> 0,278,67,22,43,		<!-- Bonus apostrophe 65--> </Spentry>	
+	<Spentry> 0,301,67,32,29,		<!-- Bonus Hammer 66--> </Spentry>			
+	<Spentry> 0,334,79,22,23,		<!-- Bonus Key 67--> </Spentry>		
+	<Spentry> 0,370,67,30,31,		<!-- Bonus Cheese 68--> </Spentry>	
+	<Spentry> 0,401,62,25,26,		<!-- Bonus toast 69--> </Spentry>		
+	<Spentry> 0,427,66,24,28,		<!-- Bonus Bunny 70--> </Spentry>			
+	<Spentry> 0,452,68,23,20,		<!-- Bonus Star 71--> </Spentry>	
+	<Spentry> 0,477,69,22,24,		<!-- Bonus Music Note 72--> </Spentry>	
+	<Spentry> 0,0,93,32,76,			<!-- Bonus clef 73--> </Spentry>	
+	<Spentry> 0,33,96,18,15,		<!-- Bonus Gem 74--> </Spentry>	
+	<Spentry> 0,33,111,15,18,		<!-- Bonus Chocolate 75--> </Spentry>		
+	<Spentry> 0,33,129,17,18,		<!-- Bonus Mushroom 76--> </Spentry>										
+	<Spentry> 0,33,147,18,17,		<!-- Cucumber 77--> </Spentry>			
+	<Spentry> 0,50,96,58,34,		<!-- Rainbow 78--> </Spentry>		
+	<Spentry> 0,50,130,18,14,		<!-- Melon 79--> </Spentry>		
+	<Spentry> 0,51,144,18,17,		<!-- Beer 80--> </Spentry>		
+	<Spentry> 0,69,130,18,16,		<!-- Crown 81--> </Spentry>		
+																									
+	<Spentry> 0,0,169,72,52,		<!-- Reduce Speed icon 82--> </Spentry>		
+	<Spentry> 0,72,169,52,46,		<!-- Aircraft icon 83--> </Spentry>		
+	<Spentry> 0,126,169,52,53,		<!-- Mushroom icon 84--> </Spentry>	
+	<Spentry> 0,108,85,34,22,		<!-- 2049er baddy 85--> </Spentry>		
+	<Spentry> 0,142,85,36,22,		<!-- 2049er baddy 2 86--> </Spentry>		
+	<Spentry> 0,108,107,34,22,		<!-- 2049er baddy 3 87--> </Spentry>			
+	<Spentry> 0,144,107,34,22,		<!-- 2049er baddy 4 88--> </Spentry>	
+	<Spentry> 0,69,146,18,19,		<!-- 2049er axe 89--> </Spentry>		
+	<Spentry> 0,87,130,18,9,		<!-- 2049er cup 90--> </Spentry>		
+	<Spentry> 0,87,138,12,23,		<!-- 2049er spade 91--> </Spentry>		
+	<Spentry> 0,105,130,20,11,		<!-- 2049er candle 92--> </Spentry>			
+	<Spentry> 0,239,21,29,20,		<!-- Wings up. 93--></Spentry>
+	<Spentry> 0,269,21,29,20,		<!-- Wings down. 94--></Spentry>
+	<Spentry> 0,128,132,22,34,		<!-- Miner Willy 1 95--> </Spentry>	
+	<Spentry> 0,150,132,22,34,		<!-- Miner Willy 2 96--> </Spentry>	
+	<Spentry> 0,170,132,22,34,		<!-- Miner Willy 3 97--> </Spentry>		
+	<Spentry> 0,251,1,16,20,		<!-- Canyon climber ground 1 98--> </Spentry>			
+	<Spentry> 0,273,1,10,20,		<!-- Canyon climber ground 2 99--> </Spentry>	
+	<Spentry> 0,521,0,16,20,		<!-- CC bridge 1 100--> </Spentry>				
+	<Spentry> 0,306,0,14,20,		<!-- CC bridge left 101--> </Spentry>		
+	<Spentry> 0,184,102,26,26,		<!-- CC dude 1 102--> </Spentry>	
+	<Spentry> 0,213,102,26,26,		<!-- CC dude 2 103--> </Spentry>	
+	<Spentry> 0,188,133,26,26,		<!-- CC dude 3 104--> </Spentry>		
+	<Spentry> 0,324,0,14,20,		<!-- Bridge right 105--> </Spentry>	
+	<Spentry> 0,343,0,14,20,		<!-- Bridge left set 106--> </Spentry>	
+	<Spentry> 0,361,0,14,20,		<!-- Bridge right set 107--> </Spentry>			
+	<Spentry> 0,380,1,16,20,		<!-- CC ground alt 2 108--> </Spentry>		
+	<Spentry> 0,402,1,16,20,		<!-- CC ground alt 3 109--> </Spentry>	
+	<Spentry> 0,425,1,16,20,		<!-- CC ground alt 4 110--> </Spentry>		
+	<Spentry> 0,0,221,17,79,		<!-- spoon 111--> </Spentry>	
+	<Spentry> 0,17,221,16,62,		<!-- caRROT 112--> </Spentry>
+	<Spentry> 0,243,106,34,34,		<!-- clock 113--> </Spentry>	
+	<Spentry> 0,244,140,34,19		<!-- psp 114--> </Spentry>																							
+   <Spentry> 0,277,110,34,24,		<!-- NES 115--> </Spentry>
+   <Spentry> 0,312,103,34,42,		<!-- TV 116--> </Spentry>
+   <Spentry> 0,346,99,34,27,		<!-- camera 117--> </Spentry>
+   <Spentry> 0,279,134,29,29,		<!-- pie slice 118--> </Spentry>
+   <Spentry> 0,309,144,17,12,		<!-- sweetie 119--> </Spentry>
+   <Spentry> 0,326,145,17,18,		<!-- banana bunch 120--> </Spentry>
+   <Spentry> 0,346,126,10,18,		<!-- coke can 121--> </Spentry>
+   <Spentry> 0,356,127,14,17,		<!-- cake 122--> </Spentry>
+   <Spentry> 0,344,145,18,17,		<!-- corn 123--> </Spentry>
+   <Spentry> 0,380,97,18,17,		<!-- treasure 124--> </Spentry>
+   <Spentry> 0,381,114,14,16,		<!-- chicken 125--> </Spentry>
+   <Spentry> 0,372,131,10,18,		<!-- sweetie 126--> </Spentry>
+   
+   <Spentry> 0,177,167,39,36,		<!-- mino rescue icon 127--> </Spentry>   
+   <Spentry> 0,34,222,50,38,		<!-- balti 128--> </Spentry>   
+   <Spentry> 0,86,221,50,49,		<!-- naan 129--> </Spentry>
+   <Spentry> 0,35,260,32,32,		<!-- cards 130--> </Spentry>
+   <Spentry> 0,20,285,10,16,		<!-- rupee 131--> </Spentry>
+   <Spentry> 0,68,270,34,26,		<!-- envelope 132--> </Spentry>
+   <Spentry> 0,102,270,24,25,		<!-- spanner 133--> </Spentry>
+   <Spentry> 0,136,222,18,18,		<!-- knife 134--> </Spentry>
+   <Spentry> 0,136,241,18,18,		<!-- fork 135--> </Spentry>
+   <Spentry> 0,127,270,10,16,		<!-- ring 136--> </Spentry>
+   <Spentry> 0,125,286,18,18,		<!-- pea pod 137--> </Spentry>
+	<Spentry> 0,49,297,29,31,		<!-- pizza 138--> </Spentry>   
+   <Spentry> 0,78,298,31,23,		<!-- steak 139--> </Spentry>
+   <Spentry> 0,109,295,16,29,		<!-- giraffe 140--> </Spentry>
+   <Spentry> 0,50,329,30,14,		<!-- fish 141--> </Spentry>
+   <Spentry> 0,50,344,15,17,		<!-- noodles 142--> </Spentry>
+   <Spentry> 0,65,344,18,17,		<!-- pudding 143--> </Spentry>
+   <Spentry> 0,50,361,16,17,		<!-- pineapple 144--> </Spentry>
+   <Spentry> 0,99,324,18,16,		<!-- tank 145--> </Spentry>
+   <Spentry> 0,66,361,16,8,			<!-- defender ship 146--> </Spentry>
+   <Spentry> 0,83,321,16,30,		<!-- mummy 147--> </Spentry>
+   <Spentry> 0,0,302,48,32,			<!-- 16 tons 148--> </Spentry>
+   <Spentry> 0,99,340,26,18,		<!-- mule 149--> </Spentry>
+   <Spentry> 0,66,369,15,13,		<!-- camel 150--> </Spentry>
+   <Spentry> 0,99,358,26,29,		<!-- joystick 151--> </Spentry>
+
+   <Spentry> 0,218,158,50,35,		<!--  AMC camel 152--> </Spentry>
+   <Spentry> 0,269,162,20,32,		<!-- Running man 153--> </Spentry>
+   <Spentry> 0,0,334,34,34,			<!-- 154 Osborne--> </Spentry>
+   <Spentry> 0,178,203,25,23,		<!-- Cippy 155--> </Spentry>
+   <Spentry> 0,215,193,36,26,		<!-- Chilli 156--> </Spentry>
+   <Spentry> 0,155,226,26,28,		<!-- Frying pan 157--> </Spentry>
+   <Spentry> 0,287,163,17,34,		<!-- Fish 158--> </Spentry>
+   <Spentry> 0,304,163,14,30,		<!-- Fish 159--> </Spentry>
+   <Spentry> 0,318,163,15,34,		<!-- Fish 160--> </Spentry>
+   <Spentry> 0,332,163,26,33,		<!-- Flower 161--> </Spentry>
+   
+   <Spentry> 0,362,149,26,21,		<!-- E-Meter 162--> </Spentry>
+   <Spentry> 0,358,170,24,24,		<!-- Butterfly 163--> </Spentry>
+   <Spentry> 0,399,88,25,25,		<!-- Laughing Cow 164--> </Spentry>
+   <Spentry> 0,398,112,34,56,		<!-- Uncle Clive 165--> </Spentry>
+   <Spentry> 0,382,170,17,18,		<!-- Pudding 166--> </Spentry>
+   <Spentry> 0,383,132,13,15,		<!-- Burger 167--> </Spentry>
+   <Spentry> 0,425,94,34,17,		<!-- British Rail logo 168--> </Spentry>
+   <Spentry> 0,432,111,26,39,		<!-- Men sign 169--> </Spentry>
+   <Spentry> 0,432,150,26,39,		<!-- Women sign 170--> </Spentry>
+   <Spentry> 0,146,254,68,54,		<!-- Eggagog 171--> </Spentry>
+  
+	<Spentry> 0,217,221,32,47,		<!-- washing machine 172--> </Spentry>
+	<Spentry> 0,217,269,26,26,		<!-- toaster 173--> </Spentry>
+	<Spentry> 0,125,307,34,18,		<!-- pastie 174--> </Spentry>
+	<Spentry> 0,126,325,34,26,		<!-- iron 175--> </Spentry>
+	<Spentry> 0,125,351,34,20,		<!-- bicycle 176--> </Spentry>
+	
+	<Spentry> 0,451,1,16,20,		<!-- CC platform 177--> </Spentry>
+	<Spentry> 0,473,1,16,20,		<!-- CC platform 2 178--> </Spentry>
+	<Spentry> 0,460,92,26,18,		<!-- CC car 179--> </Spentry>
+	<Spentry> 0,488,92,18,18,		<!-- CC cat 180--> </Spentry>
+	<Spentry> 0,462,110,18,18,		<!-- CC cat flying 181--> </Spentry>
+	
+	<Spentry> 0,494,1,12,20,		<!-- Pie factory main platform 182--> </Spentry>
+	<Spentry> 0,301,18,11,20,		<!-- Pie factory left end cap 183--> </Spentry>
+	<Spentry> 0,316,18,11,20,		<!-- Pie factory right end cap 184--> </Spentry>
+	<Spentry> 0,480,110,10,9,		<!-- Pie factory cog 185--> </Spentry>
+	<Spentry> 0,331,18,12,20,		<!-- Pie factory pink platform 186--> </Spentry>
+	<Spentry> 0,463,130,34,33,		<!-- Pinkie Pie pie 187--> </Spentry>
+	
+	<Spentry> 0,402,169,15,18,		<!-- SMB platform block 188--> </Spentry>
+	<Spentry> 0,460,164,15,18,		<!-- SMB platform block solid 189--> </Spentry>
+	<Spentry> 0,478,164,16,16,		<!-- Rotating skull 190--> </Spentry>
+	
+	<Spentry> 0,252,195,34,28,		<!-- Billionaire Gentleman-Horse 191--> </Spentry>
+	<Spentry> 0,255,224,50,31,		<!--  Blimp 192--> </Spentry>
+	<Spentry> 0,252,254,34,49,		<!--  Loo seat 193--> </Spentry>
+	<Spentry> 0,287,255,17,38,		<!--  Red dragon 194--> </Spentry>
+	<Spentry> 0,287,198,17,12,		<!--  Sword 195--> </Spentry>
+	<Spentry> 0,305,197,16,18,		<!--  Cup 196--> </Spentry>
+	
+	<Spentry> 0,864,312,8,20,		<!--  Chuckie egg plat 1 197--> </Spentry>
+	<Spentry> 0,885,312,7,20,		<!--  Chuckie egg plat 2 198--> </Spentry>
+	<Spentry> 0,491,110,14,16,		<!--  Chuckie egg dude 1 199--> </Spentry>
+	<Spentry> 0,497,126,14,16,		<!--  Chuckie egg dude 2 200--> </Spentry>
+	<Spentry> 0,499,142,10,9,		<!--  Chuckie Egg egg 201--> </Spentry>
+	<Spentry> 0,327,197,10,18,		<!--  CE chicken 1 202--> </Spentry>
+	<Spentry> 0,337,197,10,18,		<!--  CE chicken 2 203--> </Spentry>
+	
+	<Spentry> 0,371,17,2,20,		<!--  Finish platform 204--> </Spentry>	
+	<Spentry> 1,0,273,17,17,		<!--  Starfield star 205--> </Spentry>	
+	
+	<Spentry> 0,161,486,101,25,		<!--  Pause button 206--> </Spentry>	
+	<Spentry> 0,264,486,101,25,		<!--  Resume button 207--> </Spentry>		
+	<Spentry> 0,367,486,101,25,		<!--  Quit button 208--> </Spentry>	
+		
+	<Spentry> 0,306,215,18,12,		<!--  Invader 1 209--> </Spentry>	
+	<Spentry> 0,306,227,18,12,		<!--  Invader 2 210--> </Spentry>		
+	<Spentry> 0,306,239,18,12,		<!--  Invader 3 211--> </Spentry>	
+	<Spentry> 0,306,251,18,12,		<!--  Invader 4 212--> </Spentry>	
+	<Spentry> 0,306,263,18,12,		<!--  Invader 5 213--> </Spentry>	
+	<Spentry> 0,306,275,18,12,		<!--  Invader 6 214--> </Spentry>	
+	<Spentry> 0,325,215,16,12,		<!--  Laser base 215--> </Spentry>	
+	<Spentry> 0,325,227,16,16,		<!--  Red Ghost 216--> </Spentry>
+	<Spentry> 0,325,243,16,16,		<!--  Pink Ghost 217--> </Spentry>	
+	<Spentry> 0,325,259,16,16,		<!--  Cyan Glost 218--> </Spentry>	
+	<Spentry> 0,325,275,16,16,		<!--  Yellow Ghost 219--> </Spentry>	
+	<Spentry> 0,341,215,9,15,		<!--  Key 220--> </Spentry>		
+	<Spentry> 0,348,197,32,10,		<!--  Atlantis ship 221--> </Spentry>	
+	<Spentry> 0,348,207,34,9,		<!--  SI mothership 222--> </Spentry>	
+	<Spentry> 0,376,234,15,10,		<!--  SI laser base 223--> </Spentry>
+	<Spentry> 0,353,216,16,15,		<!--  Flower 224--> </Spentry>
+	<Spentry> 0,342,230,16,25,		<!--  Flower 225--> </Spentry>	
+	<Spentry> 0,342,255,16,25,		<!--  Flower 226--> </Spentry>		
+	<Spentry> 0,342,280,7,12,		<!--  Shield 1 227--> </Spentry>	
+	<Spentry> 0,350,280,7,13,		<!--  Shield 2 228--> </Spentry>
+	<Spentry> 0,359,264,13,14,		<!--  Shield 3 229--> </Spentry>	
+	<Spentry> 0,359,278,15,15,		<!--  Shield 4 230--> </Spentry>
+	<Spentry> 0,383,204,15,15,		<!--  Shield 5 231--> </Spentry>	
+	<Spentry> 0,376,219,13,15,		<!--  Shield 6 232--> </Spentry>	
+	<Spentry> 0,359,246,18,17,		<!--  10 Flag 233--> </Spentry>		
+	<Spentry> 0,359,231,16,15,		<!--  Carrot 234--> </Spentry>		
+	<Spentry> 0,381,188,16,16,		<!--  Onion 235--> </Spentry>	
+	<Spentry> 0,402,231,20,18,		<!--  Solvalou 236--> </Spentry>
+	<Spentry> 0,421,207,35,53,		<!--  Ear 237--> </Spentry>	
+	<Spentry> 0,377,244,25,16,		<!--  Coffee cup 238--> </Spentry>	
+	<Spentry> 0,492,276,20,52,		<!--  Receiver 239--> </Spentry>	
+	<Spentry> 0,403,249,17,18,		<!--  Phoenix spaceship 240--> </Spentry>	
+	<Spentry> 0,400,267,23,34,		<!--  Eastr egg 241--> </Spentry>	
+	<Spentry> 0,420,189,34,18,		<!--  Shoe 242--> </Spentry>
+	<Spentry> 0,376,260,23,32,		<!--  Chess horse 243--> </Spentry>	
+	<Spentry> 0,422,261,13,7,		<!--  Eyeballs 244--> </Spentry>	
+	<Spentry> 0,425,280,13,10,		<!--  Xbox controller 245--> </Spentry>	
+	<Spentry> 0,438,280,13,13,		<!--  Rice bowl 246--> </Spentry>	
+	<Spentry> 0,401,191,18,18,		<!--  Star Force ship 247--> </Spentry>		
+	
+	<Spentry> 0,162,309,34,30,		<!--  Big burger 248--> </Spentry>	
+	<Spentry> 0,495,160,17,17,		<!--  Sandwich 249--> </Spentry>	
+	<Spentry> 0,477,180,15,17,		<!--  Milk carton 250--> </Spentry>		
+	<Spentry> 0,494,176,18,17,		<!--  Hot dog 251--> </Spentry>	
+	<Spentry> 0,455,193,18,16,		<!--  Orage 252--> </Spentry>	
+	<Spentry> 0,473,196,17,17,		<!--  Bit of tart 253--> </Spentry>	
+	<Spentry> 0,492,193,18,16,		<!--  Tomato 254--> </Spentry>	
+	<Spentry> 0,456,208,15,18,		<!--  Radar Scope ship 255--> </Spentry>
+	<Spentry> 0,472,213,18,15,		<!--  Candy cane 256--> </Spentry>	
+	<Spentry> 0,492,209,18,18,		<!--  Bit of chicken 257--> </Spentry>	
+	<Spentry> 0,456,227,16,18,		<!--  Bit of meat 258--> </Spentry>		
+	<Spentry> 0,472,228,17,17,		<!--  Bit of tart 259--> </Spentry>	
+	<Spentry> 0,492,227,18,18,		<!--  Apple 260--> </Spentry>
+	<Spentry> 0,455,245,28,16,		<!--  Grapes 261--> </Spentry>	
+	<Spentry> 0,438,262,32,14,		<!--  Choccy 262--> </Spentry>		
+	<Spentry> 0,473,262,31,14,		<!--  Curry 263--> </Spentry>	
+	<Spentry> 0,451,277,27,18,		<!--  Sarny 264--> </Spentry>	
+				
+	<Spentry> 0,198,308,21,30,		<!--  ST bin 265--> </Spentry>	
+	<Spentry> 0,220,302,33,31,		<!--  ST disk 266--> </Spentry>	
+	<Spentry> 0,253,304,33,23,		<!--  ST HD 267 --> </Spentry>	
+	<Spentry> 0,291,296,17,16,		<!--  ST bee 268--> </Spentry>	
+	<Spentry> 0,309,290,12,16,		<!--  ST pointer 269--> </Spentry>	
+	<Spentry> 0,163,339,32,26,		<!--  Amiga disk 270--> </Spentry>	
+	<Spentry> 0,197,339,11,11,		<!--  Amiga pointer 271--> </Spentry>	
+	<Spentry> 0,196,351,16,17,		<!--  Amigz aaa 272--> </Spentry>	
+	<Spentry> 0,214,340,12,13,		<!--  Amiga pointy hand 273--> </Spentry>	
+	<Spentry> 0,215,355,13,13,		<!--  Amiga crosshair 274--> </Spentry>	
+	<Spentry> 0,227,334,16,16,		<!--  Amiga pointers 275--> </Spentry>	
+	<Spentry> 0,230,352,14,16,		<!--  Amiga paint brush 276--> </Spentry>	
+	<Spentry> 0,287,315,20,20,		<!--  Amiga ticks 277--> </Spentry>	
+	
+	<Spentry> 0,251,331,35,17,		<!--  square pan 278--> </Spentry>
+	<Spentry> 0,324,292,13,13,		<!--  galaxian mothership 279--> </Spentry>	
+	<Spentry> 0,248,350,32,28,		<!--  Plane 1 280--> </Spentry>	
+	<Spentry> 0,288,338,39,38,		<!--  Plane 2 281--> </Spentry>
+	<Spentry> 0,335,313,25,17,		<!--  Plane 3 282--> </Spentry>
+	<Spentry> 0,329,332,25,23,		<!--  Plane 4 283--> </Spentry>
+	<Spentry> 0,366,293,31,21,		<!--  Plane 5 284--> </Spentry>
+	<Spentry> 0,362,318,18,23,		<!--  Plane 6 285--> </Spentry>
+	<Spentry> 0,339,294,22,15,		<!--  Gyruss spaceship 286--> </Spentry>
+	<Spentry> 0,355,343,25,18,		<!--  SIS camel 287--> </Spentry>
+	<Spentry> 0,311,310,21,20,		<!--  Dig Dug enemy 288--> </Spentry>
+	<Spentry> 0,400,301,16,11,		<!--  cake 289--> </Spentry>
+	<Spentry> 0,417,312,15,18,		<!--  Veg 1 290--> </Spentry>
+	<Spentry> 0,433,312,8,14,		<!--  Veg 2 291--> </Spentry>
+	<Spentry> 0,417,330,12,15,		<!--  Veg 3 292--> </Spentry>
+	<Spentry> 0,431,327,14,47,		<!--  Veg 4 293--> </Spentry>
+	<Spentry> 0,328,357,17,16,		<!--  Veg 5 294--> </Spentry>
+	<Spentry> 0,416,347,16,16,		<!--  Mr. Sausage 295--> </Spentry>
+	<Spentry> 0,347,363,16,15,		<!--  Veg 6 296--> </Spentry>
+	<Spentry> 0,495,330,16,16,		<!--  Mr. Egg 297--> </Spentry>
+	<Spentry> 0,366,362,10,17,		<!--  Veg 7 298--> </Spentry>
+	<Spentry> 0,495,348,16,16		<!--  Mr. Pickle 299--> </Spentry>
+	<Spentry> 0,400,354,14,16,		<!--  Veg 8 300--> </Spentry>
+	<Spentry> 0,425,294,18,17,		<!--  BurgerTime chef 301--> </Spentry>
+	<Spentry> 0,382,355,16,16,		<!--  Veg 9 302--> </Spentry>
+	<Spentry> 0,163,368,32,7,		<!--  Burger Time bun lid 303--> </Spentry>
+	<Spentry> 0,447,296,45,61,		<!--  Moo Montana 304--> </Spentry>
+	<Spentry> 0,406,315,10,21,		<!--  Pitfall Harry 305--> </Spentry>
+	
+	<Spentry> 0,183,228,13,7,		<!--  Arrow 306--> </Spentry>
+	<Spentry> 0,35,334,15,23,		<!--  Pliers 307--> </Spentry>
+	<Spentry> 0,199,228,16,16,		<!--  Burning monster 308--> </Spentry>
+	<Spentry> 0,37,360,10,9,			<!--  White arrow 309--> </Spentry>
+	<Spentry> 0,84,352,11,22,		<!--  Bowling pin 310--> </Spentry>
+	<Spentry> 0,70,402,23,15,		<!--  Pointy hand 311--> </Spentry>
+	<Spentry> 0,242,381,16,13,		<!--  Nemesis powerup 312--> </Spentry>
+	<Spentry> 0,183,237,15,15,		<!--  Battle axe 313--> </Spentry>
+	<Spentry> 0,217,407,12,13,		<!--  Bell 314--> </Spentry>
+	<Spentry> 0,1,369,33,31,		<!--  Viking boat 315--> </Spentry>
+	<Spentry> 0,148,377,25,26,		<!--  Radar dish 316--> </Spentry>
+	<Spentry> 0,73,383,22,18,		<!--  Hair drier 317--> </Spentry>
+	<Spentry> 0,132,449,22,15,		<!--  Hard boiled eggs 318--> </Spentry>
+	<Spentry> 0,222,390,16,14,		<!--  Telly 319--> </Spentry>
+	<Spentry> 0,42,402,9,15,		<!--  Lemming 320--> </Spentry>
+	<Spentry> 0,114,428,15,15,		<!--  Helmet 321--> </Spentry>
+	<Spentry> 0,175,377,25,25,		<!--  Satellite 322--> </Spentry>
+	<Spentry> 0,1,401,24,23,		<!--  Handcuffs 323--> </Spentry>
+	<Spentry> 0,262,401,16,8,		<!--  Centipede thingy 324--> </Spentry>
+	<Spentry> 0,93,453,16,16,		<!--  Axe 325--> </Spentry>
+	<Spentry> 0,74,419,13,16,		<!--  Flamingo 326--> </Spentry>
+	<Spentry> 0,107,476,11,12,		<!--  Ladybird 327--> </Spentry>
+	<Spentry> 0,121,387,23,14,		<!--  zaxxon ship 328--> </Spentry>
+	<Spentry> 0,1,461,20,24,		<!--  Ace of spades 329--> </Spentry>
+	<Spentry> 0,242,398,16,16,		<!--  Gradius sphere 330--> </Spentry>
+	<Spentry> 0,36,378,17,22,		<!--  Plastic oil can 331--> </Spentry>
+	<Spentry> 0,131,427,15,10,		<!--  Small fish 332--> </Spentry>
+	<Spentry> 0,203,370,29,19,		<!--  Turret gun 333--> </Spentry>
+	<Spentry> 0,120,481,14,14,		<!--  Melon thing 334--> </Spentry>
+	<Spentry> 0,262,391,15,8,		<!--  Centipede spider 335--> </Spentry>
+	<Spentry> 0,89,470,16,16,		<!--  Spade 336--> </Spentry>
+	<Spentry> 0,165,404,16,16,		<!--  Book 337--> </Spentry>
+	<Spentry> 0,1,426,26,16,		<!--  Blue rhino 338--> </Spentry>
+	<Spentry> 0,26,401,14,18,		<!--  Padlock 339--> </Spentry>
+	<Spentry> 0,146,466,20,20,		<!--  FZ enemy 1 340--> </Spentry>
+	<Spentry> 0,23,461,20,24,		<!--  Ace of hearts 341--> </Spentry>
+	<Spentry> 0,30,421,14,16,		<!--  Wizards hat 342--> </Spentry>
+	<Spentry> 0,198,408,16,14,		<!--  Computer 343--> </Spentry>
+	<Spentry> 0,182,473,15,9,		<!--  Fish 344--> </Spentry>
+	<Spentry> 0,1,444,13,13,		<!--  Book 2 345--> </Spentry>
+	<Spentry> 0,110,460,17,15,		<!--  posh flower 346--> </Spentry>
+	<Spentry> 0,96,400,20,14,		<!--  15-Cup 347--> </Spentry>
+	<Spentry> 0,54,383,15,29,		<!--  Blender 348--> </Spentry>
+	<Spentry> 0,105,145,14,14,		<!--  FZ enemy 2 349--> </Spentry>
+	<Spentry> 0,133,402,16,23,		<!--  NZ Story star enemy 350--> </Spentry>
+	<Spentry> 0,45,461,20,24,		<!--  ace of clubs 351--> </Spentry>
+	<Spentry> 0,16,443,16,16,		<!--  basket 352--> </Spentry>
+	<Spentry> 0,199,469,16,16,		<!--  FZ enemy 3 353--> </Spentry>
+	<Spentry> 0,95,436,17,16,		<!--  envelope with gift 354--> </Spentry>
+	<Spentry> 0,117,402,15,24,		<!--  guy out of teddy boy 355--> </Spentry>
+	<Spentry> 0,45,419,14,16,		<!--  sleihj bell 356--> </Spentry>
+	<Spentry> 0,182,405,15,16,		<!--  key 357--> </Spentry>
+	<Spentry> 0,130,466,14,13,		<!--  heart 358--> </Spentry>
+	<Spentry> 0,126,372,20,9,		<!--  paint tube 359--> </Spentry>
+	<Spentry> 0,90,418,16,16,		<!--  gold pot 360--> </Spentry>
+	<Spentry> 0,203,390,16,16,		<!--  crossbow 361--> </Spentry>
+	<Spentry> 0,262,380,16,9,		<!--  grasshopper 362--> </Spentry>
+	<Spentry> 0,33,439,12,16,		<!--  zap 363--> </Spentry>
+	<Spentry> 0,151,404,12,15,		<!--  apple 364--> </Spentry>
+	<Spentry> 0,47,437,11,16,		<!--  pink flower 365--> </Spentry>
+	<Spentry> 0,156,449,15,16,		<!--  watch 366--> </Spentry>
+	<Spentry> 0,67,461,20,24,		<!--  ace of diamonds 367--> </Spentry>
+	<Spentry> 0,149,423,39,24,		<!--  big fish 368--> </Spentry>
+	<Spentry> 0,61,437,32,20,		<!--  THANK YOU 369--> </Spentry>
+	<Spentry> 0,61,419,11,16,		<!--  Red potion 370--> </Spentry>
+	<Spentry> 0,173,449,21,21,		<!--  Giraffe 1 371--> </Spentry>
+	<Spentry> 0,191,423,21,21,		<!--  Giraffe 2 372--> </Spentry>	
+	<Spentry> 0,196,446,21,21,		<!--  Giraffe 3 373--> </Spentry>
+	<Spentry> 0,215,423,21,21,		<!--  Giraffe surprised 374--> </Spentry>
+	<Spentry> 0,97,387,21,12,		<!--  space taxi 375--> </Spentry>
+	
+	<Spentry> 0,230,406,9,9,		<!--  tiiny pacman 376--> </Spentry>
+	<Spentry> 0,298,377,14,15,		<!--  RR jet 377--> </Spentry>
+	<Spentry> 0,313,377,18,11,		<!--  RR copter 378--> </Spentry>
+	<Spentry> 0,297,392,18,8,		<!--  RR jet 379--> </Spentry>
+	<Spentry> 0,234,415,34,10,		<!--  RR boat 380--> </Spentry>
+	<Spentry> 0,238,425,28,26,		<!--  Kettle 381--> </Spentry>
+	<Spentry> 0,237,452,29,25,		<!--  Pony 382--> </Spentry>
+	<Spentry> 0,217,471,14,14,		<!--  Bubble 383--> </Spentry>
+	<Spentry> 0,266,453,18,13,		<!--  Shoes 384--> </Spentry>
+	<Spentry> 0,268,432,30,22,		<!--  Lips 385--> </Spentry>
+	<Spentry> 0,268,411,14,20,		<!--  Jouster 386--> </Spentry>
+	<Spentry> 0,282,414,11,17,		<!--  Balloon 387--> </Spentry>
+	<Spentry> 0,280,396,16,17,		<!--  Thumb up 388--> </Spentry>
+	<Spentry> 0,280,377,16,19,		<!--  Impossible Mission guy 389--> </Spentry>
+	<Spentry> 0,295,401,15,17,		<!--  Yet another strawberry 390--> </Spentry>
+	<Spentry> 0,298,420,18,18,		<!--  Crystals 391--> </Spentry>
+	<Spentry> 0,296,451,34,34,		<!--  Dice 392--> </Spentry>
+	<Spentry> 0,315,389,30,30,		<!--  Big green fruit slice 393,--> </Spentry>
+	<Spentry> 0,299,439,16,11,		<!--  Flag 1 Brazil 394--> </Spentry>
+	<Spentry> 0,267,468,16,11,		<!--  Flag 2 NK 395--> </Spentry>		
+	<Spentry> 0,220,446,14,24,		<!--  RR fuel 396--> </Spentry>		
+	
+	<Spentry> 0,423,369,16,11,		<!--  Flag 3 397--> </Spentry>	
+	<Spentry> 0,441,369,16,11,		<!--  Flag 4 398--> </Spentry>	
+	<Spentry> 0,459,369,16,11,		<!--  Flag 5 399--> </Spentry>	
+	<Spentry> 0,477,369,16,11,		<!--  Flag 6 400--> </Spentry>	
+	<Spentry> 0,495,369,16,11,		<!--  Flag 7 401--> </Spentry>		
+	
+	<Spentry> 0,351,382,16,11,		<!--  Flag  402--> </Spentry>			
+	<Spentry> 0,369,382,16,11,		<!--  Flag  403--> </Spentry>		
+	<Spentry> 0,387,382,16,11,		<!--  Flag  404--> </Spentry>		
+	<Spentry> 0,405,382,16,11,		<!--  Flag  405--> </Spentry>		
+	<Spentry> 0,423,382,16,11,		<!--  Flag  406--> </Spentry>		
+	<Spentry> 0,441,382,16,11,		<!--  Flag  407--> </Spentry>		
+	<Spentry> 0,459,382,16,11,		<!--  Flag  408--> </Spentry>		
+	<Spentry> 0,477,382,16,11,		<!--  Flag  409--> </Spentry>		
+	<Spentry> 0,495,382,16,11,		<!--  Flag  410--> </Spentry>		
+	
+	<Spentry> 0,351,395,16,11,		<!--  Flag  411--> </Spentry>			
+	<Spentry> 0,369,395,16,11,		<!--  Flag  412--> </Spentry>		
+	<Spentry> 0,387,395,16,11,		<!--  Flag  413--> </Spentry>		
+	<Spentry> 0,405,395,16,11,		<!--  Flag  414--> </Spentry>		
+	<Spentry> 0,423,395,16,11,		<!--  Flag  415--> </Spentry>		
+	<Spentry> 0,441,395,16,11,		<!--  Flag  416--> </Spentry>		
+	<Spentry> 0,459,395,16,11,		<!--  Flag  417--> </Spentry>		
+	<Spentry> 0,477,395,16,11,		<!--  Flag  418--> </Spentry>		
+	<Spentry> 0,495,395,16,11,		<!--  Flag  419--> </Spentry>		
+	
+	<Spentry> 0,351,408,16,11,		<!--  Flag  420--> </Spentry>			
+	<Spentry> 0,369,408,16,11,		<!--  Flag  421--> </Spentry>		
+	<Spentry> 0,387,408,16,11,		<!--  Flag  422--> </Spentry>		
+	<Spentry> 0,405,408,16,11,		<!--  Flag  423--> </Spentry>		
+	<Spentry> 0,423,408,16,11,		<!--  Flag  424--> </Spentry>		
+	<Spentry> 0,441,408,16,11,		<!--  Flag  425--> </Spentry>		
+	<Spentry> 0,459,408,16,11,		<!--  Flag  426--> </Spentry>		
+	<Spentry> 0,477,408,16,11,		<!--  Flag  427--> </Spentry>		
+	<Spentry> 0,495,408,16,11,		<!--  Flag  428--> </Spentry>		
+	
+	<Spentry> 0,333,447,16,11,		<!--  Flag  429--> </Spentry>		
+	<Spentry> 0,351,447,16,11,		<!--  Flag  430--> </Spentry>			
+	<Spentry> 0,369,447,16,11,		<!--  Flag  431--> </Spentry>		
+	<Spentry> 0,387,447,16,11,		<!--  Flag  432--> </Spentry>		
+	<Spentry> 0,405,447,16,11,		<!--  Flag  433--> </Spentry>		
+	<Spentry> 0,423,447,16,11,		<!--  Flag  434--> </Spentry>		
+	<Spentry> 0,441,447,16,11,		<!--  Flag  435--> </Spentry>		
+	<Spentry> 0,459,447,16,11,		<!--  Flag  436--> </Spentry>		
+	<Spentry> 0,477,447,16,11,		<!--  Flag  437--> </Spentry>		
+	<Spentry> 0,495,447,16,11,		<!--  Flag  438--> </Spentry>		
+	
+	<Spentry> 0,333,460,16,11,		<!--  Flag  439--> </Spentry>		
+	<Spentry> 0,351,460,16,11,		<!--  Flag  440--> </Spentry>			
+	<Spentry> 0,369,460,16,11,		<!--  Flag  441--> </Spentry>		
+	<Spentry> 0,387,460,16,11,		<!--  Flag  442--> </Spentry>		
+	<Spentry> 0,405,460,16,11,		<!--  Flag  443--> </Spentry>		
+	<Spentry> 0,423,460,16,11,		<!--  Flag  444--> </Spentry>		
+	<Spentry> 0,441,460,16,11,		<!--  Flag  445--> </Spentry>		
+	<Spentry> 0,459,460,16,11,		<!--  Flag  446--> </Spentry>		
+	<Spentry> 0,477,460,16,11,		<!--  Flag  447--> </Spentry>		
+	<Spentry> 0,495,460,16,11,		<!--  Flag  448--> </Spentry>		
+
+	<Spentry> 0,333,473,16,11,		<!--  Flag  449--> </Spentry>		
+	<Spentry> 0,351,473,16,11,		<!--  Flag  450--> </Spentry>			
+	<Spentry> 0,369,473,16,11,		<!--  Flag  451--> </Spentry>		
+	<Spentry> 0,387,473,16,11,		<!--  Flag  452--> </Spentry>		
+	<Spentry> 0,405,473,16,11,		<!--  Flag  453--> </Spentry>		
+	<Spentry> 0,423,473,16,11,		<!--  Flag  454--> </Spentry>		
+	<Spentry> 0,441,473,16,11,		<!--  Flag  455--> </Spentry>		
+	<Spentry> 0,459,473,16,11,		<!--  Flag  456--> </Spentry>		
+	<Spentry> 0,477,473,16,11,		<!--  Flag  457--> </Spentry>		
+	<Spentry> 0,495,473,16,11,		<!--  Flag  458--> </Spentry>	
+																
+	<Spentry> 0,477,486,16,11,		<!--  Flag  459--> </Spentry>		
+	<Spentry> 0,495,486,16,11,		<!--  Flag  460--> </Spentry>		
+	
+	<Spentry> 0,477,499,16,11,		<!--  Flag  461--> </Spentry>		
+	<Spentry> 0,495,499,16,11,		<!--  Flag  462--> </Spentry>																																
+																
+	<Spentry> 0,318,421,16,11,		<!--  Flag  463--> </Spentry>		
+	<Spentry> 0,336,421,16,11,		<!--  Flag  464--> </Spentry>		
+	<Spentry> 0,354,421,16,11,		<!--  Flag  465--> </Spentry>		
+	<Spentry> 0,372,421,16,11,		<!--  Flag  466--> </Spentry>		
+	<Spentry> 0,390,421,16,11,		<!--  Flag  467--> </Spentry>		
+	<Spentry> 0,408,421,16,11,		<!--  Flag  468--> </Spentry>		
+	<Spentry> 0,426,421,16,11,		<!--  Flag  469--> </Spentry>		
+	<Spentry> 0,444,421,16,11,		<!--  Flag  470--> </Spentry>		
+	<Spentry> 0,462,421,16,11,		<!--  Flag  471--> </Spentry>		
+	<Spentry> 0,480,421,16,11,		<!--  Flag  472--> </Spentry>		
+
+	<Spentry> 0,318,434,16,11,		<!--  Flag  473--> </Spentry>		
+	<Spentry> 0,336,434,16,11,		<!--  Flag  474--> </Spentry>		
+	<Spentry> 0,354,434,16,11,		<!--  Flag  475--> </Spentry>		
+	<Spentry> 0,372,434,16,11,		<!--  Flag  476--> </Spentry>		
+	<Spentry> 0,390,434,16,11,		<!--  Flag  477--> </Spentry>		
+	<Spentry> 0,408,434,16,11,		<!--  Flag  478--> </Spentry>		
+	<Spentry> 0,426,434,16,11,		<!--  Flag  479--> </Spentry>		
+	<Spentry> 0,444,434,16,11,		<!--  Flag  480--> </Spentry>		
+	<Spentry> 0,462,434,16,11,		<!--  Flag  481--> </Spentry>		
+	<Spentry> 0,480,434,16,11,		<!--  Flag  482--> </Spentry>		
+	
+	<Spentry> 0,910,278,31,27,		<!--  Plush 483--> </Spentry>	
+	<Spentry> 0,497,48,11,8,		<!--  Swarmer 484--> </Spentry>		
+	<Spentry> 0,510,48,11,10,		<!--  TP roll 485--> </Spentry>	
+	<Spentry> 0,499,60,18,18,		<!--  MM phone 486--> </Spentry>	
+	
+	<Spentry> 0,545,0,65,49,		<!--  Caprichoso 487--> </Spentry>	
+	<Spentry> 0,613,12,17,17,		<!--  Flag 1 488--> </Spentry>	
+	<Spentry> 0,613,32,17,17,		<!--  Flag 2 489--> </Spentry>		
+	<Spentry> 0,613,51,17,17,		<!--  Flag 3 490--> </Spentry>	
+	<Spentry> 0,595,51,17,17,		<!--  Flag 4 491--> </Spentry>	
+	<Spentry> 0,577,51,17,17,		<!--  Flag 5 492--> </Spentry>	
+	<Spentry> 0,561,51,17,17,		<!--  Flag 6 493--> </Spentry>	
+	<Spentry> 0,580,69,17,17,		<!--  Flag 7 494--> </Spentry>	
+	<Spentry> 0,510,98,16,18,		<!--  Medal 495--> </Spentry>	
+	<Spentry> 0,561,78,18,18,		<!--  Controller  496--> </Spentry>		
+	<Spentry> 0,601,69,16,17,		<!--  Lightbulb 497--> </Spentry>	
+	<Spentry> 0,603,89,15,15,		<!--  Magnifier 498--> </Spentry>	
+	<Spentry> 0,633,21,12,18,		<!--  Dollar 499--> </Spentry>	
+	<Spentry> 0,523,48,34,49,		<!--  LRH 500--> </Spentry>			
+	<Spentry> 0,528,98,18,17,		<!--  Lego block 501--> </Spentry>	
+	<Spentry> 0,547,98,18,18,		<!--  Bug 502--> </Spentry>		
+	<Spentry> 0,567,98,17,12,		<!--  Car 503--> </Spentry>		
+	<Spentry> 0,586,90,16,17,		<!--  Joystick 504--> </Spentry>
+	<Spentry> 0,620,88,17,16,		<!--  Pencil 505--> </Spentry>	
+	<Spentry> 0,632,1,14,18,		<!--  Medal 506--> </Spentry>	
+	<Spentry> 0,662,81,14,14,		<!--  Omega 507--> </Spentry>	
+	<Spentry> 0,680,80,18,18,		<!--  Spanner 508--> </Spentry>	
+	<Spentry> 0,648,2,16,16,		<!--  Pill 509--> </Spentry>	
+	<Spentry> 0,648,21,18,18,		<!--  8 ball 510--> </Spentry>		
+	<Spentry> 0,632,42,14,16,		<!--  Euro 511--> </Spentry>	
+	<Spentry> 0,670,60,18,16,		<!--  Star 512--> </Spentry>	
+	<Spentry> 0,641,80,18,18,		<!--  Golf ball 513--> </Spentry>	
+	<Spentry> 0,687,1,16,16,		<!--  Clock 514--> </Spentry>	
+	<Spentry> 0,667,2,17,17,		<!--  racket 515--> </Spentry>	
+	<Spentry> 0,670,41,18,18,		<!--  tennis ball 516--> </Spentry>		
+	<Spentry> 0,633,60,12,16,		<!--  £ 517--> </Spentry>	
+	<Spentry> 0,649,60,18,18,		<!--  american football 518--> </Spentry>	
+	<Spentry> 0,649,41,18,18,		<!--  basketball 519--> </Spentry>		
+	<Spentry> 0,668,22,18,18,		<!--  football 520--> </Spentry>	
+	<Spentry> 0,688,21,17,17,		<!--  wand 521--> </Spentry>
+	<Spentry> 0,706,1,17,17,		<!--  ,agnifier 522--> </Spentry>		
+	<Spentry> 0,691,41,15,17,		<!--  cloudy 523--> </Spentry>	
+	<Spentry> 0,690,60,15,16,		<!--  sunny 524--> </Spentry>	
+	
+	<Spentry> 0,578,111,16,28,		<!--  pawn 525--> </Spentry>	
+	<Spentry> 0,595,108,28,31,		<!--  bish 526--> </Spentry>	
+	<Spentry> 0,624,110,22,28,		<!--  castle 527--> </Spentry>	
+	<Spentry> 0,647,99,30,28,		<!--  queen 528--> </Spentry>	
+	<Spentry> 0,678,98,30,31,		<!--  king 529--> </Spentry>
+	<Spentry> 0,708,19,29,31,		<!--  horse 530--> </Spentry>
+	<Spentry> 0,708,51,28,29,		<!--  horse 531--> </Spentry>
+	<Spentry> 0,711,81,29,32,		<!--  horse 532--> </Spentry>
+	<Spentry> 0,710,114,32,33,		<!--  horse 533--> </Spentry>
+	<Spentry> 0,581,142,36,37,		<!--  aries 534--> </Spentry>
+	<Spentry> 0,621,143,35,36,		<!--  taurus 535--> </Spentry>
+	<Spentry> 0,662,134,41,37,		<!--  gemini 536--> </Spentry>
+	<Spentry> 0,707,148,37,37,		<!--  cancer 537--> </Spentry>
+	<Spentry> 0,747,122,38,37,		<!--  scorpio 538--> </Spentry>
+	<Spentry> 0,745,82,39,37,		<!--  libra 539--> </Spentry>
+	<Spentry> 0,743,42,37,38,		<!--  virgo 540--> </Spentry>
+	<Spentry> 0,738,1,37,37,		<!--  leo 541--> </Spentry>
+	<Spentry> 0,517,167,38,39,		<!--  sagittarius 542--> </Spentry>
+	<Spentry> 0,556,182,36,37,		<!--  caprica 543--> </Spentry>
+	<Spentry> 0,597,183,36,38,		<!--  thingy 544--> </Spentry>
+	<Spentry> 0,637,183,35,37,		<!--  pisces 545--> </Spentry>
+	<Spentry> 0,676,173,32,29,		<!--  banana 546--> </Spentry>
+	<Spentry> 0,678,204,26,26,		<!--  coconut 547--> </Spentry>
+	<Spentry> 0,560,222,29,28,		<!--  lime 548--> </Spentry>
+	<Spentry> 0,591,223,29,29,		<!--  orange 549--> </Spentry>
+	<Spentry> 0,624,223,28,27,		<!--  peach 550--> </Spentry>
+	<Spentry> 0,655,229,23,30,		<!--  strawberry 551--> </Spentry>
+	<Spentry> 0,712,189,31,24,		<!--  melon 552--> </Spentry>
+	<Spentry> 0,745,163,63,57,		<!--  pyramid 553--> </Spentry>
+	<Spentry> 0,514,221,42,42,		<!--  amiga ball 554--> </Spentry>
+	
+	<Spentry> 0,517,266,38,39,		<!--  guitar 555--> </Spentry>
+	<Spentry> 0,559,259,36,38,		<!--  lute 556--> </Spentry>
+	<Spentry> 0,514,306,67,65,		<!--  guitar 557--> </Spentry>
+	<Spentry> 0,599,259,39,23,		<!--  synth 558--> </Spentry>
+	<Spentry> 0,641,261,24,21,		<!--  iron symbol 559--> </Spentry>
+	<Spentry> 0,682,236,24,22,		<!--  purple smily 560--> </Spentry>
+	<Spentry> 0,710,216,20,20,		<!--  small cake 561--> </Spentry>
+	<Spentry> 0,706,238,17,21,		<!--  bunny in hat 562--> </Spentry>
+	<Spentry> 0,686,262,23,21,		<!--  small plant 563--> </Spentry>
+	<Spentry> 0,600,284,34,34,		<!--  giraffe 564--> </Spentry>
+	<Spentry> 0,636,284,28,34,		<!--  hippo 565--> </Spentry>
+	<Spentry> 0,585,319,31,34,		<!--  bunny 566--> </Spentry>
+	<Spentry> 0,619,319,34,34,		<!--  donkey 567--> </Spentry>
+	<Spentry> 0,655,319,33,35,		<!--  goat 568--> </Spentry>
+	<Spentry> 0,828,76,26,34,		<!--  bunny 569--> </Spentry>
+	<Spentry> 0,513,117,64,48,		<!--  Deer Leader badge 570--> </Spentry>
+	<Spentry> 0,792,77,32,63,		<!--  giraffe 571--> </Spentry>
+	<Spentry> 0,780,4,31,33,		<!--  cake 572--> </Spentry>
+	<Spentry> 0,816,7,35,30,		<!--  cake 573--> </Spentry>
+	<Spentry> 0,853,7,36,30,		<!--  cake 574--> </Spentry>
+	<Spentry> 0,891,2,32,36,		<!--  cake 575--> </Spentry>
+	<Spentry> 0,927,2,32,36,		<!--  cake 576--> </Spentry>
+	<Spentry> 0,960,6,32,32,		<!--  round lolly 577--> </Spentry>
+	<Spentry> 0,784,41,31,33,		<!--  round lolly 578--> </Spentry>
+	<Spentry> 0,821,40,30,34,		<!--  lolly 579--> </Spentry>
+	<Spentry> 0,853,40,29,33,		<!--  angry lolly 580--> </Spentry>
+	<Spentry> 0,884,41,23,32,		<!--  green lolly 581--> </Spentry>
+	<Spentry> 0,914,40,23,32,		<!--  pink lolly 582--> </Spentry>
+	<Spentry> 0,939,40,20,34,		<!--  ice cream 583--> </Spentry>
+	<Spentry> 0,963,39,20,35,		<!--  ice cream 584--> </Spentry>
+	<Spentry> 0,987,39,19,35,		<!--  ice cream 585--> </Spentry>
+	
+	<Spentry> 0,856,74,64,69,		<!--  LS logo 586--> </Spentry>	
+	<Spentry> 0,924,76,66,63,		<!--  MR icon 587--> </Spentry>
+	<Spentry> 0,815,147,66,63,		<!--  Minotron icon 588--> </Spentry>
+	<Spentry> 0,889,145,66,66,		<!--  Deflex icon 589--> </Spentry>
+	<Spentry> 0,962,147,34,34,		<!--  Berzerk robot 590--> </Spentry>
+	<Spentry> 0,736,223,34,55,		<!--  little minotaur 591--> </Spentry>
+	<Spentry> 0,777,225,34,30,		<!--  asteroid 592--> </Spentry>
+	<Spentry> 0,816,219,51,44,		<!--  camel 593--> </Spentry>
+	<Spentry> 0,873,218,25,37,		<!--  running minotaur 594--> </Spentry>
+	<Spentry> 0,903,216,32,32,		<!--  devil smily 595--> </Spentry>
+	<Spentry> 0,941,218,67,50,		<!--  musk ox 596--> </Spentry>
+	<Spentry> 0,667,285,51,32,		<!--  Patience 597--> </Spentry>
+	<Spentry> 0,723,285,49,73,		<!--  kettle 598--> </Spentry>
+	<Spentry> 0,776,276,59,82,		<!--  lamb 599--> </Spentry>
+	<Spentry> 0,840,266,42,35,		<!--  horns 600--> </Spentry>
+	<Spentry> 0,910,312,30,30,		<!--  starfield star 601--> </Spentry>
+	<Spentry> 0,858,366,164,124,	<!--  Mino Rescue 602--> </Spentry>	
+	<Spentry> 0,686,367,168,135,	<!--  Minotron 603--> </Spentry>	
+	<Spentry> 0,514,374,169,128,	<!--  Deflex 604--> </Spentry>
+	<Spentry> 0,959,277,31,28,	<!--  Star 605--> </Spentry>		
+	<Spentry> 0,957,318,33,34,	<!--  OF leaves 606--> </Spentry>																			
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>1024,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+ <Sample maxinstance='1' >yay0.wav</Sample>
+ <Sample maxinstance='1' >yay1.wav</Sample>
+ <Sample maxinstance='1' >yay2.wav</Sample>
+ <Sample maxinstance='1' >yay3.wav</Sample>
+  <Sample maxinstance='1' >yay4.wav</Sample>
+   <Sample maxinstance='1' >woohoo.wav</Sample>
+ <Sample maxinstance='1' >waytogo.wav</Sample>      
+  <Sample maxinstance='1' >yourock.wav</Sample>   
+ <Sample maxinstance='1' >jump.wav</Sample>   	
+ <Sample maxinstance='1' >mate.wav</Sample>  
+  <Sample maxinstance='1' >munch.wav</Sample>  	 
+  <Sample maxinstance='1' >pop.wav</Sample>   
+  <Sample maxinstance='1' >hitbaddy.wav</Sample> 
+  <Sample maxinstance='1' >bonus.wav</Sample>   
+  <Sample maxinstance='1' >bleat1.wav</Sample>    
+    <Sample maxinstance='1' >jump2049.wav</Sample>   
+	  <Sample maxinstance='1' >siren2049.wav</Sample>    
+	  <Sample maxinstance='1' >hitbaddy2049.wav</Sample>   
+	<Sample maxinstance='1' >pickup2049.wav</Sample> 
+	<Sample maxinstance='1' >jumpmm.wav</Sample>  	 
+	<Sample maxinstance='1' >pickupmm.wav</Sample> 
+<Sample maxinstance='1' >mmtune.wav</Sample>  
+<Sample maxinstance='1' >ccbridge.wav</Sample>  
+<Sample maxinstance='1' >ccjump.wav</Sample>  	
+<Sample maxinstance='1' >ccpickup.wav</Sample>  	
+<Sample maxinstance='1' >cctune.wav</Sample> 
+<Sample maxinstance='1' >cconcat.wav</Sample>  
+<Sample maxinstance='1' >ccontune.wav</Sample>   
+<Sample maxinstance='1' >kidbaa.wav</Sample>   	
+<Sample maxinstance='1' >mjump.wav</Sample>   
+<Sample maxinstance='1' >mzjump.wav</Sample>   
+<Sample maxinstance='1' >mzland.wav</Sample>   
+<Sample maxinstance='1' >mzrev.wav</Sample>  
+<Sample maxinstance='1' >cejump.wav</Sample>   
+<Sample maxinstance='1' >cepickup.wav</Sample>   
+<Sample maxinstance='1' >cetune.wav</Sample>  
+<Sample maxinstance='1' >gameover.wav</Sample> 
+<Sample maxinstance='1' >lostkid.wav</Sample>   
+<Sample maxinstance='1' >mushroom.wav</Sample>  
+<Sample maxinstance='1' >bip.wav</Sample>  		
+<Sample maxinstance='1' >bip2.wav</Sample>  
+<Sample maxinstance='1' >different.wav</Sample>  
+<Sample maxinstance='1' >fanfare.wav</Sample>  	  	 		 		  	       		 		 							 	 	 	 				 				  							  		  			  																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								  			  													
+  </Sounds>
+</NeonResources>

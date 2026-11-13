@@ -1,0 +1,62 @@
+OpenMinotaur - licensing and retained rights
+
+This distribution contains project contributions, reconstructed original game
+and engine material, original assets, and separately licensed third-party
+components. These categories do not all carry the same permissions.
+
+1. Project contributions - Zero-Clause BSD (0BSD)
+
+To the extent that the project contributors hold copyright in their original
+contributions to this project, those contributions are offered under the
+unmodified Zero-Clause BSD license in LICENSES/0BSD.txt, unless a different
+license is expressly stated for the material concerned.
+
+This grant covers only rights the contributors are entitled to license. It does
+not relicense pre-existing Llamasoft material or other third-party material,
+including copyrightable expression retained in reconstructed or adapted code.
+Where a file contains both new contributions and pre-existing material, this
+grant applies only to the contributors' own copyrightable additions.
+
+Credit to the project and its contributors is appreciated, but is not a
+condition of the 0BSD grant. This voluntary request does not replace or waive
+attribution requirements imposed by other applicable licenses.
+
+2. Original games, reconstructed material, and assets
+
+Jeff Minter has authorized the maintainer to publish this project as open source.
+Original game assets are included with Llamasoft's permission. Copyright and
+other intellectual property rights in the original games, engine material and
+assets remain with Llamasoft and their respective rights holders.
+
+The project contributors do not claim ownership of that pre-existing material.
+Its inclusion or reconstruction does not place it in the public domain or
+automatically subject it to the project's 0BSD grant. This notice does not
+expand the permission granted by the original rights holders or grant a general
+right to relicense their material.
+
+Re-use of original game assets requires explicit permission from the relevant
+copyright holder, unless the particular use is already authorized by that
+holder or permitted by applicable law. This includes artwork, sprites, logos,
+audio, music, original game text, level data, and extracted or adapted versions
+of those assets. Their availability in this repository or a built application
+is not itself permission to extract, redistribute, modify, or use them in
+another project.
+
+No trademark rights or right to imply endorsement by Llamasoft or the original
+authors are granted by the project contributors.
+
+3. Third-party components
+
+Libraries, shaders, fonts and other third-party components retain their own
+licenses and notices. See THIRD-PARTY-NOTICES.txt, LICENSES/, and notices beside
+the relevant source or assets. Those licenses remain effective; the original
+game-asset reservation above does not impose additional restrictions on
+material separately licensed by its rights holder.
+
+The project contribution license does not waive third-party obligations or
+determine whether additional terms apply to a derived or combined distribution.
+In particular, the included GPL-licensed CRT components retain their applicable
+GPL terms.
+
+Nothing in this notice restricts permissions already granted by a rights holder
+or rights and exceptions available under applicable law.

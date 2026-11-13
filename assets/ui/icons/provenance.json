@@ -1,0 +1,38 @@
+{
+  "minos": {
+    "source_ipa": "Minos.ipa",
+    "entry": "Payload/Minos.app/Icon@2x.png"
+  },
+  "deflex": {
+    "source_ipa": "Deflex.ipa",
+    "entry": "Payload/Deflex.app/Icon@2x.png"
+  },
+  "superoxwars": {
+    "source_ipa": "uk.co.llamasoft.sf-iOS3.0-(Clutch-2.0.4).ipa",
+    "entry": "Payload/SuperOxWars.app/Icon@2x.png"
+  },
+  "goatup2": {
+    "source_ipa": "co.uk.llamasoft.Grunt-iOS4.3-(Clutch-2.0.4).ipa",
+    "entry": "Payload/GoatUp 2.app/Icon@2x.png"
+  },
+  "gridrunner": {
+    "source_ipa": "uk.co.llamasoft.gridrunner-iOS4.3-(Clutch-2.0.4).ipa",
+    "entry": "Payload/Gridrunner.app/Icon@2x.png"
+  },
+  "goatup": {
+    "source_ipa": "GoatUp [Llamasoft] v1.01.ipa",
+    "entry": "Payload/GoatUp.app/Icon@2x.png"
+  },
+  "fiveaday": {
+    "source_ipa": "uk.co.llamasoft.tp-iOS3.0-(Clutch-2.0.4).ipa",
+    "entry": "Payload/FiveADay.app/Icon@2x.png"
+  },
+  "minotron": {
+    "source_ipa": "uk.co.llamasoft.minotron-iOS3.0-(Clutch-2.0.4).ipa",
+    "entry": "Payload/Minotron.app/Icon@2x.png"
+  },
+  "minorescue": {
+    "source_ipa": "Mino Rescue.ipa",
+    "entry": "Payload/Mino Rescue.app/Icon@2x.png"
+  }
+}

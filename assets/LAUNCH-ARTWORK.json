@@ -1,0 +1,47 @@
+{
+  "minotron": {
+    "ipa": "Minotron 2112.ipa",
+    "entry": "Payload/Minotron.app/Default-LandscapeLeft.png",
+    "sha256": "c28931fdcab98222dbf71fb8f522e02750a8ce26e44d8ec88d8a3bf89265e2ec"
+  },
+  "minorescue": {
+    "ipa": "Minotaur Rescue.ipa",
+    "entry": "Payload/Mino Rescue.app/Default-LandscapeLeft.png",
+    "sha256": "81c8c44a18835c0acdd58509eff35db2a5fb88d040d15fc4cb3d785fd2714981"
+  },
+  "minos": {
+    "ipa": "Caverns of Minos.ipa",
+    "entry": "Payload/Minos.app/Default@2x.png",
+    "sha256": "41bb5b8b5ada548579712d4ed8b4628476d30f332826c6b292cb5e0b594a03f2"
+  },
+  "deflex": {
+    "ipa": "Deflex.ipa",
+    "entry": "Payload/Deflex.app/Default-LandscapeLeft.png",
+    "sha256": "a2836bf1bac75e69bebf8d2920206af5f750df55fcd84007ae352dbf0fba9e95"
+  },
+  "gridrunner": {
+    "ipa": "Gridrunner.ipa",
+    "entry": "Payload/Gridrunner.app/Default@2x.png",
+    "sha256": "8344a520f5d5d514e7bd7fdddc33bb9cedd0ec84676d9103f0102a76f79201ca"
+  },
+  "goatup": {
+    "ipa": "GoatUp.ipa",
+    "entry": "Payload/GoatUp.app/Default@2x.png",
+    "sha256": "bcd166cd6465e71045e03a22acb87a9745a5465b4e0a35901751d98552039f3c"
+  },
+  "goatup2": {
+    "ipa": "Goatup 2.ipa",
+    "entry": "Payload/GoatUp 2.app/Default~ipad.png",
+    "sha256": "766e543e199fe277e5f3f4fd4dc530f10d116247db63068691ca56c546987aba"
+  },
+  "fiveaday": {
+    "ipa": "Five A Day.ipa",
+    "entry": "Payload/FiveADay.app/Default@2x.png",
+    "sha256": "e469946e3e9836cb2b6685a7beaaa4d95836e01684b05ef35dbe37020a6137d3"
+  },
+  "superoxwars": {
+    "ipa": "Super Ox Wars.ipa",
+    "entry": "Payload/SuperOxWars.app/Default@2x.png",
+    "sha256": "889b36f7d8e4a35e86bd2b6caa0fe1b682a9171c67d05434a49877ff39627979"
+  }
+}

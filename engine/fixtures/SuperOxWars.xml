@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='2' fonts='1' spritemaps='1' spritepages='2' >
+  <Literals>
+    <Literal index='0'>sf.png</Literal>  
+    <Literal>sf_chars.png</Literal>  
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->   
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='93'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+	<Spentry>0,0,0,512,512, </Spentry>
+	
+	<Spentry> 0,1,1,1,1,	<!-- White pixel for colour fills. 0. --> </Spentry>
+	<Spentry> 0,10,0,66,64,	<!-- pause button 1--> </Spentry>
+	<Spentry> 0,78,0,31,32,	<!-- star/round dot 2--> </Spentry>
+	<Spentry> 0,112,0,97,25,	<!-- START 3--> </Spentry>
+	<Spentry> 0,209,0,22,25,	<!-- Level select + 4--> </Spentry>
+	<Spentry> 0,231,0,22,25,	<!-- Level select - 5--> </Spentry>
+	<Spentry> 0,113,25,98,53,	<!-- Exit 6--> </Spentry>
+	<Spentry> 0,211,24,97,25,	<!-- TOUCH button 7--> </Spentry>	
+	<Spentry> 0,211,50,97,25,	<!-- TILT button 8--> </Spentry>	
+	<Spentry> 0,0,70,66,87,     <!-- Cow 9--> </Spentry>		
+	<Spentry> 0,79,40,28,22,	<!-- Player ship 10--> </Spentry>			
+	<Spentry> 0,382,0,130,85,	<!-- Galaxy 1 11--> </Spentry>		
+	<Spentry> 0,382,85,130,108, <!-- Galaxy 2 12--> </Spentry>		
+	<Spentry> 0,382,193,130,82,	<!-- Galaxy 3 13--> </Spentry>	
+	<Spentry> 0,382,275,130,130,	<!-- Galaxy 4 14--> </Spentry>	
+	<Spentry> 0,79,63,5,12,     <!-- Player shot--> </Spentry>	
+	<Spentry> 0,254,1,22,22,	<!-- Small turret 16--> </Spentry>	
+	<Spentry> 0,313,0,60,60,	<!-- Explosion 17--> </Spentry>	
+	<Spentry> 0,68,240,65,59,	<!-- Beachball turret 18--> </Spentry>		
+	<Spentry> 0,3,67,25,31,     <!-- Pointing turret 19--> </Spentry>		
+	<Spentry> 0,0,106,66,66,	<!-- Caprichoso tile 20--> </Spentry>	
+	<Spentry> 0,66,106,66,66,	<!-- Garantido tile 21--> </Spentry>	
+	<Spentry> 0,133,79,37,41,	<!-- Crater 22--> </Spentry>	
+	<Spentry> 0,172,78,17,18,	<!-- Enemy ship 23--> </Spentry>	
+	<Spentry> 0,0,172,66,66,	<!-- Eyeball 24--> </Spentry>	
+	<Spentry> 0,66,172,66,66,	<!-- Iris 25--> </Spentry>		
+	<Spentry> 0,0,238,66,65,	<!-- Ground base 26--> </Spentry>	
+	<Spentry> 0,1,304,65,54,	<!-- The nose 27--> </Spentry>	
+	<Spentry> 0,132,122,44,40,	<!-- Caprichoso powerup 28--> </Spentry>	
+	<Spentry> 0,173,98,28,34,	<!-- garantido powerup 29--> </Spentry>	
+	<Spentry> 0,0,404,15,16,	<!-- 0 30--> </Spentry>	
+    <Spentry> 0,16,404,15,16,	<!-- 1 31--> </Spentry>	
+    <Spentry> 0,32,404,15,16,	<!-- 2 32--> </Spentry>	
+    <Spentry> 0,48,404,15,16,	<!-- 3 33--> </Spentry>	
+    <Spentry> 0,64,404,15,16,	<!-- 4 34--> </Spentry>	
+    <Spentry> 0,80,404,15,16,	<!-- 5 35--> </Spentry>	
+    <Spentry> 0,96,404,15,16,	<!-- 6 36--> </Spentry>	
+    <Spentry> 0,112,404,15,16,	<!-- 7 37--> </Spentry>	
+    <Spentry> 0,128,404,15,16,	<!-- 8 38--> </Spentry>	
+    <Spentry> 0,144,404,15,16,	<!-- 9 39--> </Spentry>	   
+
+	<Spentry> 0,35,66,32,18,	<!-- "ox" tile 40--> </Spentry>	
+	<Spentry> 0,35,85,27,11,	<!-- "ox" text 41--> </Spentry>	
+	<Spentry> 0,339,68,36,40,	<!-- ? coin 42--> </Spentry>	
+	<Spentry> 0,332,115,50,50,	<!-- Star coin 43--> </Spentry>		
+	<Spentry> 0,332,165,50,50,	<!-- Heart coin 44--> </Spentry>	
+	<Spentry> 0,222,325,81,80,	<!-- Caprichoso 1up 45--> </Spentry>	
+	<Spentry> 0,301,325,81,80,	<!-- Garantido 1up 46--> </Spentry>	
+	<Spentry> 0,65,317,130,86,	<!-- Super Ox Wars logo 47--> </Spentry>	
+	<Spentry> 0,70,82,34,20,	<!-- gauge ox 48--> </Spentry>	
+	<Spentry> 0,209,240,68,77,	<!-- Caprichoso head 49--> </Spentry>	
+	<Spentry> 0,140,240,68,77,	<!-- Garantido head 50--> </Spentry>		
+	<Spentry> 0,133,165,34,34,	<!-- Mine 51--> </Spentry>	
+	<Spentry> 0,133,199,34,34,	<!-- Pyramid 52--> </Spentry>	
+	<Spentry> 0,179,134,16,16,	<!-- Pyramid lid 53--> </Spentry>		
+	<Spentry> 0,178,152,15,37,	<!-- Fence 54--> </Spentry>	
+	<Spentry> 0,276,269,62,55,	<!-- Cow ear 55--> </Spentry>
+	<Spentry> 0,279,235,66,35,	<!-- Cow horn 56--> </Spentry>	
+	<Spentry> 0,174,202,32,30,	<!-- Toothpaste laser ball 57--> </Spentry>	
+	<Spentry> 0,211,76,32,29,	<!-- Small flower 58--> </Spentry>	
+	<Spentry> 0,338,298,34,24,	<!-- Butterfly 59--> </Spentry>	
+	<Spentry> 0,286,152,43,83,	<!-- Fox 60--> </Spentry>	
+	<Spentry> 0,195,132,10,18,	<!-- Hedge 61--> </Spentry>	
+	<Spentry> 0,107,82,11,11,	<!-- Tooth 62--> </Spentry>	
+	<Spentry> 0,190,78,15,10,	<!-- Ship 63 --> </Spentry>	
+	<Spentry> 0,202,105,17,18,	<!-- Ship 64 --> </Spentry>	
+	<Spentry> 0,219,105,17,18,	<!-- Ship 65 --> </Spentry>		
+	<Spentry> 0,236,105,18,18,	<!-- Ship 66 --> </Spentry>		
+	<Spentry> 0,290,76,23,12,	<!-- ship 67 --> </Spentry>	
+	<Spentry> 0,263,75,27,18,	<!-- ship 68 --> </Spentry>	
+	<Spentry> 0,244,75,18,18,	<!-- ship 69 --> </Spentry>	
+	<Spentry> 0,255,94,21,30,	<!-- ship 70 --> </Spentry>
+	<Spentry> 0,278,93,36,44,	<!-- ship 71 --> </Spentry>		
+	<Spentry> 0,206,124,30,31,	<!-- ship 72 --> </Spentry>		
+	<Spentry> 0,236,124,30,34,	<!-- ship 73 --> </Spentry>	
+	<Spentry> 0,197,156,31,41,	<!-- ship 74 --> </Spentry>	
+	<Spentry> 0,230,159,42,30,	<!-- ship 75 --> </Spentry>	
+	<Spentry> 0,313,69,18,18,	<!-- ship 76 --> </Spentry>	
+	<Spentry> 0,213,196,25,24,	<!-- ship 77 --> </Spentry>	
+	<Spentry> 0,238,189,18,33,	<!-- ship 78 --> </Spentry>		
+	<Spentry> 0,349,220,33,28,	<!-- garden ship 79 --> </Spentry>		
+	<Spentry> 0,352,248,31,32,	<!-- garden ship 80 --> </Spentry>		
+	<Spentry> 0,0,358,33,32,	<!-- garden ship 81 --> </Spentry>		
+	<Spentry> 0,33,359,31,32,	<!-- garden ship 82 --> </Spentry>		
+	<Spentry> 0,213,222,34,18,	<!-- Exerion bird 83 --> </Spentry>	
+	<Spentry> 0,464,445,48,68,	<!-- Head 84 --> </Spentry>	
+	<Spentry> 0,196,321,8,18,	<!-- Tiny knife 85 --> </Spentry>	
+	<Spentry> 0,163,404,18,18,	<!-- Sphere 86 --> </Spentry>	
+	<Spentry> 0,181,404,16,18,	<!-- Bouncer 87 --> </Spentry>	
+	<Spentry> 0,366,463,48,46,	<!-- Deer 88 --> </Spentry>	
+	<Spentry> 0,308,471,50,40,	<!-- Lamb 89 --> </Spentry>	
+	<Spentry> 0,257,462,50,50,	<!-- Cow 90 --> </Spentry>	
+	
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+      
+  <Sample maxinstance='1' >moo.wav</Sample>   
+  <Sample maxinstance='1' >bonuspip.wav</Sample>  
+  <Sample maxinstance='1' >boom.wav</Sample>  
+  <Sample maxinstance='1' >extralife.wav</Sample>  
+  <Sample maxinstance='1' >kazing.wav</Sample>  
+  <Sample maxinstance='1' >shot.wav</Sample> 
+        <Sample maxinstance='1' >x1.wav</Sample>   
+      <Sample maxinstance='1' >x2.wav</Sample> 
+      <Sample maxinstance='1' >x3.wav</Sample> 
+      <Sample maxinstance='1' >x4.wav</Sample> 
+      <Sample maxinstance='1' >x5.wav</Sample> 
+      <Sample maxinstance='1' >x6.wav</Sample> 
+      <Sample maxinstance='1' >x7.wav</Sample> 
+      <Sample maxinstance='1' >x8.wav</Sample> 
+      <Sample maxinstance='1' >x9.wav</Sample> 
+       <Sample maxinstance='1' >x91.wav</Sample> 
+       <Sample maxinstance='1' >thung.wav</Sample> 
+       <Sample maxinstance='1' >zang.wav</Sample> 
+      <Sample maxinstance='1' >x10.wav</Sample> 
+      <Sample maxinstance='1' >x11.wav</Sample> 
+      <Sample maxinstance='1' >hit.wav</Sample> 
+      <Sample maxinstance='1' >revert.wav</Sample> 
+      <Sample maxinstance='1' >shipdie.wav</Sample> 
+      <Sample maxinstance='1' >toilet.wav</Sample>
+      <Sample maxinstance='1' >eshot.wav</Sample> 
+      <Sample maxinstance='1' >foom.wav</Sample> 
+      <Sample maxinstance='1' >bang.wav</Sample> 
+      <Sample maxinstance='1' >hashoom.wav</Sample> 
+      <Sample maxinstance='1' >splat.wav</Sample> 
+      <Sample maxinstance='1' >bunce.wav</Sample> 
+      <Sample maxinstance='1' >explosion.wav</Sample> 
+      <Sample maxinstance='1' >wub.wav</Sample> 
+      <Sample maxinstance='1' >wub2.wav</Sample> 
+      <Sample maxinstance='1' >progress.wav</Sample> 
+   </Sounds>
+</NeonResources>

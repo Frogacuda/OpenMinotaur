@@ -1,0 +1,180 @@
+{
+  "format": 1,
+  "assets": [
+    {
+      "file": "platform/ui_assets/kFontPng.png",
+      "bytes": 113982,
+      "sha256": "e549175e0a4a3643c25f6a020bc2835cdf90f6102a8fca83e0d7bf27a14c227e",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kFontPng"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_minorescue.png",
+      "bytes": 2421,
+      "sha256": "7f125792fcda9259a75cde3e75ee30123c161d3296c6f0fcf3fff3569166eee5",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_minorescue"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_minotron.png",
+      "bytes": 4817,
+      "sha256": "3502de8a3244e80eb4e4bf8de083857c3e0cfd0682517cce825cc9be4dea7933",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_minotron"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_goatup.png",
+      "bytes": 23172,
+      "sha256": "efb211e7b8f92fb137ae9cabd812566ec4414dbeb249857a0496a703c7d72cb3",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_goatup"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_minos.png",
+      "bytes": 10116,
+      "sha256": "23820a2707a159c184f115d40bf502105b0e8dcd08727fccf15d1008000df483",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_minos"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_gridrunner.png",
+      "bytes": 1340,
+      "sha256": "9dea257095d508135807301bd919e6c273785aa84af1a1c9f752e0ff1b80e5af",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_gridrunner"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_fiveaday.png",
+      "bytes": 19737,
+      "sha256": "7cbfb6b38f52a36c266ca1758fd1b35f498b63985d6bc1201a0432654c6495c6",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_fiveaday"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_superoxwars.png",
+      "bytes": 24343,
+      "sha256": "7836a7485901c679986f6305dfc3bd56f101f7a94febff1560323df9021511c1",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_superoxwars"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_deflex.png",
+      "bytes": 15096,
+      "sha256": "bdfb4d50904c0068cba9f68489884c396db5be8d656268dd3753e9e3a21ffac7",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_deflex"
+    },
+    {
+      "file": "platform/ui_assets/kIcon_goatup2.png",
+      "bytes": 17396,
+      "sha256": "c7f83b530fcbbcbbdad43006fcb0a4fe00dee9b4711f5cbe8df9593e858fd4ba",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kIcon_goatup2"
+    },
+    {
+      "file": "platform/notes_assets/kFontPng.png",
+      "bytes": 56700,
+      "sha256": "5ef6c0a140a40a37cd999eced1910d8b7247bad6718792157a1acc5ee658e392",
+      "consumer": "platform/notes_assets.cpp",
+      "symbol": "kFontPng"
+    },
+    {
+      "file": "platform/wallpaper_0/horizontal.png",
+      "bytes": 2357327,
+      "sha256": "d8e1ec2068684f8003d30e6b69f15697375bfa87a2ec4b0a628a4203a5e7cef9",
+      "consumer": "platform/wallpaper_0.cpp",
+      "symbol": "horizontal"
+    },
+    {
+      "file": "platform/wallpaper_0/vertical.png",
+      "bytes": 2300083,
+      "sha256": "f4bfc9a9f527d098b34b066a531f4daee1a3d07e6b57a6a424bc97805b2c0e64",
+      "consumer": "platform/wallpaper_0.cpp",
+      "symbol": "vertical"
+    },
+    {
+      "file": "platform/wallpaper_1/horizontal.png",
+      "bytes": 3075354,
+      "sha256": "d4436e1de99e8f1f152f313209c19d4e92dff0e75bb973d92e14e29768c323c4",
+      "consumer": "platform/wallpaper_1.cpp",
+      "symbol": "horizontal"
+    },
+    {
+      "file": "platform/wallpaper_1/vertical.png",
+      "bytes": 3033346,
+      "sha256": "ca1aa891b4afc3be1c943cead09b305301b263b5678e90c8dd5a81ceed84dc24",
+      "consumer": "platform/wallpaper_1.cpp",
+      "symbol": "vertical"
+    },
+    {
+      "file": "platform/wallpaper_2/horizontal.png",
+      "bytes": 2160386,
+      "sha256": "a65a8b61091786539538703bbae4229b16295ed8ab772eef7a26c16d80768f20",
+      "consumer": "platform/wallpaper_2.cpp",
+      "symbol": "horizontal"
+    },
+    {
+      "file": "platform/wallpaper_2/vertical.png",
+      "bytes": 2123830,
+      "sha256": "f3a7fb653c2af6ade3be7be35e6824613e24e54cc33974e1ebd57ef5256287ca",
+      "consumer": "platform/wallpaper_2.cpp",
+      "symbol": "vertical"
+    },
+    {
+      "file": "platform/wallpaper_3/horizontal.png",
+      "bytes": 2673847,
+      "sha256": "032e15dc961982c235f5363c68772b9c47bccca0cf05315e98c52791bac412b2",
+      "consumer": "platform/wallpaper_3.cpp",
+      "symbol": "horizontal"
+    },
+    {
+      "file": "platform/wallpaper_3/vertical.png",
+      "bytes": 2724330,
+      "sha256": "8a3dbad62e3bcc487e5e9df6e1ff953c7a3e8311346bffae72632f21abc1a7f7",
+      "consumer": "platform/wallpaper_3.cpp",
+      "symbol": "vertical"
+    },
+    {
+      "file": "platform/royale_assets/data.zip",
+      "bytes": 1092856,
+      "sha256": "e7c8e98179a0e90e60f3930a2c8a739179ff9184c758a556347d15151047b003",
+      "consumer": "platform/royale_assets.cpp",
+      "symbol": "data"
+    },
+    {
+      "file": "platform/consumer_assets/data.zip",
+      "bytes": 5912,
+      "sha256": "0e0ef4830e8d60c904dcfc60d223c734535e3763ba55f880d8debca190f97561",
+      "consumer": "platform/consumer_assets.cpp",
+      "symbol": "data"
+    },
+    {
+      "file": "platform/presentation_archive/bytes.zip",
+      "bytes": 583253,
+      "sha256": "3926014a5d48f230928fbbf7a6c536da1eeb58f0728778123bbbf6bd2b66b367",
+      "consumer": "platform/presentation_archive.cpp",
+      "symbol": "bytes"
+    },
+    {
+      "file": "cores/minos/loading_art/LoadingArt.png",
+      "bytes": 3742,
+      "sha256": "4f0e9597ccd9a5333d6b568f698ad0b35cb0a6c1c1ae7637c9f1887cf6c8fc61",
+      "consumer": "cores/minos/loading_art.h",
+      "symbol": "LoadingArt"
+    },
+    {
+      "file": "cores/minos/menu_art/MenuAtlas.png",
+      "bytes": 1349,
+      "sha256": "a5f727573035011114d8d079c1745d40a0362d6d3d21e4422a52741e7029972f",
+      "consumer": "cores/minos/menu_art.h",
+      "symbol": "MenuAtlas"
+    },
+    {
+      "file": "cores/goatup2/loading_art/Artwork.png",
+      "bytes": 286011,
+      "sha256": "766e543e199fe277e5f3f4fd4dc530f10d116247db63068691ca56c546987aba",
+      "consumer": "cores/goatup2/loading_art.cpp",
+      "symbol": "Artwork"
+    }
+  ]
+}

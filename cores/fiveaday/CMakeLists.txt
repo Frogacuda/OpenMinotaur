@@ -1,0 +1,28 @@
+add_library(mino_fiveaday_rules STATIC world.cpp actors.cpp ship.cpp palette.cpp score.cpp boss.cpp bonus.cpp next_enemies.cpp mines.cpp phase_enemies.cpp game_over.cpp records.cpp)
+target_include_directories(mino_fiveaday_rules PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mino_fiveaday_rules PUBLIC neon_engine)
+target_link_libraries(mino_fiveaday_rules PRIVATE neon_source_numeric)
+add_executable(mino_fiveaday_checks EXCLUDE_FROM_ALL tests/world.cpp)
+target_link_libraries(mino_fiveaday_checks PRIVATE mino_fiveaday_rules)
+if(TARGET neon_renderer)
+    set(FAD_BINDING ${PROJECT_SOURCE_DIR}/engine/bindings/late)
+    set(FAD_RESOURCES ${PROJECT_SOURCE_DIR}/engine/bindings/common)
+    add_library(mino_fiveaday_backend STATIC EXCLUDE_FROM_ALL backend.cpp proportional.cpp
+        ${FAD_BINDING}/neon_sprite.cpp ${PROJECT_SOURCE_DIR}/engine/bindings/common/neon_synth.cpp
+        ${PROJECT_SOURCE_DIR}/engine/bindings/common/mod_showjoy.cpp ${PROJECT_SOURCE_DIR}/engine/bindings/common/mod_mixer.cpp ${FAD_BINDING}/mod_cellgrid.cpp
+)
+    target_include_directories(mino_fiveaday_backend PUBLIC ${FAD_BINDING} ${FAD_RESOURCES} ${PROJECT_SOURCE_DIR}/include)
+    target_compile_definitions(mino_fiveaday_backend PUBLIC MINO_PROPORTIONAL_TEXT PRIVATE NEON_GAME=fiveaday)
+    target_link_libraries(mino_fiveaday_backend PUBLIC mino_fiveaday_rules neon_renderer)
+    add_library(mino_core_fiveaday STATIC EXCLUDE_FROM_ALL fiveaday_core.cpp)
+    target_compile_definitions(mino_core_fiveaday PRIVATE NEON_GAME=fiveaday)
+    target_link_libraries(mino_core_fiveaday PUBLIC mino_fiveaday_backend mino_shared)
+    if(NOT MINO_STANDALONE_GAME)
+        add_executable(mino_fiveaday_view_checks EXCLUDE_FROM_ALL tests/view.cpp ${PROJECT_SOURCE_DIR}/platform/display.cpp)
+        set_target_properties(mino_fiveaday_view_checks PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+        target_include_directories(mino_fiveaday_view_checks PRIVATE ${PROJECT_SOURCE_DIR}/platform ${PROJECT_SOURCE_DIR}/third_party/stb)
+        target_compile_definitions(mino_fiveaday_view_checks PRIVATE NEON_GAME=fiveaday)
+        target_link_libraries(mino_fiveaday_view_checks PRIVATE mino_core_fiveaday mino_crt SDL3::SDL3)
+    endif()
+endif()
+

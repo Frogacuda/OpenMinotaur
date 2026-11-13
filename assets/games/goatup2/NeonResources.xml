@@ -1,0 +1,308 @@
+﻿<?xml version="1.0" encoding="unicode" ?>
+<NeonResources literals='3' fonts='1' spritemaps='1' spritepages='3' >
+  <Literals>
+    <Literal index='0'>grunt.png</Literal>
+    <Literal>grunt_chars.png</Literal>
+    <Literal>pause-buttons.png</Literal>
+  </Literals>
+  <Fonts>
+   <Font index='0' size='14' >Segoe UI</Font><!-- Primary menu item TITLE -->
+  </Fonts>
+  <Spritemaps>
+   <Spritemap entries='191'>
+ 	<!-- first LITBASE pages are just the literals themselves -->
+	<!-- in a form that sprite understands -->
+  <!-- [spritepage][x,y][width,height] -->
+	<Spentry index='0'>0,0,0,512,512, </Spentry>
+	<Spentry>0,0,0,512,512, </Spentry>
+	
+	<Spentry> 0,1,1,1,1,	<!-- White pixel for colour fills. 0. --> </Spentry>
+	<Spentry> 0,10,0,66,64,	<!-- pause button 1--> </Spentry>
+	<Spentry> 0,78,0,31,32,	<!-- star/round dot 2--> </Spentry>
+	<Spentry> 0,112,0,97,25,	<!-- RH Touch 3--> </Spentry>
+	<Spentry> 0,209,0,22,25,	<!-- Level select + 4--> </Spentry>
+	<Spentry> 0,231,0,22,25,	<!-- Level select - 5--> </Spentry>
+	<Spentry> 0,113,25,98,53,	<!-- Exit 6--> </Spentry>
+	<Spentry> 0,211,24,97,25,	<!-- LH Touch button 7--> </Spentry>	
+	<Spentry> 0,211,50,97,25,	<!-- TILT button 8--> </Spentry>	
+	<Spentry> 0,0,65,16,16,     <!-- Dot 1--> </Spentry>
+	<Spentry> 0,0,65,32,16,     <!-- Dot 2 10--> </Spentry>
+	<Spentry> 0,0,65,48,16,     <!-- Dot 3 11--> </Spentry>
+	<Spentry> 0,0,65,64,16,     <!-- Dot 4 12--> </Spentry>
+	<Spentry> 0,0,65,80,16,     <!-- Dot 5 13--> </Spentry>
+	<Spentry> 0,0,88,19,19,     <!-- Tile cursor 14--> </Spentry>
+	<Spentry> 0,22,88,12,12,	<!-- X cursor 15--> </Spentry>
+	<Spentry> 0,309,0,50,50,	<!-- Mode icon 0,2 16--> </Spentry>
+	<Spentry> 0,360,0,50,50,	<!-- Mode icon 1 17--> </Spentry>
+	<Spentry> 0,411,0,50,50,	<!-- Mode icon 3 18--> </Spentry>
+	<Spentry> 0,35,88,29,20,	<!-- Goat 1 19--> </Spentry>
+	<Spentry> 0,66,88,29,20,	<!-- Goat 2 20--> </Spentry>
+	<Spentry> 0,461,0,50,50,	<!-- PLAY button 21--> </Spentry>
+	<Spentry> 0,307,50,25,26,	<!-- Little pony 22--> </Spentry>
+	<Spentry> 0,333,50,26,26,	<!-- Floppy disk 23--> </Spentry>
+	<Spentry> 0,360,50,26,26,	<!-- Toast 24--> </Spentry>
+	<Spentry> 0,386,50,18,37,	<!-- Rhindle 25--> </Spentry>
+	<Spentry> 0,0,109,34,12,	<!-- NOM 26--> </Spentry>
+	<Spentry> 0,97,80,38,34,	<!-- Grav changer logo 27--> </Spentry>
+	<Spentry> 0,179,79,15,14,	<!-- Star 28--> </Spentry>
+	<Spentry> 0,224,77,16,16,	<!-- 0 29--> </Spentry>
+	<Spentry> 0,240,77,16,16,	<!-- 1 30--> </Spentry>
+	<Spentry> 0,256,77,16,16,	<!-- 2 31--> </Spentry>
+	<Spentry> 0,272,77,16,16,	<!-- 3 32--> </Spentry>
+	<Spentry> 0,288,77,16,16,	<!-- 4 33--> </Spentry>
+	<Spentry> 0,304,77,16,16,	<!-- 5 34--> </Spentry>
+	<Spentry> 0,320,77,16,16,	<!-- 6 35--> </Spentry>
+	<Spentry> 0,336,77,16,16,	<!-- 7 36--> </Spentry>
+	<Spentry> 0,352,77,16,16,	<!-- 8 37--> </Spentry>
+	<Spentry> 0,368,77,16,16,	<!-- 9 38--> </Spentry>
+	<Spentry> 0,410,217,50,50,	<!-- COPY button 39--> </Spentry>
+	<Spentry> 0,461,51,50,50,	<!-- DEL button 40--> </Spentry>
+	<Spentry> 0,411,51,50,50,	<!-- INS button 41--> </Spentry>
+	<Spentry> 0,411,102,50,50,	<!-- BYE button 42--> </Spentry>
+	<Spentry> 0,449,155,62,58,	<!-- Standard explosion 43--> </Spentry>
+	<Spentry> 0,136,79,25,24,	<!-- "Move" cursor 44--> </Spentry>
+	<Spentry> 0,163,78,16,16,	<!-- Ghost platform patroller 45--> </Spentry>
+	<Spentry> 0,76,108,22,34,	<!-- Miner Willy 1 46--> </Spentry>
+	<Spentry> 0,54,108,22,34,	<!-- Miner Willy 2 47--> </Spentry>
+	<Spentry> 0,34,108,22,34,	<!-- Miner Willy 3 48--> </Spentry>
+	<Spentry> 0,208,94,51,39,	<!-- Exit outline 49--> </Spentry>
+	<Spentry> 0,312,94,98,73,	<!-- Exit active 50--> </Spentry>
+	<Spentry> 0,180,79,14,14,	<!-- Confetti 51--> </Spentry>
+	<Spentry> 0,196,80,11,11,	<!-- Confetti 52--> </Spentry>
+	<Spentry> 0,208,79,8,12,	<!-- Confetti 53--> </Spentry>
+	<Spentry> 0,162,94,10,16,	<!-- Confetti 54--> </Spentry>
+    <Spentry> 0,0,142,29,20,	<!-- Goat 3 55--> </Spentry>
+    <Spentry> 0,30,142,29,20,	<!-- Goat 4 56--> </Spentry>
+    <Spentry> 0,60,142,29,20,	<!-- Goat 5 57--> </Spentry>
+    <Spentry> 0,90,142,29,20,	<!-- Goat 6 58--> </Spentry>
+    <Spentry> 0,120,142,29,20,	<!-- Goat 7 59--> </Spentry>
+    <Spentry> 0,150,142,29,20,	<!-- Goat 8 60--> </Spentry>
+	<Spentry> 0,0,163,29,20,	<!-- Goat -1 61--> </Spentry>
+	<Spentry> 0,30,163,29,20,	<!-- Goat -2 62--> </Spentry>
+	<Spentry> 0,100,116,13,13,	<!-- Cherry 63 --> </Spentry>
+	<Spentry> 0,113,116,12,13,	<!-- Strawberry 64 --> </Spentry>
+	<Spentry> 0,125,116,12,13,	<!-- Apple 65 --> </Spentry>
+	<Spentry> 0,137,109,18,14,	<!-- Melon 66 --> </Spentry>
+	<Spentry> 0,136,125,18,17,	<!-- Corn 67 --> </Spentry>
+	<Spentry> 0,155,110,17,17,	<!-- Banana 68 --> </Spentry>
+	<Spentry> 0,172,94,18,15,	<!-- Orange 69 --> </Spentry>
+	<Spentry> 0,172,109,18,18,	<!-- Cucumber 70 --> </Spentry>
+	<Spentry> 0,0,183,16,18,	<!-- Manic Miner key 71 --> </Spentry>
+	<Spentry> 0,181,143,16,19,	<!-- \x\number prefix 72 --> </Spentry>
+	<Spentry> 0,190,94,18,18,	<!-- MM raquet 73 --> </Spentry>
+	<Spentry> 0,17,183,18,18,	<!-- MM box 74 --> </Spentry>
+	<Spentry> 0,35,183,18,18,	<!-- MM cherries 75 --> </Spentry>
+	<Spentry> 0,54,183,18,18,	<!-- MM banana 76 --> </Spentry>
+	<Spentry> 0,72,183,18,18,	<!-- MM plant 77 --> </Spentry>
+	<Spentry> 0,91,183,18,18,	<!-- MM bauble  78 --> </Spentry>
+	<Spentry> 0,108,183,18,18,	<!-- MM 10p 79 --> </Spentry>
+	<Spentry> 0,127,183,18,18,	<!-- MM thingy 80 --> </Spentry>
+	<Spentry> 0,145,183,16,18,	<!-- MM chip 81 --> </Spentry>
+	<Spentry> 0,161,183,16,18,	<!-- MM moneybag 82 --> </Spentry>
+	<Spentry> 0,177,183,18,18,	<!-- MM boxes 83 --> </Spentry>
+	<Spentry> 0,0,202,25,19,	<!-- Invader 1 84 --> </Spentry>
+	<Spentry> 0,26,202,25,19,	<!-- Invader 2  85 --> </Spentry>
+	<Spentry> 0,53,203,32,34,	<!-- Mutant telephone 1 86 --> </Spentry>
+	<Spentry> 0,87,203,32,34,	<!-- Mutant telephone 2 2 87 --> </Spentry>
+	<Spentry> 0,124,203,32,34,	<!-- Mutant telephone 3 88 --> </Spentry>
+	<Spentry> 0,159,203,18,18,	<!-- Amoebatron 1 89 --> </Spentry>
+	<Spentry> 0,178,203,18,18,	<!-- Amoebatron 2 90 --> </Spentry>
+    <Spentry> 0,197,203,18,18,	<!-- Amoebatron 3 91 --> </Spentry>
+     <Spentry> 0,0,221,33,29,	<!-- Sheepie plushie  92 --> </Spentry>
+     <Spentry> 0,0,250,33,29,	<!-- Musk ox  93 --> </Spentry>
+     <Spentry> 0,36,239,42,42,	<!-- Amiga ball  94 --> </Spentry>
+     <Spentry> 0,79,237,48,41,	<!-- Kong  95 --> </Spentry>
+     <Spentry> 0,128,238,14,12,	<!-- Kong barrel 96 --> </Spentry>
+    <Spentry> 0,143,238,5,9,	<!-- Invader bomb 97 --> </Spentry>
+    <Spentry> 0,461,217,50,50,	<!-- NAM button 98 --> </Spentry>
+    <Spentry> 0,410,367,50,50,	<!-- UNDO button 99 --> </Spentry>
+   <Spentry> 0,410,267,50,50,	<!-- RIGHT button 100 --> </Spentry>
+   <Spentry> 0,461,267,50,50,	<!-- LEFT button 101 --> </Spentry>
+   <Spentry> 0,410,317,50,50,	<!-- UP button 102 --> </Spentry>
+   <Spentry> 0,461,317,50,50,	<!-- DOWN button 103 --> </Spentry>
+   <Spentry> 0,410,367,50,50,	<!-- GEN button 104 --> </Spentry>
+    <Spentry> 0,127,250,18,18,	<!-- Fire gate base 105 --> </Spentry>
+     <Spentry> 0,127,268,11,10,	<!-- Fire gate fireball 106 --> </Spentry>
+    <Spentry> 0,158,223,30,26,	<!-- Billy goat 107 --> </Spentry>
+    <Spentry> 0,188,223,30,26,	<!-- Billy goat 108 --> </Spentry>
+    <Spentry> 0,145,249,68,44,	<!-- Frak dude 109 --> </Spentry>
+     <Spentry> 0,0,285,117,40,	<!-- BUCK! 110 --> </Spentry>
+     <Spentry> 0,65,162,13,18,	<!-- Pacpatroller 111 --> </Spentry>
+    <Spentry> 0,79,162,13,18,	<!-- Pacpatroller 112 --> </Spentry>
+    <Spentry> 0,93,162,13,18,	<!-- Pacpatroller 113 --> </Spentry>
+     <Spentry> 0,213,178,22,30,	<!-- Janga 114  --> </Spentry>
+    <Spentry> 0,241,178,22,30,	<!-- Janga 115  --> </Spentry>
+    <Spentry> 0,267,178,22,30,	<!-- Janga 116  --> </Spentry>
+    <Spentry> 0,461,367,50,50,	<!-- EDIT button 117 --> </Spentry>
+    <Spentry> 0,280,302,127,114,	<!-- Goat head 118 --> </Spentry>
+    <Spentry> 0,0,328,34,29,	<!-- Rainbow dot 119 --> </Spentry>
+    <Spentry> 0,218,209,34,44,	<!-- Bonus minotaur 120 --> </Spentry>
+    <Spentry> 0,252,209,25,26,	<!-- RI item 121 --> </Spentry>
+    <Spentry> 0,107,163,15,18,	<!-- RI item 122 --> </Spentry>
+    <Spentry> 0,122,163,18,17,	<!-- RI item 123 --> </Spentry>
+    <Spentry> 0,140,163,16,17,	<!-- RI item 124 --> </Spentry>
+    <Spentry> 0,156,163,18,18,	<!-- RI item 125 --> </Spentry>
+    <Spentry> 0,174,163,18,18,	<!-- RI item 126 --> </Spentry>
+    <Spentry> 0,192,164,16,14,	<!-- RI item 127 --> </Spentry>
+    <Spentry> 0,117,293,66,66,	<!-- Portal 128 --> </Spentry>
+    <Spentry> 0,214,254,31,31,	<!-- Portal cake 129 --> </Spentry>
+    <Spentry> 0,290,175,46,46,	<!-- little bull 130 --> </Spentry>
+    <Spentry> 0,336,175,47,46,	<!-- Ram 131 --> </Spentry>
+    <Spentry> 0,390,168,32,30,	<!-- Boot 132 --> </Spentry>
+    <Spentry> 0,390,200,32,1,	<!-- Trouser 133 --> </Spentry>
+    <Spentry> 0,252,237,32,32,	<!-- Atari Bee 134 --> </Spentry>
+     <Spentry> 0,279,217,16,16,	<!-- Atari Asteroids ship 135 --> </Spentry>
+    <Spentry> 0,284,239,34,30,	<!-- Atari Asteroid 136 --> </Spentry>
+    <Spentry> 0,320,223,22,34,	<!-- Flappy toilet 137 --> </Spentry>
+     <Spentry> 0,344,223,22,34,	<!-- Flappy toilet 138 --> </Spentry>
+     <Spentry> 0,368,223,22,34,	<!-- Flappy toilet 139 --> </Spentry>
+     <Spentry> 0,320,258,22,34,	<!-- Flappy toilet 140 --> </Spentry>
+    <Spentry> 0,43,327,34,29,	<!-- Trotting bull 141 --> </Spentry>
+    <Spentry> 0,79,327,34,29,	<!-- Trotting bull 142 --> </Spentry>
+    <Spentry> 0,0,363,34,29,	<!-- Trotting bull 143 --> </Spentry>
+    <Spentry> 0,254,4,18,18,	<!-- Eugene 144 --> </Spentry>
+    <Spentry> 0,145,444,16,16,	<!-- Smash block sprite 145 --> </Spentry>
+       
+     <Spentry> 0,163,444,16,16,	<!-- Dirt smash block sprite 146 --> </Spentry>
+    <Spentry> 0,271,444,16,16,	<!-- Checker smash block sprite 147 --> </Spentry>
+    <Spentry> 0,289,444,16,16,	<!-- Checker smash block sprite 148 --> </Spentry>
+    <Spentry> 0,307,444,16,16,	<!-- Checker smash block sprite 149 --> </Spentry>
+    <Spentry> 0,325,444,16,16,	<!-- Checker smash block sprite 150 --> </Spentry>
+    <Spentry> 0,392,223,16,18,	<!-- Bubble 151 --> </Spentry>
+    <Spentry> 0,249,272,40,26,	<!-- Fish 152 --> </Spentry>
+    <Spentry> 0,187,296,50,38,	<!-- Curry 153 --> </Spentry>
+       <Spentry> 0,80,367,96,50,	<!-- Main PLAY button 154 --> </Spentry>
+       <Spentry> 0,178,367,96,50,	<!-- EDIT LEVEL button 155 --> </Spentry>
+       <Spentry> 0,445,456,66,55,	<!-- Foot 156 --> </Spentry>
+       <Spentry> 0,347,258,40,40,	<!-- Boxing glove 157 --> </Spentry>
+        <Spentry> 0,240,301,18,18,	<!-- Boulder 158 --> </Spentry>
+        <Spentry> 0,1,145,96,16,	<!-- DELETE 159 --> </Spentry>
+        <Spentry> 0,100,145,64,16,	<!-- MOVE 160 --> </Spentry>
+         <Spentry> 0,186,338,50,10,	<!-- Lift 161 --> </Spentry>
+       <Spentry> 0,242,323,33,30,	<!-- Pow 162 --> </Spentry>
+       <Spentry> 0,265,146,23,21,	<!-- Caprichoso star 163 --> </Spentry>
+        <Spentry> 0,1,162,18,16,	<!-- Lifty 164 --> </Spentry>
+       <Spentry> 0,34,359,45,57,	<!-- The Queen 165 --> </Spentry>
+       <Spentry> 0,0,66,85,20,	<!-- Reset button 166 --> </Spentry>
+         <Spentry> 0,0,122,16,15,	<!-- Sphere 167 --> </Spentry>
+         <Spentry> 0,16,122,16,15,	<!-- Sphere 168 --> </Spentry>
+         <Spentry> 0,76,36,16,15,	<!-- Sphere 169 --> </Spentry>
+         <Spentry> 0,92,36,16,15,	<!-- Sphere 170 --> </Spentry>
+         <Spentry> 0,76,51,16,15,	<!-- Sphere 171 --> </Spentry>
+         <Spentry> 0,92,51,16,15,	<!-- Sphere 172 --> </Spentry>
+         <Spentry> 0,100,129,16,15,	<!-- Sphere 173 --> </Spentry>
+       <Spentry> 0,21,161,28,22,	<!-- Sphere 174 --> </Spentry>
+         <Spentry> 0,274,0,26,24,	<!-- Flower 175 --> </Spentry>
+        <Spentry> 0,1,394,18,12,	<!-- Saucer 1 176 --> </Spentry>
+        <Spentry> 0,1,406,18,12,	<!-- Saucer 2 177 --> </Spentry>
+        <Spentry> 0,19,394,14,12,	<!-- SR ship 178 --> </Spentry>
+        <Spentry> 0,19,406,16,12,	<!-- SR ship 179 --> </Spentry>
+        <Spentry> 0,297,275,14,16,	<!-- Tea 180 --> </Spentry>
+        <Spentry> 0,387,53,20,40,	<!-- Kiosk 181 --> </Spentry>
+        <Spentry> 0,155,128,15,13,	<!-- Rubber ducky 182 --> </Spentry>
+       <Spentry> 0,461,102,50,50,	<!-- GC button 183 --> </Spentry>
+       <Spentry> 0,261,94,50,50,	<!-- Help button 184 --> </Spentry>
+       <Spentry> 0,209,134,51,43,	<!-- LS button 185 --> </Spentry>
+       
+       
+       
+       
+	
+     <Spentry>2,1,1,85,20, <!-- local Title, raw frame 186; Reset style --> </Spentry>
+    <Spentry>2,1,25,151,25, <!-- Tilt On, raw frame 187 --> </Spentry>
+    <Spentry>2,1,52,151,25, <!-- Tilt Off, raw frame 188 --> </Spentry>
+   </Spritemap>
+  </Spritemaps>
+  <SpritePages>
+  	<Spritepage>512,512, </Spritepage>
+  	<Spritepage>512,512, </Spritepage>
+    <Spritepage>512,512, </Spritepage>
+  </SpritePages>
+  <Sounds>
+   <Sample maxinstance='4' >grunt2.wav</Sample>
+	<Sample maxinstance='4' >grunt1.wav</Sample>
+	<Sample maxinstance='4' >grunt5.wav</Sample>
+	<Sample maxinstance='4' >grunt7.wav</Sample>
+	<Sample maxinstance='4' >grunt8.wav</Sample>   
+  <Sample maxinstance='2' >bleep.wav</Sample>  
+      
+  <Sample maxinstance='4' >moo.wav</Sample>
+  <Sample maxinstance='1' >type.wav</Sample>
+    <Sample maxinstance='1' >click.wav</Sample>
+      <Sample maxinstance='1' >knap.wav</Sample>
+      <Sample maxinstance='1' >tut.wav</Sample>
+       <Sample maxinstance='1' >parp1.wav</Sample>
+      <Sample maxinstance='1' >parp2.wav</Sample>
+      <Sample maxinstance='1' >parp3.wav</Sample>
+      <Sample maxinstance='1' >parp4.wav</Sample>
+      <Sample maxinstance='1' >jump1.wav</Sample>
+      <Sample maxinstance='1' >hungerdeath.wav</Sample>
+      <Sample maxinstance='1' >burp1.wav</Sample>
+      <Sample maxinstance='1' >burp2.wav</Sample>
+      <Sample maxinstance='1' >burp3.wav</Sample>
+      <Sample maxinstance='1' >burp4.wav</Sample>
+        <Sample maxinstance='1' >fatdeath.wav</Sample>
+      <Sample maxinstance='1' >munch1.wav</Sample>
+      <Sample maxinstance='1' >munch2.wav</Sample>
+       <Sample maxinstance='1' >kidbaa.wav</Sample>
+       <Sample maxinstance='1' >baddiekill.wav</Sample>
+      <Sample maxinstance='1' >getfruit.wav</Sample>
+       <Sample maxinstance='1' >eatfruit.wav</Sample>
+       <Sample maxinstance='1' >key01.wav</Sample>
+       <Sample maxinstance='1' >key02.wav</Sample>
+       <Sample maxinstance='1' >key03.wav</Sample>
+       <Sample maxinstance='1' >key04.wav</Sample>
+       <Sample maxinstance='1' >key05.wav</Sample>
+       <Sample maxinstance='1' >key06.wav</Sample>
+       <Sample maxinstance='1' >key07.wav</Sample>
+       <Sample maxinstance='1' >key08.wav</Sample>
+      <Sample maxinstance='1' >exitopen.wav</Sample>
+       <Sample maxinstance='1' >goatexits.wav</Sample>
+            <Sample maxinstance='1' >kidexits.wav</Sample>
+            <Sample maxinstance='1' >keyexits.wav</Sample>
+       <Sample maxinstance='1' >exitnoise.wav</Sample>
+      <Sample maxinstance='1' >gravityreverse.wav</Sample>
+       <Sample maxinstance='1' >goatdead.wav</Sample>
+       <Sample maxinstance='1' >bonk.wav</Sample>
+        <Sample maxinstance='2' >clapping1.wav</Sample>
+       <Sample maxinstance='2' >clapping1_5.wav</Sample>
+       <Sample maxinstance='2' >clapping2.wav</Sample>
+       <Sample maxinstance='2' >clapping3.wav</Sample>
+       <Sample maxinstance='2' >ting.wav</Sample>
+      <Sample maxinstance='1' >barrel.wav</Sample>
+      <Sample maxinstance='1' >jump.wav</Sample>
+      <Sample maxinstance='1' >delete.wav</Sample>
+      <Sample maxinstance='1' >save.wav</Sample>
+      <Sample maxinstance='1' >scroll.wav</Sample>
+      <Sample maxinstance='1' >makename.wav</Sample>
+      <Sample maxinstance='1' >generate.wav</Sample>
+      <Sample maxinstance='1' >clear.wav</Sample>
+      <Sample maxinstance='1' >back.wav</Sample>
+      <Sample maxinstance='1' >goatbaa.wav</Sample>
+      <Sample maxinstance='1' >portal.wav</Sample>
+       <Sample maxinstance='4' >bullmoo.wav</Sample>
+      <Sample maxinstance='1' >stomp.wav</Sample>
+      <Sample maxinstance='1' >swim.wav</Sample>
+      <Sample maxinstance='1' >curry.wav</Sample>
+    <Sample maxinstance='1' >kick.wav</Sample>
+      <Sample maxinstance='1' >snap.wav</Sample>
+      <Sample maxinstance='1' >gameovertone.wav</Sample>
+      <Sample maxinstance='1' >kiss.wav</Sample>
+       <Sample maxinstance='1' >boing.wav</Sample>
+       <Sample maxinstance='1' >bsp.wav</Sample>
+      <Sample maxinstance='1' >beatscore.wav</Sample>
+       <Sample maxinstance='1' >beattime.wav</Sample>
+      <Sample maxinstance='1' >pause.wav</Sample>
+       <Sample maxinstance='1' >queen.wav</Sample>
+       <Sample maxinstance='1' >queenoff.wav</Sample>
+      <Sample maxinstance='1' >cock.wav</Sample>
+      <Sample maxinstance='1' >shot.wav</Sample>
+       <Sample maxinstance='1' >moretea.wav</Sample>
+       <Sample maxinstance='1' >ringing.wav</Sample>
+       <Sample maxinstance='1' >range.wav</Sample>
+       <Sample maxinstance='2' >clang.wav</Sample>
+      <Sample maxinstance='1' >pup_6.wav</Sample>
+     
+      
+   </Sounds>
+</NeonResources>
