@@ -27,6 +27,8 @@ struct Draw {
     Matrix transform;
     Rect bounds{}, clip{};
     std::array<double, 4> color{1, 1, 1, 1};
+    std::array<double, 4> trackColor{.14, .21, .28, 1};
+    int segments = 16;
     double fill = 1, lineWidth = 1, fontSize = 24;
     Value points, frame;
     std::string align = "left";

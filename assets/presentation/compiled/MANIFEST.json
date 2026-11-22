@@ -1,12 +1,12 @@
 {
   "format": 1,
-  "compiler_signature": "15050e968483d6fbc96257841ac485978a0f08e6854ebae2747dc49529685324",
+  "compiler_signature": "a7aa020e381a9309e85305ab02634d7031d2d296fdfce79aa74db31679ecdc9d",
   "scenes": [
     {
       "source": "bezels/Deflex.neongles",
       "source_sha256": "a0300d22f087325c6076446d13a128fb6ad881ee7b0cd0eb48cfdde0d9872aec",
       "file": "bezels/Deflex.neonb",
-      "sha256": "2f13342c39e2e8907a1e53b559841e1a35b62fac57db7fb4ba2aae75bd3ab63e",
+      "sha256": "517d3aa4ff3a3d83e5bf92b9940b1e1dc043cc8203787288d0d40459d98db929",
       "resources": {
         "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
         "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
@@ -55,7 +55,7 @@
       "source": "bezels/FiveADay.neongles",
       "source_sha256": "63d57a5abac3d8965a913daae0355b65009e08310d32e5b9ec700fe641f11b7e",
       "file": "bezels/FiveADay.neonb",
-      "sha256": "4cc5f37a83e6c20fdbc7ec35c277212250e80d8acfbaf633ff34c1cce33d4951",
+      "sha256": "f75f79b0b3d1e0e42378b410a8ee2d261ce1d03b75622be78c25f38ddcfa5566",
       "resources": {
         "gles/shaders/23.frag": "8e1aa937e457e216ea751f4d9c4c0894f897435b1df11a013791bb21a9dc249c",
         "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
@@ -107,7 +107,7 @@
       "source": "bezels/GoatUp.neongles",
       "source_sha256": "74637397280f19bde40a128bff56793b7464b45c0365b4adf9a3674d1935cb40",
       "file": "bezels/GoatUp.neonb",
-      "sha256": "e0fc47169a443084a3a1340b419cb36b93dcd3e3fecd46907e8a877359d71651",
+      "sha256": "a80128277ad19ee6a1da28fe897d05185ee67b566663e6f171fb705e1c587379",
       "resources": {
         "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
         "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
@@ -162,7 +162,7 @@
       "source": "bezels/GoatUp2.neongles",
       "source_sha256": "e6fdf4142f510c2abeb1fef4e7c201566fab46f71ae9bd95d05b2f7e829e3ae9",
       "file": "bezels/GoatUp2.neonb",
-      "sha256": "ea3acc3eb8ad5bc6506caf7e49c37dde0b6f2d7d91927119b75e117ab4b6c781",
+      "sha256": "59b027aa03079650ce96f9f7c9a793a29fc1a3ea16f49efe9665afd0b5802073",
       "resources": {
         "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
         "gles/shaders/20.frag": "6db08370e9e1f24f5f29f605dd12b4dadb8629f1b3e91b706fe76213dc14925a",
@@ -225,7 +225,7 @@
       "source": "bezels/Gridrunner.neongles",
       "source_sha256": "08b085db9fa94d0c81871425f67dfe45168533f836936aa02347ac990b6e97e1",
       "file": "bezels/Gridrunner.neonb",
-      "sha256": "572c9e8e43af0617799f22b58f6c4a19a0866c3ab861ca7717a0a6687882f4ce",
+      "sha256": "bc03321411dc657065eeb9b41504d3a41ac6beff69e2b25cfacb66c560762bfe",
       "resources": {
         "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
         "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
@@ -303,7 +303,7 @@
       "source": "bezels/GridrunnerClassic.neongles",
       "source_sha256": "c2b3f3527182c8af7b1bd8e806a5fb709e9d8323c6de3e9bf734e35b6e4ff2b7",
       "file": "bezels/GridrunnerClassic.neonb",
-      "sha256": "79b911654609fa9e73f0308db4797333a6a6c9e66f0b3063dda67c5f4be311e7",
+      "sha256": "1a973a5fbfa876fefa53c3932544bb35ac5ba515e5322349f315fa0f0918afcc",
       "resources": {
         "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
         "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
@@ -347,9 +347,9 @@
     },
     {
       "source": "bezels/Minos.neongles",
-      "source_sha256": "f2bb26e701d23778e4b0062c114a4c48f40ef1d4098c6112439bfbd6a9470bb9",
+      "source_sha256": "6646b517c535ea9038909b1a7b555edca1e9da425393d40aad890f3d37a4958e",
       "file": "bezels/Minos.neonb",
-      "sha256": "c7303c69c288800a0816f6db4f3373d5331e9d0e29979622e0ee1f1953f180bd",
+      "sha256": "2e56d842c02894b3c2c239940500c1e08f00d75a0570d670d2a577ecb9c9464e",
       "resources": {
         "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
         "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
@@ -420,7 +420,7 @@
       "source": "bezels/MinotaurRescue.neongles",
       "source_sha256": "be63af972e5e1db04ee5f4b12e6be2b9e6e3235697947281eda162c98272ae3a",
       "file": "bezels/MinotaurRescue.neonb",
-      "sha256": "9f0473de5f016fb635dcc0cbb39919d3d051d5958085dabdbceea39d2098863e",
+      "sha256": "cb4f7b20ab96f9d639b231bacae11bd21ef7e0945355d5141e26672c4036eb5a",
       "resources": {
         "gles/shaders/20.frag": "6db08370e9e1f24f5f29f605dd12b4dadb8629f1b3e91b706fe76213dc14925a",
         "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
@@ -477,7 +477,7 @@
       "source": "bezels/Minotron.neongles",
       "source_sha256": "ef57720ea9be606609e40bfc9c3a8a80d60f16ab7a5466aa939601ff2fe7613d",
       "file": "bezels/Minotron.neonb",
-      "sha256": "bcc7e8aa65b06b1b448faaa17e30109d3a89148ad187116ddd70803a39abea4c",
+      "sha256": "332147f5d8a0974a3e7aa591ca5d9337326357714f3f0ae08c863104dba9023c",
       "resources": {
         "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
         "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
@@ -542,7 +542,7 @@
       "source": "bezels/SuperOxWars.neongles",
       "source_sha256": "18b10a77a8365c552c5830cfaa5b3a5bf6b9a55a4fb1de941d4d14335443d723",
       "file": "bezels/SuperOxWars.neonb",
-      "sha256": "41d0e8ce1a91dddc87da0047ec7cb1339d6db043b1d1cccb7d5138690734c547",
+      "sha256": "32004723878de7ae6ea6e988010d4af3ab4d2de4371b1623cfc6a56f4d5af6a5",
       "resources": {
         "gles/shaders/11.frag": "719875f854eb80de7c2ad7c6045df484c77d2518b7b9ad0965e17a2ef66a9cf7",
         "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
@@ -594,7 +594,7 @@
       "source": "Vaporwave.neongles",
       "source_sha256": "c4e62a7e11df548c0599b32d30849f36de43ec37f8c497fe50136a4a14f03a3d",
       "file": "Vaporwave.neonb",
-      "sha256": "d18db6b64eb038078d47c739bc8c1234d8a93c49fef4218a590c149aa70301db",
+      "sha256": "617025b47f3dde169876c62d60633655dffd9960c5ed87705c865bee6220e0f8",
       "resources": {
         "gles/shaders/0.frag": "4399790f8e78874f5cf55e2c8a438cc02cf0eadd9cf6fa8fc55348525188990e",
         "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",

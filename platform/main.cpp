@@ -20,6 +20,7 @@
 #include "input.h"
 #ifdef MINO_COLLECTION_TITLE
 #include "collection_title.h"
+#include "gridrunner_widgets.h"
 #endif
 #ifdef MINO_LIVE_BEZELS
 #include "audio_level.h"
@@ -116,6 +117,10 @@ struct App {
     SDL_AudioStream *audio = nullptr;
     std::vector<float> mixBuf;
     Display display;
+#ifdef MINO_COLLECTION_TITLE
+    GridrunnerWidgets gridrunnerWidgets;
+    bool gridrunnerWidgetPrototype = SDL_GetHintBoolean("MINO_GRIDRUNNER_WIDGETS", false);
+#endif
 #ifdef MINO_LIVE_BEZELS
     LiveBezel bezel;
     AudioLevel audioLevel;
@@ -128,6 +133,8 @@ struct App {
     Input input;
 #ifndef MINO_STANDALONE_GAME
     Settings settings;
+    ShellAudio shellAudio;
+    bool shellAudioStream = false;
     Launcher launcher;
     LauncherTransition launchTransition;
 #endif
@@ -186,6 +193,16 @@ bool HostImpl::presentStartupFrame() {
 #endif
     app->display.present();
     SDL_GL_SwapWindow(app->window);
+#ifdef MINO_COLLECTION_TITLE
+    // Present the loading art before spending time creating its widget cache.
+    if (app->gridrunnerWidgetPrototype && app->gameId == "gridrunner") {
+        int width = 0, height = 0;
+        SDL_GetWindowSizeInPixels(app->window, &width, &height);
+        const auto &game = app->display.viewport();
+        app->gridrunnerWidgets.prepare(width, height, game.x, game.y, game.w, game.h,
+                                       app->display.presentationTurns());
+    }
+#endif
     return true;
 }
 void HostImpl::startupPresentationFinished() {
@@ -241,11 +258,30 @@ void HostImpl::requestQuit() {
     app->returnRequested = true;
 }
 
+template <bool Shell = false>
 void SDLCALL audioCallback(void *user, SDL_AudioStream *stream, int additional, int) {
     App *app = static_cast<App *>(user);
     int frames = additional / int(sizeof(float) * 2);
     if (frames <= 0)
         return;
+#ifndef MINO_STANDALONE_GAME
+    if constexpr (Shell) {
+        std::array<float, 2048> block;
+        const bool paused = app->paused;
+        if (paused) {
+            app->shellAudio.suspend();
+            block.fill(0.f);
+        }
+        while (frames > 0) {
+            const int count = std::min(frames, int(block.size() / 2));
+            if (!paused)
+                app->shellAudio.mix(block.data(), count);
+            SDL_PutAudioStreamData(stream, block.data(), count * int(sizeof(float) * 2));
+            frames -= count;
+        }
+        return;
+    }
+#endif
     app->mixBuf.assign(size_t(frames) * 2, 0.0f);
     if (app->core && !app->paused)
         app->core->mixAudio(app->mixBuf.data(), frames);
@@ -254,6 +290,47 @@ void SDLCALL audioCallback(void *user, SDL_AudioStream *stream, int additional, 
 #endif
     SDL_PutAudioStreamData(stream, app->mixBuf.data(), frames * int(sizeof(float) * 2));
 }
+
+void stopAudio(App &app) {
+    if (app.audio)
+        SDL_DestroyAudioStream(app.audio);
+    app.audio = nullptr;
+#ifndef MINO_STANDALONE_GAME
+    app.shellAudioStream = false;
+#endif
+}
+
+template <bool Shell = false>
+void startAudio(App &app) {
+    SDL_AudioSpec spec{SDL_AUDIO_F32, 2, kAudioRate};
+    app.audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec,
+                                          audioCallback<Shell>, &app);
+    if (app.audio)
+        SDL_ResumeAudioStreamDevice(app.audio);
+    else
+        SDL_Log("no audio: %s", SDL_GetError());
+#ifndef MINO_STANDALONE_GAME
+    app.shellAudioStream = Shell && app.audio;
+#endif
+}
+
+#ifndef MINO_STANDALONE_GAME
+void applyShellAudioMode(App &app) {
+    const auto mode = app.settings.get("global", "shell_audio", "full");
+    app.shellAudio.setMode(mode == "off"    ? ShellAudio::Mode::Off
+                           : mode == "cues" ? ShellAudio::Mode::Cues
+                                            : ShellAudio::Mode::Full);
+}
+
+void startShellAudio(App &app, ShellAudio::Scene scene) {
+    app.shellAudio.setScene(scene);
+    if (!app.audio) {
+        app.shellAudio.preload();
+        app.shellAudio.reset();
+        startAudio<true>(app);
+    }
+}
+#endif
 
 bool createContext(App &app, bool preferES) {
     auto attempt = [&](bool es) {
@@ -541,6 +618,7 @@ bool fullscreenShortcut(App &app, const SDL_KeyboardEvent &key) {
 #ifdef MINO_COLLECTION_TITLE
 bool startCollectionTitle(App &app) {
     auto title = std::make_unique<CollectionTitle>();
+    title->setShellAudio(app.shellAudio);
     title->setShaderCacheDirectory(std::filesystem::path(app.prefDir) / "cache/neon-programs");
     title->setHighQuality(app.settings.neonHighQuality("global"));
 #ifdef MINO_LIVE_BEZELS
@@ -559,6 +637,7 @@ bool startCollectionTitle(App &app) {
     if (title->init(app.host, app.display.surface())) {
         title.release();
         app.coreReady = true;
+        startShellAudio(app, ShellAudio::Scene::Title);
         return true;
     }
     app.core = &app.launcher;
@@ -635,6 +714,7 @@ bool synchronizeGraphics(App &app) {
 #ifdef MINO_COLLECTION_TITLE
         if (app.gameId == "title")
             static_cast<CollectionTitle *>(app.core)->abandonGraphics();
+        app.gridrunnerWidgets.abandonGraphics();
 #endif
 #ifndef MINO_STANDALONE_GAME
         app.launchTransition.abandonGraphics();
@@ -691,12 +771,15 @@ void observeNeonPerformance(App &app, const NeonFrameTimer::Sample &sample) {
 }
 #endif
 
-void stopGame(App &app) {
-    // Destroying the stream waits for its callback before core pointers,
-    // samples or game state can be destroyed/replaced.
-    if (app.audio)
-        SDL_DestroyAudioStream(app.audio);
-    app.audio = nullptr;
+void stopGame(App &app, bool keepShellAudio = false) {
+    // The shell callback owns its synth and never reads a core. The game
+    // callback must finish before its core or samples can be destroyed.
+#ifndef MINO_STANDALONE_GAME
+    if (!keepShellAudio || !app.shellAudioStream)
+#else
+    (void)keepShellAudio;
+#endif
+        stopAudio(app);
     if (!app.core)
         return;
 #ifndef MINO_STANDALONE_GAME
@@ -706,6 +789,10 @@ void stopGame(App &app) {
     app.input.cancelTouches(app.core);
     app.core->save();
     app.host.flushAchievements();
+#ifdef MINO_COLLECTION_TITLE
+    if (app.gameId == "gridrunner")
+        app.gridrunnerWidgets.release();
+#endif
 #ifdef MINO_LIVE_BEZELS
     app.neonTimer.reset();
     app.bezel.reset();
@@ -719,7 +806,7 @@ void stopGame(App &app) {
 
 #ifndef MINO_STANDALONE_GAME
 void showLauncher(App &app) {
-    stopGame(app);
+    stopGame(app, true);
     app.core = &app.launcher;
     app.coreReady = true;
     app.gameId = "launcher";
@@ -731,6 +818,7 @@ void showLauncher(App &app) {
     // The surface can already have the right dimensions after a failed init.
     app.launcher.resize(app.display.surface());
     SDL_SetWindowTitle(app.window, app.launcher.info().title);
+    startShellAudio(app, ShellAudio::Scene::Launcher);
     app.settings.save();
 }
 
@@ -747,6 +835,8 @@ bool startGame(App &app, const std::string &requestedId, bool animate = false,
         return false;
     }
     if (animate && app.core == &app.launcher) {
+        app.shellAudio.play(ShellAudio::Cue::Launch);
+        app.shellAudio.setScene(ShellAudio::Scene::Leaving);
         int width = 0, height = 0;
         SDL_GetWindowSizeInPixels(app.window, &width, &height);
         app.launchTransition.prepare(app.launcher, width, height,
@@ -853,13 +943,8 @@ bool startGame(App &app, const std::string &requestedId, bool animate = false,
                      entry->info->assetGameId ? entry->info->assetGameId : id);
     app.settings.save();
     SDL_SetWindowTitle(app.window, entry->info->title);
-    SDL_AudioSpec spec{SDL_AUDIO_F32, 2, kAudioRate};
-    app.audio =
-        SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, audioCallback, &app);
-    if (app.audio)
-        SDL_ResumeAudioStreamDevice(app.audio);
-    else
-        SDL_Log("no audio: %s", SDL_GetError());
+    stopAudio(app);
+    startAudio(app);
     return true;
 }
 
@@ -887,11 +972,7 @@ bool startGame(App &app, const std::string &id) {
         return false;
     app.coreReady = true;
     SDL_SetWindowTitle(app.window, entry->info->title);
-    SDL_AudioSpec spec{SDL_AUDIO_F32, 2, kAudioRate};
-    app.audio =
-        SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, audioCallback, &app);
-    if (app.audio)
-        SDL_ResumeAudioStreamDevice(app.audio);
+    startAudio(app);
     return true;
 }
 #endif
@@ -1134,6 +1215,8 @@ int main(int argc, char **argv) {
     refreshOptions(app);
     applyWindow(app);
     app.launcher.setPaths(prefDir);
+    app.launcher.setShellAudio(app.shellAudio);
+    applyShellAudioMode(app);
     app.launcher.setAchievements(app.host.achievements);
     app.launcher.selectGame(app.settings.get("global", "last_game", "minorescue"));
     reconfigure(app, false);
@@ -1166,6 +1249,10 @@ int main(int argc, char **argv) {
 #ifdef MINO_COLLECTION_TITLE
     if (gameArg.empty() && !app.quit)
         startCollectionTitle(app);
+#endif
+#ifndef MINO_STANDALONE_GAME
+    if (!app.quit && app.core == &app.launcher)
+        startShellAudio(app, ShellAudio::Scene::Launcher);
 #endif
     Uint64 last = SDL_GetTicksNS();
     SDL_AddEventWatch(lifecycleWatch, &app);
@@ -1399,6 +1486,7 @@ int main(int argc, char **argv) {
             } else if (request.action == Launcher::Action::Quit)
                 app.quit = true;
             else if (request.action == Launcher::Action::SettingsChanged) {
+                applyShellAudioMode(app);
                 app.input.cancelTouches(app.core);
                 app.gatePads = true;
                 applyWindow(app);
@@ -1501,6 +1589,20 @@ int main(int argc, char **argv) {
                                          app.display.surface().height);
             return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
         });
+#endif
+#ifdef MINO_COLLECTION_TITLE
+        if (app.gridrunnerWidgetPrototype && app.gameId == "gridrunner")
+            app.display.bezelOverlay([&](unsigned f, int w, int h, int x, int y, int vw, int vh,
+                                         int turns) {
+                bool refresh = true;
+#ifdef MINO_LIVE_BEZELS
+                if (app.display.liveBackgroundRequested() && app.bezel.available())
+                    refresh = app.bezel.refreshedFrame();
+#endif
+                return app.gridrunnerWidgets.draw(*app.core, refresh, f, w, h, x, y, vw, vh, turns);
+            });
+        else
+            app.display.bezelOverlay({});
 #endif
         app.display.present();
 #ifdef MINO_LIVE_BEZELS

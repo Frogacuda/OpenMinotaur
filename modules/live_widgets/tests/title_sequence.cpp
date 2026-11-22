@@ -35,6 +35,22 @@ int main(int argc, char **argv) {
         check(argc == 2, "Usage: mino_title_sequence_checks assets/title");
         fs::path folder = argv[1];
         auto document = Value::parse(read(folder / "Minotaur-Title.widgetml"));
+        Runtime text;
+        text.document(Value::parse(R"({
+            "widgetML":1,
+            "root":{"id":"fonts","kind":"group","inputs":{"face":["read","face"]},"children":[
+                {"id":"heading","kind":"text","text":"SCORE","font":["get","face"]},
+                {"id":"value","kind":"text","text":"50","font":"neon-hud"}
+            ]}
+        })"));
+        text.observe({"fonts", 1, 1, {{"face", "vectrex-menu"}}});
+        auto &selected = text.update(0);
+        check(find(selected, "fonts/heading").font == "vectrex-menu" &&
+                  find(selected, "fonts/value").font == "neon-hud",
+              "Text objects did not resolve their individual font choices");
+        text.observe({"fonts", 1, 2, {{"face", "neon-hud"}}});
+        check(find(text.update(0), "fonts/heading").font == "neon-hud",
+              "Text did not update its bound font");
         TitleSequence title(document);
         check(title.maxFrameRate() == 60, "Title frame-rate cap changed");
         for (auto size : {std::array<int, 2>{1600, 900}, {900, 1600}, {1200, 900}, {900, 1200}}) {

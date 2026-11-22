@@ -28,6 +28,10 @@ class LevelProgram {
 };
 class Campaign final : public HeadWorld {
   public:
+    struct CollectedPickup {
+        uint64_t id;
+        int32_t kind;
+    };
     enum class State { Playing, Completing, Complete, GameOver };
     static constexpr int32_t normalScriptCount = 23, survivalScriptCount = 6;
     explicit Campaign(std::function<Vec2(int32_t)> textureSize, uint32_t seed = 1,
@@ -77,6 +81,7 @@ class Campaign final : public HeadWorld {
     void achievement(int32_t) override;
     LevelProgram program;
     Ship *currentShip() const;
+    const std::vector<CollectedPickup> &recentPickups() const { return recentPickups_; }
     void makePod(Vec2, bool) override;
     void score(int32_t) override;
     void sound(int32_t) override;
@@ -117,6 +122,7 @@ class Campaign final : public HeadWorld {
         explicit Pickups(Campaign &);
         void sound(int32_t) override;
         void score(int32_t) override;
+        void collected(int32_t) override;
     } pickups_;
     struct Pods final : PodWorld {
         Campaign &game;
@@ -146,6 +152,8 @@ class Campaign final : public HeadWorld {
             podQuota_ = 9999;
     bool madePod_ = false;
     bool demo_ = false;
+    uint64_t pickupSequence_ = 0;
+    std::vector<CollectedPickup> recentPickups_;
     uint32_t goalsDone_ = 0;
     std::array<int32_t, 65> soundGains_{};
     void initLevel();

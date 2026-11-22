@@ -1,3 +1,36 @@
+# Version 0.9.6
+
+## EF190 — Collection audio level
+
+- Raise title and iOX audio by 25%, with another 10% on iOX menu cues.
+
+## EF189 — Collection audio balance
+
+- Lower the harmonic bed, give the settings kick more weight, and let the
+  music fade in after the collection title reaches full opacity.
+
+## EF188 — Collection sound design
+
+- The collection title and iOX share a procedural harmonic bed with slowly
+  shifting resonance. Short phrases from the bundled games pass through a
+  stereo reverb, with irregular timing, occasional overlap and movement.
+- Icon moves accent the current harmony. Icon selection and Back have
+  distinct melodic cues. Settings use light snare ticks and a short kick.
+- Set **Title & iOX Audio** under **Options → Controls** to **Full**,
+  **Cues Only** or **Off**. The setting is saved for the next startup.
+
+## EF187 — Extended scene coverage
+
+- Composited scene layers extend with the viewport instead of mirroring at the
+  authored reference boundary. Sprite Flight on the title retains its direction
+  and sprite orientation in portrait.
+- Native layer producers cover the UV bounds requested by downstream affine and
+  single-surface barrel passes. Existing target allocations and pass counts are
+  retained; the reference frame continues to define scale and proportions.
+- Independent input-axis domains preserve intentional material tiling. Minos
+  extends along the pipe while retaining its cross-pipe material symmetry.
+- Effect Lab and game playback share the same coverage rules.
+
 # Version 0.9.5
 
 LiveSynth game-responsive bezels are available throughout the collection, with

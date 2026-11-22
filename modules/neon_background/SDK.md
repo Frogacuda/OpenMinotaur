@@ -82,3 +82,19 @@ can repeat that completed image if requested by its sampler.
 Surface-filter geometry uses unwrapped reference coordinates in the vertex stage,
 independently of transformed material UVs. Aspect expansion therefore reveals
 more of the same warp instead of scaling its curvature to the new viewport.
+
+## Reference units and scene coverage
+
+The authored reference frame defines scale, not a repeated image boundary.
+Automatic flat composites consume the extended scene surface. Mesh materials
+and projected tunnel shaders retain reference-material sampling. Explicit input
+domains override that policy: 1 is a reference tile, 2 an extended surface,
+3 extended U/reference V, and 4 reference U/extended V.
+
+Native producers render the bounds requested by their consumers, including
+rotated/scaled UVs and single-surface barrel displacement. Coverage changes
+coordinates within the existing render targets; it adds neither targets nor
+passes. Wider hidden coverage can reduce that producer's sampling density.
+Final composition crops to the viewport. Retained feedback stays finite and
+transform coverage is bounded to 64 reference widths/heights. Intentional
+material repeat/mirror/clamp remains separate from scene-surface coverage.

@@ -14,6 +14,8 @@
 #include "launcher_transition.h"
 #include "startup_screen.h"
 #include <SDL3/SDL.h>
+#include <algorithm>
+#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <filesystem>
@@ -29,6 +31,64 @@
 namespace mino {
 struct LauncherChecks {
     using Screen = iox::Screen;
+    static void shellAudio() {
+        using Cue = ShellAudio::Cue;
+        using Mode = ShellAudio::Mode;
+        using Scene = ShellAudio::Scene;
+        ShellAudio dry;
+        ShellAudio arcade;
+        arcade.preload();
+        dry.reset();
+        arcade.reset();
+        dry.setScene(Scene::Title);
+        arcade.setScene(Scene::Title);
+        std::vector<float> reference(2 * kAudioRate), actual(reference.size());
+        bool heardArcade = false;
+        for (int sec = 0; sec < 6; ++sec) {
+            if (sec == 1) {
+                dry.markTitleVisible();
+                arcade.markTitleVisible();
+            }
+            if (sec == 2)
+                arcade.setScene(Scene::Launcher);
+            dry.mix(reference.data(), kAudioRate);
+            arcade.mix(actual.data(), kAudioRate);
+            for (size_t i = 0; i < actual.size(); ++i) {
+                REQUIRE(std::isfinite(actual[i]) && std::abs(actual[i]) < 1.f);
+                heardArcade |= std::abs(reference[i] - actual[i]) > .001f;
+            }
+            if (sec == 0) {
+                REQUIRE(reference == actual);
+                REQUIRE(std::all_of(reference.begin(), reference.end(), [](float v) {
+                    return v == 0.f;
+                }));
+            }
+        }
+        if (allGamesBundled())
+            REQUIRE(heardArcade);
+        REQUIRE(std::any_of(reference.begin(), reference.end(),
+                            [](float v) { return std::abs(v) > .01f; }));
+
+        auto silent = [](const auto &samples) {
+            return std::all_of(samples.begin(), samples.end(), [](float v) { return v == 0.f; });
+        };
+        arcade.setMode(Mode::Cues);
+        arcade.reset();
+        arcade.mix(actual.data(), kAudioRate);
+        REQUIRE(silent(actual));
+        for (Cue cue : {Cue::Move, Cue::Confirm, Cue::Back, Cue::Tick, Cue::Kick}) {
+            arcade.play(cue);
+            arcade.mix(actual.data(), kAudioRate);
+            REQUIRE(!silent(actual));
+        }
+        arcade.suspend();
+        arcade.mix(actual.data(), kAudioRate);
+        REQUIRE(silent(actual));
+        arcade.setMode(Mode::Off);
+        arcade.play(Cue::Confirm);
+        arcade.mix(actual.data(), kAudioRate);
+        REQUIRE(silent(actual));
+    }
     static void settle(Launcher &l) {
         for (int i = 0; l.appLaunch_.active() && i < 20; ++i)
             l.frame(1.0 / 60);
@@ -899,6 +959,8 @@ int main(int argc, char **argv) {
         const bool launchChecks = argc == 3 && std::string(argv[2]) == "--launch-checks";
         const auto scratch = std::filesystem::absolute(argv[1]);
         std::filesystem::create_directories(scratch);
+        if (argc == 2)
+            mino::LauncherChecks::shellAudio();
         REQUIRE(SDL_Init(SDL_INIT_VIDEO));
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

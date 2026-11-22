@@ -37,6 +37,9 @@ class Display {
     const Rect &viewport() const {
         return view_;
     }
+    int presentationTurns() const {
+        return layout_.turns;
+    }
 
     // Bind the surface FBO and its viewport, ready for the core to draw.
     void beginFrame();
@@ -51,6 +54,9 @@ class Display {
     using BackgroundPass = std::function<bool(unsigned, int, int, int, int, int, int, int)>;
     void backgroundPass(BackgroundPass pass) {
         backgroundPass_ = std::move(pass);
+    }
+    void bezelOverlay(BackgroundPass pass) {
+        bezelOverlay_ = std::move(pass);
     }
 
     // Window pixel position -> surface pixel position (unclamped; may lie outside).
@@ -72,6 +78,7 @@ class Display {
     unsigned compile(const char *vs, const char *fs);
 
     BackgroundPass backgroundPass_;
+    BackgroundPass bezelOverlay_;
     bool es_ = false;
     bool directCRT_ = false;
     SurfaceInfo surface_;

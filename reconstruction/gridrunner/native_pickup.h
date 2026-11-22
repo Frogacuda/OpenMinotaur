@@ -17,6 +17,7 @@ struct PickupWorld {
     virtual ~PickupWorld() = default;
     virtual void sound(int32_t) = 0;
     virtual void score(int32_t) = 0;
+    virtual void collected(int32_t) {}
 };
 // Source fhbon, the animated artwork emitted when a pickup is collected.
 class Fhbon final : public Entity {
@@ -27,6 +28,7 @@ class Fhbon final : public Entity {
 };
 class Powerup final : public Entity {
   public:
+    static constexpr std::array<int32_t, 8> duration = {600, 600, 600, 600, 250, 400, 1800, 20};
     explicit Powerup(PickupWorld &w) : world(w), ac(w.ac) {}
     PickupWorld &world;
     HeadAcState &ac;

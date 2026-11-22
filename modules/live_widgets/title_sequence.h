@@ -27,6 +27,9 @@ class TitleSequence {
     bool finished() const {
         return finished_;
     }
+    bool dismissing() const {
+        return leaving_;
+    }
 
     // Consumed once, after the authored exit completes. The host clears touch
     // ownership and gates held controls before allowing iOX to receive input.

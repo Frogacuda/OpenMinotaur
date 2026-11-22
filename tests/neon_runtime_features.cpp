@@ -2,6 +2,7 @@
 #include "../platform/audio_level.h"
 #include "effect_runtime.h"
 #include "layer_domain_validation.h"
+#include "scene_coverage_validation.h"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <fstream>
@@ -47,6 +48,8 @@ int main(int argc, char **argv) {
         auto context = SDL_GL_CreateContext(window);
         require(context != nullptr, SDL_GetError());
         initialize();
+        if (argc == 2)
+            validateSceneCoverage(argv[1]);
         {
             Runtime source(argv[1]);
             source.selectPreset(7);

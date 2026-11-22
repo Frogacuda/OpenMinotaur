@@ -1,0 +1,193 @@
+{
+  "widgetML": 1,
+  "templates": {
+    "statBox": {
+      "kind": "group",
+      "inputs": {
+        "label": "Score:",
+        "value": ["read", "score"],
+        "width": 304,
+        "stacked": false,
+        "accent": [0.35, 0.86, 0.95, 1]
+      },
+      "size": [["get", "width"], ["get", "height"]],
+      "clip": true,
+      "children": [
+        {
+          "id": "height", "kind": "logic",
+          "value": ["if", ["get", "stacked"], 88, 54]
+        },
+        {
+          "id": "frame", "kind": "rect",
+          "color": [0.28, 0.44, 0.53, 0.9]
+        },
+        {
+          "id": "panel", "kind": "rect", "x": 2, "y": 2,
+          "size": [["-", ["get", "width"], 4], ["-", ["get", "height"], 4]],
+          "color": [0.025, 0.045, 0.07, 0.95]
+        },
+        {
+          "id": "edge", "kind": "rect", "size": [4, ["get", "height"]],
+          "color": ["get", "accent"]
+        },
+        {
+          "id": "label", "kind": "text", "x": 17,
+          "y": ["if", ["get", "stacked"], 15, 19],
+          "fontSize": 16, "lineWidth": 1.6,
+          "color": [0.77, 0.84, 0.90, 1], "text": "{label}"
+        },
+        {
+          "id": "value", "kind": "text", "x": 17,
+          "y": ["if", ["get", "stacked"], 41, 16],
+          "size": [["-", ["get", "width"], 31], 32],
+          "align": "right", "fontSize": ["if", ["get", "stacked"], 29, 22], "lineWidth": 2,
+          "color": [0.94, 0.98, 1, 1], "text": "{value}"
+        }
+      ]
+    },
+    "activeTimer": {
+      "kind": "group",
+      "inputs": {
+        "label": "Power-up",
+        "remaining": ["read", "powerup.remaining"],
+        "duration": ["read", "powerup.duration"],
+        "timeText": ["read", "powerup.timeText"],
+        "width": 360,
+        "style": "bar",
+        "warningFraction": 0.25,
+        "accent": [0.35, 0.86, 0.95, 1],
+        "warning": [1, 0.66, 0.32, 1]
+      },
+      "size": [["get", "faceWidth"], ["get", "faceHeight"]],
+      "visible": ["get", "active"],
+      "clip": true,
+      "children": [
+        {
+          "id": "active", "kind": "logic",
+          "value": ["and", [">", ["get", "remaining"], 0], [">", ["get", "duration"], 0]]
+        },
+        {
+          "id": "radial", "kind": "logic",
+          "value": ["==", ["get", "style"], "radial"]
+        },
+        {
+          "id": "faceWidth", "kind": "logic",
+          "value": ["if", ["get", "radial"], 132, ["get", "width"]]
+        },
+        {
+          "id": "faceHeight", "kind": "logic",
+          "value": ["if", ["get", "radial"], 132, 73]
+        },
+        {
+          "id": "fraction", "kind": "logic",
+          "value": ["normalize", ["get", "remaining"], 0, ["get", "duration"]]
+        },
+        {
+          "id": "meterColor", "kind": "logic",
+          "value": ["if", ["<=", ["get", "fraction"], ["get", "warningFraction"]],
+                    ["get", "warning"], ["get", "accent"]]
+        },
+        {
+          "id": "frame", "kind": "rect",
+          "color": [0.28, 0.44, 0.53, 0.9]
+        },
+        {
+          "id": "panel", "kind": "rect", "x": 2, "y": 2,
+          "size": [["-", ["get", "faceWidth"], 4], ["-", ["get", "faceHeight"], 4]],
+          "color": [0.025, 0.045, 0.07, 0.95]
+        },
+        {
+          "id": "edge", "kind": "rect", "size": [4, 73],
+          "visible": ["not", ["get", "radial"]],
+          "color": ["get", "meterColor"]
+        },
+        {
+          "id": "label", "kind": "text", "x": 17, "y": 16,
+          "visible": ["not", ["get", "radial"]],
+          "fontSize": 16, "lineWidth": 1.6,
+          "color": [0.77, 0.84, 0.90, 1], "text": "{label}"
+        },
+        {
+          "id": "time", "kind": "text", "x": 17, "y": 13,
+          "visible": ["not", ["get", "radial"]],
+          "size": [["-", ["get", "width"], 31], 24],
+          "align": "right", "fontSize": 22, "lineWidth": 2,
+          "color": [0.94, 0.98, 1, 1], "text": "{timeText}"
+        },
+        {
+          "id": "track", "kind": "rect", "x": 17, "y": 47,
+          "visible": ["not", ["get", "radial"]],
+          "size": [["-", ["get", "width"], 31], 11],
+          "color": [0.14, 0.21, 0.28, 1]
+        },
+        {
+          "id": "fill", "kind": "rect", "x": 17, "y": 47,
+          "visible": ["not", ["get", "radial"]],
+          "size": [["-", ["get", "width"], 31], 11],
+          "color": ["get", "meterColor"],
+          "fill": ["get", "fraction"], "fillDirection": "right"
+        },
+        {
+          "id": "ring", "kind": "radial", "size": [132, 132], "segments": 16,
+          "enabled": ["and", ["get", "radial"], ["get", "active"]],
+          "fill": ["get", "fraction"], "color": ["get", "meterColor"],
+          "trackColor": [0.14, 0.21, 0.28, 1]
+        },
+        {
+          "id": "ring-label", "kind": "text", "x": 20, "y": 47, "size": [92, 13],
+          "visible": ["get", "radial"],
+          "align": "center", "fontSize": 12, "lineWidth": 1.6,
+          "color": [0.77, 0.84, 0.90, 1], "text": "{label}"
+        },
+        {
+          "id": "ring-time", "kind": "text", "x": 20, "y": 65, "size": [92, 20],
+          "visible": ["get", "radial"],
+          "align": "center", "fontSize": 16, "lineWidth": 2,
+          "color": [0.94, 0.98, 1, 1], "text": "{timeText}"
+        }
+      ]
+    },
+    "timerComparison": {
+      "kind": "group",
+      "inputs": {
+        "label": "Shield",
+        "remaining": ["read", "powerup.remaining"],
+        "duration": ["read", "powerup.duration"],
+        "timeText": ["read", "powerup.timeText"]
+      },
+      "children": [
+        {
+          "id": "bar", "use": "activeTimer", "y": 29.5,
+          "inputs": { "label": ["get", "label"], "remaining": ["get", "remaining"],
+                      "duration": ["get", "duration"], "timeText": ["get", "timeText"] }
+        },
+        {
+          "id": "radial", "use": "activeTimer", "x": 378,
+          "inputs": { "label": ["get", "label"], "remaining": ["get", "remaining"],
+                      "duration": ["get", "duration"], "timeText": ["get", "timeText"], "style": "radial" }
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "gameplay-widget-samples", "kind": "group", "x": -255, "y": -228,
+    "children": [
+      {
+        "id": "top-level-score", "use": "statBox",
+        "inputs": { "label": "Top Level Score", "value": "2,338,600", "stacked": true }
+      },
+      {
+        "id": "goats-kissed", "use": "statBox", "y": 104,
+        "inputs": { "label": "Goats kissed:", "value": 23 }
+      },
+      {
+        "id": "active-example", "use": "timerComparison", "y": 174,
+        "inputs": { "remaining": 4.2, "duration": 8, "timeText": "4.2 s" }
+      },
+      {
+        "id": "expiring-example", "use": "timerComparison", "y": 322,
+        "inputs": { "remaining": 1.1, "duration": 8, "timeText": "1.1 s" }
+      }
+    ]
+  }
+}

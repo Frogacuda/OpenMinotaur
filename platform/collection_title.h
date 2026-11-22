@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <memory>
 namespace mino {
+class ShellAudio;
 // Collection-only startup route. Game modules and direct launches bypass it.
 class CollectionTitle final : public Core {
   public:
@@ -12,6 +13,7 @@ class CollectionTitle final : public Core {
     bool init(Host &, const SurfaceInfo &) override;
     void setShaderCacheDirectory(const std::filesystem::path &);
     void setHighQuality(bool);
+    void setShellAudio(ShellAudio &);
     void resize(const SurfaceInfo &) override;
     void frame(double) override;
     void touch(const TouchEvent &) override;
@@ -25,6 +27,7 @@ class CollectionTitle final : public Core {
     uint64_t framePeriodNs() const;
 
   private:
+    void updateInput(bool buttons, bool pointer);
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

@@ -466,6 +466,8 @@ void Display::present(unsigned framebuffer) {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 #endif
+    if (hasBezelArea && bezelOverlay_)
+        bezelOverlay_(framebuffer, winW_, winH_, view_.x, view_.y, view_.w, view_.h, layout_.turns);
     unsigned output = colorTex_;
     int rotation = layout_.turns;
     int textureW = surface_.width, textureH = surface_.height;

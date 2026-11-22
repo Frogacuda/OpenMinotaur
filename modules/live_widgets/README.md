@@ -113,6 +113,22 @@ the underlying assets. Render-target/context ownership remains with the shell.
 
 See [font notices](FONT-NOTICES.txt) for font sources.
 
+## Gridrunner landscape prototype
+
+Set `MINO_GRIDRUNNER_WIDGETS=1`, launch modern Gridrunner, and choose horizontal
+presentation to keep the 3:4 playfield upright. The overlay fits the usable side
+rails inside a centered 16:9 boundary. The checkpoint cards, stats, pickup log
+and cooldown stack share the editable [WidgetML layout](assets/examples/gridrunner-landscape.widgetml).
+The sample inputs exercise the full layout, including six concurrent timers.
+The app supplies live inputs through the core's read-only presentation snapshot.
+
+The loading screen is presented before the cached renderer prewarms vector beams,
+glyphs and the radial meter mask at the final widget pixel size. A resize or
+graphics context recreation can rebuild the artwork cache. Gridrunner samples
+widget inputs and evaluates its layout on the same frames LiveSynth refreshes.
+When LiveSynth reuses a frame at 30 Hz, the overlay composites its previous
+widget draw list over it. The collection title uses its existing rendering path.
+
 
 ## WidgetML
 
@@ -170,11 +186,17 @@ runtime maps them into oriented coordinates using the same turn as rendering.
 ## Objects and behavior
 
 Groups contain groups, visuals, logic and sequences. Visual kinds are vector,
-sprite, text and rect. Object IDs are unique among siblings. Group transform,
+sprite, text, rect and radial. Object IDs are unique among siblings. Group transform,
 opacity and color apply to descendants; explicit RGB inheritance can be disabled
 while retaining ancestor opacity. Visible=false hides drawing but retains logic;
 enabled=false suspends the subtree. Repeat groups instantiate a bounded
 collection by stable key with row/column/grid or absolute layout.
+
+A `radial` visual draws a segmented ring as one object. It uses `size` and
+`segments` (1–64, default 16) to select a cached mask. The `fill` expression
+sets the clockwise portion lit from twelve o'clock, `color` sets the lit
+color, and `trackColor` sets the unlit RGBA color. Changing the fraction or
+colors reuses the mask.
 
 Groups declare inputs, settings/parameters, local logic and outputs. Inputs are
 evaluated in the parent's scope. Local `get` references do not silently access
@@ -203,8 +225,14 @@ reimplementing the fade curve or scheduling iOX inside the widget model.
 
 ## Rendering and limits
 
-Vector/text objects select a built-in or declared vector font; raster text uses
-a declared atlas with cell/advance/line-height metrics. Assets are bundle-relative
+Text objects use `"kind": "text"` and select a font by name with `font`. The
+built-in IDs are `neon-hud` (the default) and `vectrex-menu`. A text object can
+also select a font declared in the document's `fonts` object. Use a literal
+such as `"font": "vectrex-menu"` or bind it to a template input with
+`"font": ["get", "headingFont"]`. The cached renderer keys its raster glyphs
+by the resolved font and pixel style, so changing only the text reuses its
+glyphs. Raster fonts use a declared atlas with cell/advance/line-height metrics.
+Assets are bundle-relative
 resource names. Color is RGBA. Fills reveal/crop local bounds rather than scaling
 artwork. Groups support rectangular clipping; rotated clips use transformed
 axis-aligned bounds.

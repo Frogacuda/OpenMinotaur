@@ -135,6 +135,12 @@ void Campaign::Pickups::sound(int32_t n) {
 void Campaign::Pickups::score(int32_t n) {
     game.score(n);
 }
+void Campaign::Pickups::collected(int32_t kind) {
+    auto &history = game.recentPickups_;
+    if (history.size() == 5)
+        history.pop_back();
+    history.insert(history.begin(), {++game.pickupSequence_, kind});
+}
 Campaign::Pods::Pods(Campaign &g)
     : PodWorld(g.ac, g.lists, g.effects, g.random, g.cells, &g.feedback_), game(g) {}
 void Campaign::Pods::sound(int32_t n) {

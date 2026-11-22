@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 namespace neon::widgets {
@@ -185,7 +186,30 @@ bool lineClip(vectors::Point &a, vectors::Point &b, Rect r) {
 const char *spriteVS = R"(#version 300 es
 precision highp float;layout(location=0)in vec2 position;layout(location=1)in vec2 uv;layout(location=2)in vec4 tint;uniform vec2 viewport;out vec2 t;out vec4 c;void main(){gl_Position=vec4(position/viewport*vec2(2,-2)+vec2(-1,1),0,1);t=uv;c=tint;})";
 const char *spritePS = R"(#version 300 es
-precision highp float;uniform sampler2D image;uniform bool textured;in vec2 t;in vec4 c;out vec4 colour;void main(){vec4 p=textured?texture(image,t):vec4(1);colour=p*c;colour.rgb*=colour.a;})";
+precision highp float;
+uniform sampler2D image;
+uniform bool textured;
+uniform bool emissive;
+uniform float radialFill;
+uniform vec4 radialTrack;
+in vec2 t;
+in vec4 c;
+out vec4 colour;
+void main(){
+    vec4 p=textured?texture(image,t):vec4(1);
+    if(emissive){colour=vec4(p.rgb*c.rgb*c.a,0);return;}
+    if(radialFill>=0.0){
+        vec2 point=t-vec2(0.5);
+        float turn=fract(atan(point.x,-point.y)/6.28318530718+1.0);
+        float edge=clamp(fwidth(turn)*0.5,0.00001,0.02);
+        float lit=radialFill>=1.0?1.0:radialFill<=0.0?0.0:
+            1.0-smoothstep(radialFill-edge,radialFill+edge,turn);
+        colour=vec4(mix(radialTrack.rgb,c.rgb,lit),mix(radialTrack.a,1.0,lit)*c.a*p.a);
+    }else{
+        colour=p*c;
+    }
+    colour.rgb*=colour.a;
+})";
 } // namespace
 namespace {
 const char *fixedBeamVS = R"WIDGET(#version 300 es
@@ -222,20 +246,62 @@ struct Renderer::Impl {
     vectors::FontRegistry fonts;
     RenderStatistics stats;
     GLuint sprite = 0, beam = 0, vao = 0, vbo = 0;
+    GLint spriteRadialFill = -1, spriteRadialTrack = -1;
     std::string beamVS = fixedBeamVS, beamPS = fixedBeamPS;
     struct Image {
         GLuint texture = 0;
         int width = 0, height = 0;
     };
     std::map<std::string, Image> images;
+    std::map<std::pair<int, int>, GLuint> radialMasks;
     std::map<std::string, std::vector<vectors::Stroke>> vectorsCache, textCache;
     vectors::BeamMesh mesh;
     std::vector<vectors::Stroke> batch;
     Rect batchClip{};
     bool batchBezel = false;
+    struct RasterTile {
+        Rect bounds, uv;
+        GLuint texture = 0;
+    };
+    int atlasSize = 1024;
+    GLuint atlas = 0, atlasFbo = 0;
+    std::vector<GLuint> atlasPages;
+    int atlasX = 0, atlasY = 0, atlasRowHeight = 0;
+    int cacheW = 0, cacheH = 0;
+    std::map<std::string, RasterTile> tiles;
+    std::set<std::string> warmedFonts;
+    bool cacheDraw = false;
+    bool warmOnly = false;
+    std::vector<Vertex> quads;
+    GLuint quadTexture = 0;
+    bool quadEmissive = false;
+    Rect quadClip{};
+    bool quadBezel = false;
     RenderTarget target;
     int nativeW = 0, nativeH = 0;
+    void forgetAtlas() {
+        atlas = atlasFbo = 0;
+        atlasPages.clear();
+        atlasX = atlasY = atlasRowHeight = 0;
+        tiles.clear();
+        warmedFonts.clear();
+        quads.clear();
+    }
+    void releaseAtlas() {
+        if (!atlasPages.empty())
+            glDeleteTextures(GLsizei(atlasPages.size()), atlasPages.data());
+        if (atlasFbo)
+            glDeleteFramebuffers(1, &atlasFbo);
+        forgetAtlas();
+    }
+    void releaseRadials() {
+        for (const auto &entry : radialMasks)
+            glDeleteTextures(1, &entry.second);
+        radialMasks.clear();
+    }
     void release() {
+        releaseAtlas();
+        releaseRadials();
         for (auto &p : images)
             if (p.second.texture)
                 glDeleteTextures(1, &p.second.texture);
@@ -293,6 +359,7 @@ struct Renderer::Impl {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         stats.uploads += size_t(w) * h * 4;
+        ++stats.textureUploads;
         return images.emplace(id, result).first->second;
     }
     std::array<double, 2> turn(double x, double y) {
@@ -356,7 +423,7 @@ struct Renderer::Impl {
         glBufferData(GL_ARRAY_BUFFER, size, p, GL_STREAM_DRAW);
         stats.uploads += size;
     }
-    void flush() {
+    void flush(float widthScale = 1) {
         if (batch.empty())
             return;
         glUseProgram(beam);
@@ -370,7 +437,7 @@ struct Renderer::Impl {
                 p->y *= 480.f / nativeH;
             }
         vectors::BeamStyle style;
-        style.width = 1.4f;
+        style.width = 1.4f * widthScale;
         style.intensity = 1.25f;
         style.halo = .25f;
         style.spread = 3;
@@ -431,7 +498,10 @@ struct Renderer::Impl {
         }
         batch.push_back(s);
     }
-    void quad(const Draw &d, Rect local, Rect uv, GLuint texture) {
+    void quad(const Draw &d, Rect local, Rect uv, GLuint texture, bool emissive = false,
+              const Draw *radial = nullptr) {
+        if (warmOnly)
+            return;
         auto cropped = intersection(local, fillRect(d));
         if (cropped.width <= 0 || cropped.height <= 0)
             return;
@@ -455,15 +525,47 @@ struct Renderer::Impl {
                            float(d.color[2]),
                            float(d.color[3])};
         }
+        if (!cacheDraw || radial) {
+            flushQuads();
+            drawQuads(vertices.data(), vertices.size(), d.clip, d.bezelOnly, texture, emissive,
+                      radial);
+            return;
+        }
+        if (!quads.empty() && (quadTexture != texture || quadEmissive != emissive ||
+                              quadClip.x != d.clip.x || quadClip.y != d.clip.y ||
+                              quadClip.width != d.clip.width || quadClip.height != d.clip.height ||
+                              quadBezel != d.bezelOnly))
+            flushQuads();
+        quadTexture = texture;
+        quadEmissive = emissive;
+        quadClip = d.clip;
+        quadBezel = d.bezelOnly;
+        quads.insert(quads.end(), vertices.begin(), vertices.end());
+    }
+    void flushQuads() {
+        if (quads.empty())
+            return;
+        drawQuads(quads.data(), quads.size(), quadClip, quadBezel, quadTexture, quadEmissive);
+        quads.clear();
+    }
+    void drawQuads(const Vertex *vertices, size_t count, Rect clip, bool bezel, GLuint texture,
+                   bool emissive, const Draw *radial = nullptr) {
         glUseProgram(sprite);
         glUniform2f(glGetUniformLocation(sprite, "viewport"), float(target.viewport.width),
                     float(target.viewport.height));
         glUniform1i(glGetUniformLocation(sprite, "image"), 0);
         glUniform1i(glGetUniformLocation(sprite, "textured"), texture != 0);
+        glUniform1i(glGetUniformLocation(sprite, "emissive"), emissive);
+        glUniform1f(spriteRadialFill, radial ? float(radial->fill) : -1.f);
+        if (radial) {
+            const auto &track = radial->trackColor;
+            glUniform4f(spriteRadialTrack, float(track[0]), float(track[1]), float(track[2]),
+                        float(track[3]));
+        }
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindSampler(0, 0);
-        upload(vertices.data(), sizeof(vertices));
+        upload(vertices, count * sizeof(Vertex));
         for (int i = 0; i < 3; ++i) {
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i, i == 2 ? 4 : 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
@@ -473,10 +575,247 @@ struct Renderer::Impl {
         }
         glDisableVertexAttribArray(3);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        paint(d.clip, d.bezelOnly, [&] {
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            stats.triangles += 2;
+        paint(clip, bezel, [&] {
+            glDrawArrays(GL_TRIANGLES, 0, GLsizei(count));
+            stats.triangles += count / 3;
         });
+    }
+    GLuint radialMask(const Draw &d) {
+        need(d.segments >= 1 && d.segments <= 64, "Invalid widget radial segment count");
+        const auto pixelSize = std::min(d.bounds.width * std::hypot(d.transform.a, d.transform.b),
+                                        d.bounds.height * std::hypot(d.transform.c, d.transform.d));
+        const int size = int(std::clamp(std::round(pixelSize), 8., 512.));
+        const auto key = std::make_pair(size, d.segments);
+        const auto found = radialMasks.find(key);
+        if (found != radialMasks.end())
+            return found->second;
+        need(radialMasks.size() < 16, "Widget radial mask budget exceeded");
+        constexpr double tau = 6.283185307179586;
+        const double step = tau / d.segments;
+        const double halfWidth = std::min(8. / 132 * 16 / d.segments, .22);
+        std::vector<uint8_t> pixels(size_t(size) * size * 4, 0);
+        const auto covered = [&](double x, double y) {
+            const double radiusSq = x * x + y * y;
+            if (radiusSq < (47. / 132) * (47. / 132) || radiusSq > .24)
+                return false;
+            const double angle = std::atan2(x, -y);
+            const double offset = std::remainder(angle - step / 2, step);
+            const double r = std::sqrt(radiusSq);
+            const double radial = r * std::cos(offset);
+            return radial >= 47. / 132 && radial <= 54. / 132 &&
+                   std::abs(r * std::sin(offset)) <= halfWidth;
+        };
+        for (int y = 0; y < size; ++y)
+            for (int x = 0; x < size; ++x) {
+                int coverage = 0;
+                for (double sy : {.125, .375, .625, .875})
+                    for (double sx : {.125, .375, .625, .875})
+                        coverage += covered((x + sx) / size - .5, (y + sy) / size - .5);
+                pixels[(size_t(y) * size + x) * 4 + 3] = uint8_t((coverage * 255 + 8) / 16);
+            }
+        GLuint texture = 0;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     pixels.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        radialMasks.emplace(key, texture);
+        ++stats.textureUploads;
+        stats.uploads += pixels.size();
+        return texture;
+    }
+    void radialDraw(const Draw &d) {
+        const auto texture = radialMask(d);
+        Draw quadDraw = d;
+        quadDraw.fill = 1;
+        // Keep this small draw in its own bezel strip.
+        auto a = d.transform.point(0, 0);
+        double left = a[0], right = a[0], top = a[1], bottom = a[1];
+        for (double x : {0., d.bounds.width})
+            for (double y : {0., d.bounds.height}) {
+                auto p = d.transform.point(x, y);
+                left = std::min(left, p[0]);
+                right = std::max(right, p[0]);
+                top = std::min(top, p[1]);
+                bottom = std::max(bottom, p[1]);
+            }
+        quadDraw.clip = intersection(d.clip, {std::floor(left), std::floor(top),
+                                           std::ceil(right) - std::floor(left),
+                                           std::ceil(bottom) - std::floor(top)});
+        quad(quadDraw, d.bounds, {0, 0, 1, 1}, texture, false, &d);
+    }
+    void addAtlasPage() {
+        need(atlasPages.size() < 4, "Widget raster cache page budget exceeded");
+        glGenTextures(1, &atlas);
+        atlasPages.push_back(atlas);
+        glBindTexture(GL_TEXTURE_2D, atlas);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlasSize, atlasSize, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        if (!atlasFbo)
+            glGenFramebuffers(1, &atlasFbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, atlasFbo);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, atlas, 0);
+        need(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+             "Widget raster atlas framebuffer unavailable");
+    }
+    RasterTile bake(const Draw &draw, const std::vector<vectors::Stroke> &strokes) {
+        if (strokes.empty())
+            return {};
+        Draw local = draw;
+        local.transform.x = local.transform.y = 0;
+        double left = INFINITY, top = INFINITY, right = -INFINITY, bottom = -INFINITY;
+        for (const auto &stroke : strokes) {
+            for (auto p : {stroke.a, stroke.b}) {
+                auto q = local.transform.point(p.x, p.y);
+                left = std::min(left, q[0]);
+                right = std::max(right, q[0]);
+                top = std::min(top, q[1]);
+                bottom = std::max(bottom, q[1]);
+            }
+        }
+        const double beamWidth = 1.4 * draw.lineWidth * std::hypot(draw.transform.a, draw.transform.b) *
+                                 nativeH / 720;
+        const double padding = std::ceil(std::clamp(beamWidth * 6, 2., 64.)) + 1;
+        left = std::floor(left - padding);
+        top = std::floor(top - padding);
+        const int w = int(std::ceil(right + padding) - left);
+        const int h = int(std::ceil(bottom + padding) - top);
+        need(w <= atlasSize && h <= atlasSize, "Widget raster tile too large");
+        if (atlasX + w > atlasSize) {
+            atlasY += atlasRowHeight;
+            atlasX = atlasRowHeight = 0;
+        }
+        flushQuads();
+        if (!atlas || atlasY + h > atlasSize) {
+            addAtlasPage();
+            atlasX = atlasY = atlasRowHeight = 0;
+        }
+        const auto previousTarget = target;
+        const auto previousW = nativeW, previousH = nativeH;
+        const int y = atlasSize - atlasY - h;
+        target = {atlasFbo, atlasSize, atlasSize, {double(atlasX), double(atlasY), double(w), double(h)}};
+        nativeW = w;
+        nativeH = h;
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, atlasFbo);
+        glViewport(atlasX, y, w, h);
+        glScissor(atlasX, y, w, h);
+        constexpr GLfloat transparent[] = {0, 0, 0, 0};
+        glColorMask(1, 1, 1, 1);
+        glClearBufferfv(GL_COLOR, 0, transparent);
+        glColorMask(1, 1, 1, 0);
+        local.transform.x = -left;
+        local.transform.y = -top;
+        local.clip = batchClip = {0, 0, double(w), double(h)};
+        batchBezel = false;
+        const auto previousStrokes = stats.strokes;
+        stats.strokes = 0;
+        for (const auto &line : strokes)
+            stroke(local, line);
+        // A tile is a crop of the final view. Its height must not make the
+        // vector beam thinner than it would be on the gameplay display.
+        flush(float(previousH) / h);
+        stats.strokes += previousStrokes;
+        ++stats.rasterBakes;
+        target = previousTarget;
+        nativeW = previousW;
+        nativeH = previousH;
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.framebuffer);
+        glViewport(int(target.viewport.x), target.height - int(target.viewport.y + target.viewport.height),
+                   int(target.viewport.width), int(target.viewport.height));
+        const RasterTile tile{
+            {left, top, double(w), double(h)},
+            {double(atlasX) / atlasSize, 1 - double(atlasY) / atlasSize,
+             double(w) / atlasSize, -double(h) / atlasSize}, atlas};
+        atlasX += w;
+        atlasRowHeight = std::max(atlasRowHeight, h);
+        return tile;
+    }
+    std::string rasterStyle(const Draw &d) const {
+        std::ostringstream key;
+        key.precision(12);
+        for (double n : {d.transform.a, d.transform.b, d.transform.c, d.transform.d,
+                         d.color[0], d.color[1], d.color[2], d.color[3], d.lineWidth})
+            key << n << '/';
+        return key.str();
+    }
+    void placeTile(const RasterTile &tile, const Draw &d, double x = 0) {
+        if (tile.bounds.width == 0)
+            return;
+        Draw spriteDraw;
+        spriteDraw.bounds = tile.bounds;
+        spriteDraw.clip = d.clip;
+        spriteDraw.bezelOnly = d.bezelOnly;
+        auto origin = d.transform.point(x, 0);
+        spriteDraw.transform.x = origin[0];
+        spriteDraw.transform.y = origin[1];
+        quad(spriteDraw, tile.bounds, tile.uv, tile.texture, true);
+    }
+    void cachedVector(const Draw &d) {
+        std::string key = rasterStyle(d) + d.points.json() + (d.closed ? "closed" : "open");
+        key += std::to_string(d.bounds.width) + "/" + std::to_string(d.bounds.height);
+        auto found = tiles.find(key);
+        if (found == tiles.end()) {
+            std::vector<vectors::Stroke> strokes;
+            const auto &points = d.points.array();
+            for (size_t n = 1; n < points.size() + (d.closed && points.size() > 1); ++n) {
+                const auto &a = points[n - 1];
+                const auto &b = points[n % points.size()];
+                strokes.push_back({{float(a.at(0).number()), float(a.at(1).number())},
+                                   {float(b.at(0).number()), float(b.at(1).number())},
+                                   {1, 1, 1}, 1, 1});
+            }
+            found = tiles.emplace(key, bake(d, strokes)).first;
+        }
+        placeTile(found->second, d);
+    }
+    void cachedText(const Draw &d) {
+        if (d.text.empty())
+            return;
+        const auto *font = fonts.find(d.font);
+        need(font, "Unknown rasterized widget font");
+        const auto styleKey = rasterStyle(d) + d.font + "/" + std::to_string(d.fontSize) + "/";
+        const auto tileFor = [&](char c) -> const RasterTile & {
+            auto key = styleKey + c;
+            const auto found = tiles.find(key);
+            if (found != tiles.end())
+                return found->second;
+            vectors::TextStyle style;
+            style.height = float(d.fontSize);
+            Draw glyph = d;
+            glyph.bounds = {-128, -128, 256, 256};
+            const auto strokes = vectors::layoutText(*font, std::string_view(&c, 1), style).strokes;
+            return tiles.emplace(std::move(key), bake(glyph, strokes)).first->second;
+        };
+        if (warmedFonts.insert(styleKey).second)
+            for (char c : std::string_view("0123456789,-./"))
+                tileFor(c);
+        const auto advance = [&](unsigned char c) {
+            const auto *g = font->find(c);
+            return (g ? g->advance : font->defaultAdvance) * d.fontSize / font->capHeight;
+        };
+        double width = 0;
+        for (unsigned char c : d.text)
+            width += advance(c);
+        double x = d.align == "right" ? d.bounds.width - width :
+                   d.align == "center" ? (d.bounds.width - width) / 2 : 0;
+        for (unsigned char c : d.text) {
+            char glyph = font->uppercase && c >= 'a' && c <= 'z' ? char(c - 'a' + 'A') : char(c);
+            placeTile(tileFor(glyph), d, x);
+            x += advance(c);
+        }
     }
     void spriteDraw(const Draw &d) {
         auto &img = image(d.asset);
@@ -606,6 +945,8 @@ void Renderer::assets(const Value &d, ResourceReader reader) {
 }
 void Renderer::abandonGraphics() {
     impl_->images.clear();
+    impl_->forgetAtlas();
+    impl_->radialMasks.clear();
     impl_->sprite = impl_->beam = impl_->vao = impl_->vbo = 0;
     impl_->stats = {};
 }
@@ -615,6 +956,15 @@ bool Renderer::loadGlesEntryPoints(void *(*resolve)(const char *)) {
     return glad_glBindSampler != nullptr;
 }
 void Renderer::render(const Frame &frame, const RenderTarget &target) {
+    renderFrame(frame, target, false);
+}
+void Renderer::renderCached(const Frame &frame, const RenderTarget &target) {
+    renderFrame(frame, target, true);
+}
+void Renderer::warmCached(const Frame &frame, const RenderTarget &target) {
+    renderFrame(frame, target, true, true);
+}
+void Renderer::renderFrame(const Frame &frame, const RenderTarget &target, bool cached, bool warm) {
     auto &i = *impl_;
     i.stats = {};
     if (frame.draws.empty())
@@ -630,6 +980,8 @@ void Renderer::render(const Frame &frame, const RenderTarget &target) {
     State state;
     if (!i.sprite) {
         i.sprite = program(spriteVS, spritePS);
+        i.spriteRadialFill = glGetUniformLocation(i.sprite, "radialFill");
+        i.spriteRadialTrack = glGetUniformLocation(i.sprite, "radialTrack");
         i.beam = program(i.beamVS.c_str(), i.beamPS.c_str());
         glGenVertexArrays(1, &i.vao);
         glGenBuffers(1, &i.vbo);
@@ -638,6 +990,15 @@ void Renderer::render(const Frame &frame, const RenderTarget &target) {
     int turns = (target.turns % 4 + 4) % 4;
     i.nativeW = int(turns % 2 ? target.viewport.height : target.viewport.width);
     i.nativeH = int(turns % 2 ? target.viewport.width : target.viewport.height);
+    i.cacheDraw = cached;
+    i.warmOnly = warm;
+    if (cached && (i.cacheW != i.nativeW || i.cacheH != i.nativeH)) {
+        i.releaseAtlas();
+        i.releaseRadials();
+        i.cacheW = i.nativeW;
+        i.cacheH = i.nativeH;
+        i.atlasSize = i.nativeH > 900 ? 2048 : 1024;
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer);
     glViewport(int(target.viewport.x),
                target.height - int(target.viewport.y + target.viewport.height),
@@ -654,18 +1015,29 @@ void Renderer::render(const Frame &frame, const RenderTarget &target) {
     glBlendEquation(GL_FUNC_ADD);
     glColorMask(1, 1, 1, 0);
     for (auto &d : frame.draws) {
-        if (d.kind == "sprite" || d.kind == "rect" ||
+        if (d.kind == "sprite" || d.kind == "rect" || d.kind == "radial" ||
             (d.kind == "text" &&
              i.manifest.at("fonts").at(d.font).at("type").string() == "raster")) {
             i.flush();
             if (d.kind == "sprite")
                 i.spriteDraw(d);
+            else if (d.kind == "radial")
+                i.radialDraw(d);
             else if (d.kind == "rect")
                 i.quad(d, d.bounds, {0, 0, 1, 1}, 0);
             else
                 i.rasterText(d, i.manifest.at("fonts").at(d.font));
             continue;
         }
+        if (cached && (d.kind == "text" || d.asset.empty())) {
+            i.flush();
+            if (d.kind == "text")
+                i.cachedText(d);
+            else
+                i.cachedVector(d);
+            continue;
+        }
+        i.flushQuads();
         if (!i.batch.empty() &&
             (d.clip.x != i.batchClip.x || d.clip.y != i.batchClip.y ||
              d.clip.width != i.batchClip.width || d.clip.height != i.batchClip.height ||
@@ -729,6 +1101,7 @@ void Renderer::render(const Frame &frame, const RenderTarget &target) {
         }
     }
     i.flush();
+    i.flushQuads();
 }
 void Renderer::release() {
     impl_->release();

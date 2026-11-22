@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(OpenMinotaur VERSION 0.9.5 LANGUAGES C CXX)
+project(OpenMinotaur VERSION 0.9.6 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -163,12 +163,13 @@ target_link_libraries(mino_crt_optimization_checks PRIVATE mino_crt)
 add_library(mino_launcher STATIC
     platform/launcher.cpp platform/launcher_apps.cpp
     platform/launcher_notes.cpp platform/notes_assets.cpp platform/launcher_buttons.cpp platform/launcher_transition.cpp platform/launcher_navigation.cpp platform/launcher_renderer.cpp
-    platform/launcher_about.cpp platform/launcher_games.cpp platform/options.cpp platform/ui_assets.cpp platform/wallpaper_asset.cpp
+    platform/launcher_about.cpp platform/launcher_games.cpp platform/options.cpp
+    platform/shell_audio.cpp platform/shell_arcade.cpp platform/ui_assets.cpp platform/wallpaper_asset.cpp
     platform/wallpaper_0.cpp platform/wallpaper_1.cpp platform/wallpaper_2.cpp platform/wallpaper_3.cpp)
 set_target_properties(mino_launcher PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(mino_launcher PRIVATE mino_baked_assets)
 target_include_directories(mino_launcher PUBLIC include platform PRIVATE third_party/stb)
-target_link_libraries(mino_launcher PUBLIC mino_shared mino_cores mino_glad SDL3::SDL3 PRIVATE mino_game_assets)
+target_link_libraries(mino_launcher PUBLIC mino_shared mino_cores mino_glad SDL3::SDL3 PRIVATE mino_game_assets neon_engine)
 
 set(PLATFORM_SOURCES
     platform/main.cpp platform/display.cpp platform/input.cpp
@@ -409,13 +410,23 @@ if(MINO_LIVE_WIDGETS AND MINO_WIDGET_RENDERER)
     add_library(mino_collection_title STATIC platform/collection_title.cpp)
     target_link_libraries(mino_collection_title PRIVATE mino_baked_assets)
     target_include_directories(mino_collection_title PUBLIC include platform engine/include PRIVATE third_party/miniz)
-    target_link_libraries(mino_collection_title PUBLIC mino_widget_renderer mino_neon_background mino_presentation_assets SDL3::SDL3 PRIVATE mino_miniz)
-    target_link_libraries(${APP_TARGET} PRIVATE mino_collection_title)
-    target_compile_definitions(${APP_TARGET} PRIVATE MINO_COLLECTION_TITLE)
-    if(TARGET mino_app_resume_checks)
-        target_link_libraries(mino_app_resume_checks PRIVATE mino_collection_title)
-        target_compile_definitions(mino_app_resume_checks PRIVATE MINO_COLLECTION_TITLE)
-    endif()
+    target_link_libraries(mino_collection_title PUBLIC mino_widget_renderer mino_neon_background mino_presentation_assets SDL3::SDL3 PRIVATE mino_miniz mino_launcher)
+    set(gridrunner_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/gridrunner-landscape.widgetml")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${gridrunner_widgetml}")
+    file(READ "${gridrunner_widgetml}" GRIDRUNNER_WIDGETML)
+    file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/gridrunner_widget_document.h"
+        CONTENT [=[
+#pragma once
+inline constexpr const char gridrunnerWidgetDocument[] = R"WidgetML(@GRIDRUNNER_WIDGETML@)WidgetML";
+]=] @ONLY)
+    foreach(shell_target IN ITEMS ${APP_TARGET} mino_app_resume_checks)
+        if(TARGET ${shell_target})
+            target_sources(${shell_target} PRIVATE platform/gridrunner_widgets.cpp)
+            target_include_directories(${shell_target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+            target_link_libraries(${shell_target} PRIVATE mino_collection_title)
+            target_compile_definitions(${shell_target} PRIVATE MINO_COLLECTION_TITLE)
+        endif()
+    endforeach()
 endif()
 
 if(MINO_LIVE_BEZELS)

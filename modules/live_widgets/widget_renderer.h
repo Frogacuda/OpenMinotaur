@@ -11,6 +11,7 @@ struct RenderTarget {
 };
 struct RenderStatistics {
     size_t draws = 0, triangles = 0, strokes = 0, uploads = 0, textLayouts = 0, dropped = 0;
+    size_t rasterBakes = 0, textureUploads = 0;
 };
 // Optional GLES3 backend. CPU semantics can be built and tested without it.
 using ResourceReader = std::function<bool(const std::string &, std::vector<uint8_t> &)>;
@@ -27,11 +28,15 @@ class Renderer {
     // Use only after the owning GL context has been lost.
     void abandonGraphics();
     void render(const Frame &, const RenderTarget &);
+    // Cached overlay path for single-line ASCII text and inline vector artwork.
+    void renderCached(const Frame &, const RenderTarget &);
+    void warmCached(const Frame &, const RenderTarget &);
     void release();
     const RenderStatistics &statistics() const;
 
   private:
     struct Impl;
+    void renderFrame(const Frame &, const RenderTarget &, bool cached, bool warm = false);
     std::unique_ptr<Impl> impl_;
 };
 } // namespace neon::widgets

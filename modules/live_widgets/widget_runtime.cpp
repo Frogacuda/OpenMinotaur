@@ -150,17 +150,24 @@ void checkNode(const Value &node, int &count, int depth) {
                  std::string::npos,
          "Widget IDs use letters, digits, underscore or hyphen");
     need(std::set<std::string>{"group", "repeat", "logic", "sequence", "vector", "sprite", "text",
-                               "rect"}
+                               "rect", "radial"}
                  .count(kind) != 0,
          "Unknown widget object kind: " + kind);
     for (auto name : {"enabled", "visible", "x", "y", "size", "scale", "rotation", "color",
-                      "opacity", "fill", "fontSize", "when", "value", "items", "where"})
+                      "opacity", "fill", "font", "fontSize", "when", "value", "items", "where",
+                      "trackColor"})
         if (node.object().count(name))
             expression(node.at(name));
     for (auto &p : node.at("inputs").object())
         expression(p.second);
     for (auto &p : node.at("outputs").object())
         expression(p.second);
+    if (kind == "radial") {
+        const auto &value = node.at("segments");
+        const double segments = value.missing() ? 16 : value.number(-1);
+        need(segments >= 1 && segments <= 64 && std::floor(segments) == segments,
+             "Radial segment count must be an integer in 1..64");
+    }
     need(node.at("frames").array().size() <= 256, "Flipbook frame budget exceeded");
     need(node.at("parameters").object().size() <= 32, "Widget parameter budget exceeded");
     for (auto &p : node.at("parameters").object()) {
@@ -855,6 +862,13 @@ struct Runtime::Impl {
         draw.color = color;
         draw.fill = std::clamp(number("fill", 1), 0., 1.);
         draw.fillDirection = n.at("fillDirection").string("right");
+        if (kind == "radial") {
+            draw.segments = int(n.at("segments").number(16));
+            const auto track = eval(n.at("trackColor"), s, full + ".trackColor");
+            for (size_t channel = 0; channel < draw.trackColor.size(); ++channel)
+                draw.trackColor[channel] = std::clamp(
+                    track.at(channel).number(draw.trackColor[channel]), 0., 1.);
+        }
         draw.bezelOnly = bezel;
         draw.lineWidth = n.at("lineWidth").number(1);
         draw.fontSize = eval(n.at("fontSize"), s, full + ".fontSize").number(h);
@@ -864,7 +878,8 @@ struct Runtime::Impl {
         draw.frame = eval(n.at("frame"), s, full + ".frame");
         draw.fit = n.at("fit").string("contain");
         draw.asset = format(n.at("asset").string(), s);
-        draw.font = n.at("font").string("neon-hud");
+        draw.font = kind == "text" ? eval(n.at("font"), s, full + ".font").string("neon-hud")
+                                    : "neon-hud";
         draw.text = format(n.at("text").string(), s);
         if (!n.at("frames").array().empty()) {
             auto &frames = n.at("frames").array();

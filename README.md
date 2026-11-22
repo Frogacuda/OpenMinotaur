@@ -1,6 +1,6 @@
 # OpenMinotaur
 
-Version 0.9.5 — public beta, progressing toward feature-complete 1.0.
+Version 0.9.6 — public beta, progressing toward feature-complete 1.0.
 
 A portable C++ reconstruction of Llamasoft's nine Minotaur Project games over
 a shared Neon engine: Minotaur Rescue, Minotron: 2112, GoatUp, Caverns of Minos,

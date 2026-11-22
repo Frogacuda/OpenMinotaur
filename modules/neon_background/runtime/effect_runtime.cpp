@@ -1,5 +1,6 @@
 #include "effect_runtime.h"
 #include "baked_io.h"
+#include "layer_coverage.h"
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -542,6 +543,79 @@ struct Runtime::Impl {
     std::map<int, ExternalLayer> externalLayers;
     std::map<int, uint64_t> imageKeys;
     GLuint imageSamplers[3]{};
+    std::array<LayerCoverage, 16> layerCoverage{}, renderedLayerCoverage{};
+    LayerCoverage viewportCoverage{};
+    bool nativeCoverage() const {
+        return selected >= 7 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+               selected != 21 && !neon::pc::isStudy(selected) &&
+               params.framing.mode != Framing::LegacyStretch;
+    }
+    std::array<bool, 2> referenceLayerAxes(int shaderId, int node, int input) {
+        const int domain = int(control(
+            ("sampling." + std::to_string(node) + "." + std::to_string(input) + ".3").c_str()));
+        if (domain == 3)
+            return {false, true};
+        if (domain == 4)
+            return {true, false};
+        if (domain)
+            return {domain == 1, domain == 1};
+        if (!nativeCoverage())
+            return {shaderId != 26, shaderId != 26};
+        const int type = scene.preset.nodes[size_t(node)].type;
+        // A mesh or projected tunnel consumes a material. A flat composite
+        // consumes a scene surface unless the creator explicitly chooses a tile.
+        const bool material = (type != 9 && type != 6) || (shaderId >= 66 && shaderId <= 70) ||
+                              shaderId == 92 || shaderId == 93;
+        return {material, material};
+    }
+    void planLayerCoverage(int output, const std::vector<std::array<int, 3>> &inputOverrides) {
+        layerCoverage.fill(viewportCoverage);
+        std::array<LayerCoverage, 16> propagated;
+        propagated.fill({0, 0});
+        auto visit = [&](auto &self, int stack, LayerCoverage required, unsigned path) -> void {
+            if (stack < 0 || stack >= 16)
+                return;
+            if (path & (1u << stack))
+                return; // Retained feedback keeps its existing finite coverage.
+            auto &seen = propagated[size_t(stack)];
+            if (seen.x >= required.x && seen.y >= required.y)
+                return;
+            seen.include(required);
+            required = seen;
+            layerCoverage[size_t(stack)].include(required);
+            path |= 1u << stack;
+            for (size_t index : scene.preset.stacks[size_t(stack)].nodes) {
+                const auto &node = scene.preset.nodes[index];
+                if (node.type != 9 && node.type != 6)
+                    continue;
+                const auto &n = settings[index];
+                const auto inputs =
+                    resolvedSamplerInputs(scene.preset, index, &settings,
+                                          inputOverrides.empty() ? nullptr : &inputOverrides);
+                for (int input = 0; input < 3; ++input) {
+                    if (!(scene.masks.at(n.integers[2]) & (1 << input)))
+                        continue;
+                    auto binding = originalTextureBinding(inputs[input]);
+                    if (binding.kind != TextureSourceKind::Stack ||
+                        externalLayers.count(binding.index))
+                        continue;
+                    auto sampleArea = required;
+                    if (n.integers[2] == 94 || n.integers[2] == 95)
+                        sampleArea = barrelCoverage(
+                            required, settings[scene.preset.stacks[size_t(stack)].nodes.back()],
+                            n.integers[2] == 95);
+                    auto coverage = transformedCoverage(sampleArea, n, input);
+                    const auto axes = referenceLayerAxes(n.integers[2], int(index), input);
+                    if (axes[0])
+                        coverage.x = 1;
+                    if (axes[1])
+                        coverage.y = 1;
+                    self(self, binding.index, coverage, path);
+                }
+            }
+        };
+        visit(visit, output, viewportCoverage, 0);
+    }
     int samplerNode = -1;
     std::map<GLuint, std::array<GLint, 39>> uniformLocations;
     enum Uniform {
@@ -679,11 +753,15 @@ struct Runtime::Impl {
           scene(playback ? RecoveredScene{} : RecoveredScene(p, "r2-c13", true, reader)),
           profiles(playback ? TunnelProfiles{}
                             : TunnelProfiles::load(p / "reference/tunnel", reader)),
-          author(playback ? pc::AuthoringModel(pc::AuthoringModel::PlaybackOnly{}, p, reader)
-                          : pc::AuthoringModel(p, reader)),
+          author(pc::AuthoringModel::PlaybackOnly{}, p, reader),
           playbackOnly(playback) {
         if (playback)
             return;
+        // Build the large creator model directly on the heap; conditional value
+        // construction can exceed the Windows thread's default stack reserve.
+        auto creator = std::make_unique<pc::AuthoringModel>(p, reader);
+        author = std::move(*creator);
+        creator.reset();
         baseReachable = scene.reachable;
         auto shapeColours = assetStream(p / "reference/shape-palette.bin", reader);
         if (!shapeColours.read((char *)shapePalette.data(), sizeof shapePalette))
@@ -1167,7 +1245,8 @@ void main(){
     }
     void bind(GLuint program, int shaderId, const ShapeSettings &terminal,
               std::array<int, 3> selectors) {
-        bool logicalInputs[3]{};
+        std::array<std::array<bool, 2>, 3> logicalInputs{};
+        std::array<LayerCoverage, 3> inputCoverages{};
         glUniform2f(location(program, U_surfaceExtent), producerPass ? 1 : screen.extentX,
                     producerPass ? 1 : screen.extentY);
         for (int i = 0; i < 3; ++i) {
@@ -1177,6 +1256,8 @@ void main(){
                  activeComponents().at(selectors[i] - 10000).kind == ComponentKind::Layer) ||
                 (selectors[i] < 10000 &&
                  originalTextureBinding(selectors[i]).kind == TextureSourceKind::Stack);
+            auto &inputCoverage = inputCoverages[size_t(i)];
+            inputCoverage = viewportCoverage;
             bool renderedLayer =
                 selectors[i] == 202 ||
                 (selectors[i] >= 10000 &&
@@ -1184,8 +1265,11 @@ void main(){
             if (selectors[i] < 10000) {
                 auto binding = originalTextureBinding(selectors[i]);
                 if (binding.kind == TextureSourceKind::Stack) {
+                    if (nativeCoverage())
+                        inputCoverage = renderedLayerCoverage[size_t(binding.index)];
                     auto external = externalLayers.find(binding.index);
                     if (external != externalLayers.end()) {
+                        inputCoverage = viewportCoverage;
                         expanded = external->second.expanded;
                         renderedLayer = external->second.flipY;
                     }
@@ -1198,17 +1282,13 @@ void main(){
             // copies retain their extended domain.
             if (expanded && samplerNode >= 0 && !materialComponent &&
                 params.framing.mode != Framing::LegacyStretch) {
-                auto key =
-                    "sampling." + std::to_string(samplerNode) + "." + std::to_string(i) + ".3";
-                int domain = int(control(key.c_str()));
-                const bool sceneCopy = shaderId == 26;
-                logicalInputs[i] = domain == 1 || (domain == 0 && !sceneCopy);
+                logicalInputs[i] = referenceLayerAxes(shaderId, samplerNode, i);
             }
             const bool angularMaterial = shaderId == 67 && i == 0;
             glUniform2f(location(program, Uniform(U_uvScale0 + i)),
-                        expanded ? 1 / screen.extentX : 1,
+                        expanded ? 1 / inputCoverage.x : 1,
                         (renderedLayer ? -1.f : 1.f) *
-                            (expanded && !angularMaterial ? 1 / screen.extentY : 1));
+                            (expanded && !angularMaterial ? 1 / inputCoverage.y : 1));
         }
         for (int i = 0; i < 3; ++i) {
             auto c = materialComponent;
@@ -1261,6 +1341,7 @@ void main(){
         // The explicitly synthetic studies retain their authored REPEAT policy.
         const GLint addressing = neon::pc::isStudy(selected) ? GL_REPEAT : GL_MIRRORED_REPEAT;
         for (int i = 0; i < 3; i++) {
+            const auto inputCoverage = inputCoverages[size_t(i)];
             glActiveTexture(GL_TEXTURE0 + i);
             glBindSampler(i, 0);
             if ((shaderId >= 1000 ? 1 : scene.masks.at(shaderId)) & (1 << i)) {
@@ -1283,18 +1364,19 @@ void main(){
                     u = int(control((key + "1").c_str()));
                     v = int(control((key + "2").c_str()));
                 }
-                if (logicalInputs[i]) {
+                if (logicalInputs[i][0] || logicalInputs[i][1]) {
                     const int defaultU = asset                         ? asset->wrapU + 1
                                          : neon::pc::isStudy(selected) ? 1
                                                                        : 2;
                     const int defaultV = asset                         ? asset->wrapV + 1
                                          : neon::pc::isStudy(selected) ? 1
                                                                        : 2;
-                    glUniform2f(location(program, Uniform(U_address0 + i)),
-                                screen.extentX != 1 ? (u ? u : defaultU) : 0,
-                                screen.extentY != 1 && !(shaderId == 67 && i == 0)
-                                    ? (v ? v : defaultV)
-                                    : 0);
+                    glUniform2f(
+                        location(program, Uniform(U_address0 + i)),
+                        logicalInputs[i][0] && inputCoverage.x != 1 ? (u ? u : defaultU) : 0,
+                        logicalInputs[i][1] && inputCoverage.y != 1 && !(shaderId == 67 && i == 0)
+                            ? (v ? v : defaultV)
+                            : 0);
                 }
                 if (selectors[i] == 202 || asset || filter || u || v) {
                     if (!imageSamplers[i])
@@ -2800,11 +2882,23 @@ void main(){
                               nodeOutput.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer(GL_FRAMEBUFFER, scratch.fbo);
         };
+        const auto visibleScreen = screen;
+        if (nativeCoverage()) {
+            const int output = endpointStack >= 0         ? endpointStack
+                               : params.layerPreview >= 0 ? params.layerPreview
+                               : params.previewStage
+                                   ? scene.stages[params.previewStage]
+                                   : int(control("scene.output", float(scene.preset.outputStack)));
+            planLayerCoverage(output, inputOverrides);
+        } else
+            layerCoverage.fill(viewportCoverage);
         for (int stack = 0; stack < 16; stack++)
             if (scene.reachable[stack]) {
                 if (externalLayers.count(stack) ||
                     (selected == 5 && stack == 1 && !allocatedRipple))
                     continue;
+                screen.extentX = layerCoverage[size_t(stack)].x;
+                screen.extentY = layerCoverage[size_t(stack)].y;
                 // A non-feedback mixer can produce its layer texture directly.
                 // Retained/self inputs and spatial draws keep the scratch-and-copy path.
                 bool directStack = params.copyElision && endpoint < 0 &&
@@ -2837,6 +2931,7 @@ void main(){
                 if (control(("layer." + std::to_string(stack)).c_str(), 1) < .5f) {
                     if (!directStack)
                         copyStack(stack);
+                    renderedLayerCoverage[size_t(stack)] = layerCoverage[size_t(stack)];
                     continue;
                 }
                 ShapeSettings cameraNode{};
@@ -2966,7 +3061,9 @@ void main(){
                 }
                 if (!directStack)
                     copyStack(stack);
+                renderedLayerCoverage[size_t(stack)] = layerCoverage[size_t(stack)];
             }
+        screen = visibleScreen;
         samplerNode = -1;
         renderedKey = revision;
     }
@@ -3138,6 +3235,7 @@ void main(){
                 clearPending = true;
             }
             screen = layout;
+            viewportCoverage = {layout.extentX, layout.extentY};
             initialize(std::max(1, int(std::lround(screen.width * params.renderScale))),
                        std::max(1, int(std::lround(screen.height * params.renderScale))));
             evaluateEdits();
@@ -3254,6 +3352,21 @@ void main(){
                     v.v = 1 - v.v;
                     v.v1 = 1 - v.v1;
                 }
+        }
+        if (nativeCoverage() && !params.sourceOnly) {
+            const int output = previewNode() >= 0 && !params.previewStage && nodeOutput.texture
+                                   ? scene.preset.nodes[size_t(previewNode())].stack
+                               : params.layerPreview >= 0 ? params.layerPreview
+                               : params.previewStage
+                                   ? scene.stages[params.previewStage]
+                                   : int(control("scene.output", float(scene.preset.outputStack)));
+            if (output >= 0 && output < 16) {
+                const auto coverage = renderedLayerCoverage[size_t(output)];
+                for (auto &v : q) {
+                    v.u = .5f + (v.u - .5f) * viewportCoverage.x / coverage.x;
+                    v.v = .5f + (v.v - .5f) * viewportCoverage.y / coverage.y;
+                }
+            }
         }
         for (auto &v : q)
             rotateScreenPoint(v.x, v.y, screen.turns);

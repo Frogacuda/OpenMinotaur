@@ -159,6 +159,10 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
                         "play Gridrunner as a side-scroller.",
                         "rotate_controls",
                         {"off", "on"}});
+        const auto shell = get("shell_audio", "full");
+        rows.push_back({"Title & iOX Audio", shell == "off" ? "Off" : shell == "cues" ? "Cues Only" : "Full",
+                        "Set ambience and button sounds for the title and iOX.",
+                        "shell_audio", {"full", "cues", "off"}});
     }
     return rows;
 }
@@ -182,10 +186,6 @@ MenuRect Launcher::optionButton(int i) const {
     return {18 + (cell % 2) * (cw + gap), top + 77 + (cell / 2) * (ch + gap), cw, ch};
 }
 void Launcher::activateOption() {
-    if (focus() == iox::options::back) {
-        back();
-        return;
-    }
     if (page() == Page::Mapping) {
         request_ = {Action::CancelRemap, {}};
         return;

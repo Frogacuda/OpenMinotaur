@@ -274,8 +274,10 @@ int main(int argc, char **argv) {
             for (int n = 0; n < 12; ++n) {
                 bezel.update("minotron", state, 1. / 60, true);
                 require(bezel.draw(0, 960, 720, 240, 200, 480, 320, 0), "Cached cadence draw");
+                require(bezel.refreshedFrame() == (n % 2 == 1), "Cached draw reported a fresh synth frame");
             }
             bezel.discardPendingFrame();
+            require(!bezel.refreshedFrame(), "Discard retained a refresh notification");
             require(bezel.cadenceDivisor() == 2, "Hidden output changed locked cadence");
             mino::NeonFrameTimer timer;
             unsigned samples = 0;

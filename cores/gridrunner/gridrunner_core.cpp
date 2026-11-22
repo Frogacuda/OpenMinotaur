@@ -96,6 +96,36 @@ class GridrunnerCore final : public Core {
         }
         return state;
     }
+    PresentationState widgetPresentationState() const override {
+        if (classic_ || !native_ || demo_ || !active_ || nativeEnded() || scoresOpen_ || nameEntry_)
+            return {};
+        PresentationState state{true, paused_ || suspended_, presentationSession_, {}};
+        state.values["widgets.shipsLost"] = shipsLost_;
+        state.values["widgets.deathless"] = int64_t(native_->ac.gridsWithoutDeath);
+        state.values["widgets.swarmers"] = int64_t(native_->ac.swarmerKills);
+        state.values["widgets.deflections"] = int64_t(native_->ac.deflectionCount);
+        const auto next = (int64_t(native_->level()) / 4 + 1) * 4;
+        if (!survival_ && next / 4 < gridrunner::CampaignProgress::kSlots) {
+            state.values["widgets.nextCheckpoint"] = next + 1;
+            if (next <= progress_.highestLevel())
+                state.values["widgets.checkpointScore"] = int64_t(progress_.at(int(next)).score);
+        }
+        for (const auto &item : native_->recentPickups())
+            state.collections["widgets.pickups"].push_back({item.id, item.kind, item.kind});
+        for (const auto kind : {0, 1, 2, 4, 5, 6}) {
+            const auto remaining = native_->ac.powers[size_t(kind)];
+            if (remaining > 0) {
+                state.collections["widgets.effects"].push_back({uint64_t(kind), remaining, kind});
+                state.values["widgets.duration." + std::to_string(kind)] =
+                    int64_t(gr::reconstruction::ios::Powerup::duration[size_t(kind)] + (kind == 5 ? 20 : 0));
+            }
+        }
+        for (int kind = 0; kind < 8; ++kind) {
+            const auto &tint = native_->pickupTints[size_t(kind)];
+            state.colours[kind] = {float(tint.r), float(tint.g), float(tint.b)};
+        }
+        return state;
+    }
     bool init(Host &host, const SurfaceInfo &surface) override {
         // Classic had no independent launch image in the original release.
         if (!classic_ && !startup_.begin(host, surface))
@@ -682,8 +712,10 @@ class GridrunnerCore final : public Core {
     }
     void startGame() { startNative(false); }
     void startNative(bool demo) {
-        if (!demo)
+        if (!demo) {
             ++presentationSession_;
+            shipsLost_ = 0;
+        }
         messages_.clear();
         const int nativeStart = demo ? 0 : startLevel();
         native_ = std::make_unique<NativeGrid>(
@@ -736,7 +768,10 @@ class GridrunnerCore final : public Core {
                     d = {v.x * 180 / kW / 60, v.y * 180 / kH / 60};
                 }
                 const auto before = native_->state();
+                const int livesBefore = native_->ac.lives;
                 native_->tick({d.x, d.y});
+                if (!demo_)
+                    shipsLost_ += std::max(0, livesBefore - native_->ac.lives);
                 feedbackFlash_ = native_->presentedFeedback();
                 nativeDraw_.prepare(*native_);
                 for (int goal : native_->achievements)
@@ -1305,6 +1340,7 @@ class GridrunnerCore final : public Core {
     std::string entryName_;
     const int kW, kH;
     uint64_t presentationSession_ = 0;
+    int64_t shipsLost_ = 0; // Derived from decreases sampled on simulation ticks.
     gr::reconstruction::ios::Classic classicGame_{&sessionRandom_};
     neon::input::ControllerFrame controllerFrame_;
     Host *host_ = nullptr;

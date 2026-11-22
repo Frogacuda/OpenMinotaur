@@ -86,7 +86,7 @@ inline void validateLayerDomains(const std::filesystem::path &data) {
             r.parameters().renderScale = scale;
             set("sampling.15.0.1", float(address));
             set("sampling.15.0.2", float(address));
-            set("sampling.15.0.3", 0);
+            set("sampling.15.0.3", 1);
             auto reference = capture(576, 432);
             for (auto dims : {std::pair<int, int>{768, 432},
                               {576, 1024},
@@ -106,7 +106,7 @@ inline void validateLayerDomains(const std::filesystem::path &data) {
                 auto old = capture(576, 1024);
                 need(difference(reference, old, 576, 1024) > 5,
                      "Layer-domain witness did not expose the old portrait failure");
-                set("sampling.15.0.3", 0);
+                set("sampling.15.0.3", 1);
             }
         }
     set("node.15.f.2", 0);

@@ -207,6 +207,9 @@ class Core {
     virtual PresentationState presentationState() const {
         return {};
     }
+    virtual PresentationState widgetPresentationState() const {
+        return {};
+    }
     virtual const CoreInfo &info() const = 0;
     virtual NativeFormat nativeFormat() const {
         const auto &i = info();

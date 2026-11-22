@@ -1,6 +1,7 @@
 #include "collection_title.h"
 #include "effect_runtime.h"
 #include "presentation_assets.h"
+#include "shell_audio.h"
 #include "title_presenter.h"
 #include <SDL3/SDL.h>
 #include <cmath>
@@ -20,6 +21,7 @@ bool effectRead(const std::filesystem::path &name, std::vector<uint8_t> &bytes) 
 struct CollectionTitle::Impl {
     std::filesystem::path shaderCache;
     Host *host = nullptr;
+    ShellAudio *audio = nullptr;
     SurfaceInfo surface{};
     bool highQuality = true;
     bool paused = false, buttons = false, begun = false;
@@ -69,6 +71,14 @@ void CollectionTitle::setHighQuality(bool high) {
     if (impl_->background)
         impl_->background->parameters().renderScale = high ? 1.f : .5f;
 }
+void CollectionTitle::setShellAudio(ShellAudio &audio) { impl_->audio = &audio; }
+void CollectionTitle::updateInput(bool buttons, bool pointer) {
+    auto &i = *impl_;
+    const bool wasDismissing = i.sequence->dismissing();
+    i.sequence->input(buttons, pointer);
+    if (i.audio && !wasDismissing && i.sequence->dismissing())
+        i.audio->play(ShellAudio::Cue::Enter);
+}
 void CollectionTitle::resize(const SurfaceInfo &surface) { impl_->surface = surface; }
 void CollectionTitle::pads(const PadState *pads, int count) {
     auto &i = *impl_;
@@ -85,7 +95,7 @@ void CollectionTitle::touch(const TouchEvent &event) {
     else if (event.phase == TouchPhase::Up)
         i.pointers.erase(event.id);
     if (i.sequence && i.begun && !i.paused)
-        i.sequence->input(i.buttons, !i.pointers.empty());
+        updateInput(i.buttons, !i.pointers.empty());
 }
 void CollectionTitle::frame(double elapsed) {
     auto &i = *impl_;
@@ -97,7 +107,7 @@ void CollectionTitle::frame(double elapsed) {
             i.begun = true;
         }
         if (!i.paused)
-            i.sequence->input(i.buttons, !i.pointers.empty());
+            updateInput(i.buttons, !i.pointers.empty());
         const int w = i.surface.width, h = i.surface.height;
         if (w <= 0 || h <= 0)
             return;
@@ -123,6 +133,8 @@ void CollectionTitle::frame(double elapsed) {
         i.presenter.render(*i.sequence, target, [&](const auto &) {
             i.background->frame(dt, {i.surface.framebuffer, w, h, {x, y, viewW, viewH}, {}, 0});
         });
+        if (i.audio && i.sequence->opacity() >= 1.0)
+            i.audio->markTitleVisible();
         if (i.sequence->takeLaunchRequest())
             i.host->requestQuit();
     } catch (const std::exception &e) {
@@ -139,7 +151,7 @@ bool CollectionTitle::back() {
     auto &i = *impl_;
     if (i.sequence && i.begun) {
         i.sequence->input(false, false);
-        i.sequence->input(true, false);
+        updateInput(true, false);
     }
     return true;
 }

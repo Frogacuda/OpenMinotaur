@@ -193,7 +193,10 @@ void Launcher::touch(const TouchEvent &e) {
     }
 }
 void Launcher::move(int dx, int dy) {
+    const int previous = focus();
     (this->*screenHandlers().move)(dx, dy);
+    if (audio_ && focus() != previous)
+        audio_->play(iox::isOptionsScreen(page()) ? ShellAudio::Cue::Tick : ShellAudio::Cue::Move);
 }
 void Launcher::moveHome(int dx, int dy) {
     focus() = layout_.move(focus(), dx, dy);
@@ -291,6 +294,8 @@ bool Launcher::back() {
         calibratingTilt_ = false;
         request_ = {Action::CancelTilt, {}};
         close();
+        if (audio_)
+            audio_->play(ShellAudio::Cue::Back);
         return true;
     }
     if (inputBlocked())
@@ -302,6 +307,8 @@ bool Launcher::back() {
         open(Page::Quit);
     else
         close();
+    if (audio_)
+        audio_->play(ShellAudio::Cue::Back);
     return true;
 }
 void Launcher::activate() {
@@ -309,7 +316,25 @@ void Launcher::activate() {
         return;
     touching_ = false;
     pressedItem_ = -1;
+    if (iox::isOptionsScreen(page()) && focus() == iox::options::back) {
+        back();
+        return;
+    }
+    const auto pageBefore = page();
+    const auto focusBefore = focus();
+    const auto depth = navigation_.depth();
     (this->*screenHandlers().activate)();
+    if (!audio_)
+        return;
+    if (pageBefore == Page::Wallpapers && page() != pageBefore)
+        audio_->play(ShellAudio::Cue::Kick);
+    else if (navigation_.depth() < depth || request_.action == Action::CancelRemap)
+        audio_->play(ShellAudio::Cue::Back);
+    else if (request_.action != Action::Launch &&
+             (page() != pageBefore || focus() != focusBefore || appLaunch_.active() ||
+              request_.action != Action::None))
+        audio_->play(iox::isOptionsScreen(pageBefore) ? ShellAudio::Cue::Kick
+                                                     : ShellAudio::Cue::Confirm);
 }
 void Launcher::activateDialog() {
     if (page() == Page::Quit && focus() == 1)

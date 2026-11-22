@@ -19,6 +19,7 @@ class LiveBezel {
     void discardPendingFrame();
     void observeFrame(double workMs, double intervalMs);
     unsigned cadenceDivisor() const;
+    bool refreshedFrame() const;
     bool available() const;
     void reset();
     void abandonGraphics();

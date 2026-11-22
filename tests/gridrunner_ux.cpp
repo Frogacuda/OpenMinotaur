@@ -225,6 +225,10 @@ struct GridrunnerUxChecks {
         if (!classic) {
             auto before = core.presentationState();
             expect(before.gameplay, "Gridrunner presentation active");
+            auto widgets = core.widgetPresentationState();
+            expect(widgets.gameplay && std::get<int64_t>(widgets.values.at("widgets.nextCheckpoint")) == 5 &&
+                   !widgets.values.count("widgets.checkpointScore"),
+                   "Next checkpoint does not borrow the previous checkpoint score");
             auto &ac = core.native_->ac;
             ac.powers[6] = 40;
             ac.powers[1] = 40;
@@ -239,6 +243,29 @@ struct GridrunnerUxChecks {
             expect(std::get<double>(snapshot.values.at("player.x")) == ship->position.x,
                    "Read-only ship coordinate");
             expect(std::get<int64_t>(snapshot.values.at("lives")) == ac.lives, "Read-only lives");
+            expect(core.widgetPresentationState().collections.at("widgets.effects").size() == 3,
+                   "Concurrent power timers remain separate in the widget snapshot");
+            using namespace gr::reconstruction::ios;
+            for (int kind : {3, 6, 6, 2, 5, 7}) {
+                core.native_->pickup(ship->position, kind);
+                auto *pickup = dynamic_cast<Powerup *>(
+                    core.native_->lists.first(gr::reconstruction::List::L3c0));
+                require(pickup, "Native pickup in collision list");
+                pickup->hitBy(*ship);
+            }
+            const auto collected = core.widgetPresentationState();
+            const auto &log = collected.collections.at("widgets.pickups");
+            expect(log.size() == 5 && log[0].value == 7 && log[3].value == 6 &&
+                       log[4].value == 6 && log[3].id != log[4].id,
+                   "Pickup log retains the latest five individual collections");
+            ship->state = Ship::State::Departing;
+            ship->arrival = 0;
+            const int lives = ac.lives;
+            frame();
+            ac.lives = lives; // Mimic a later life gain without resetting the run.
+            frame();
+            expect(std::get<int64_t>(core.widgetPresentationState().values.at("widgets.shipsLost")) == 1,
+                   "Ships Lost counts life decreases and survives a later life gain");
             ac.powers[6] = ac.powers[1] = ac.powers[4] = 0;
         }
         core.scores_.lastName = "ABCDEFGHIJ";

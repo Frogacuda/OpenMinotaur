@@ -34,7 +34,7 @@ struct LiveBezel::Impl {
     double rate = 1, pending = 0;
     float baselineHue = 0;
     uint64_t sequence = 0;
-    bool failed = false, primed = false, shadersReady = false;
+    bool failed = false, primed = false, shadersReady = false, refreshed = false;
     std::vector<std::pair<std::string, std::string>> bindings;
 };
 LiveBezel::LiveBezel() : impl_(std::make_unique<Impl>()) {}
@@ -66,6 +66,7 @@ bool LiveBezel::assessingCadence() const {
 void LiveBezel::discardPendingFrame() {
     impl_->pending = 0;
     impl_->pacer.reset();
+    impl_->refreshed = false;
 }
 void LiveBezel::observeFrame(double workMs, double intervalMs) {
     if (available() && impl_->assessing)
@@ -73,6 +74,9 @@ void LiveBezel::observeFrame(double workMs, double intervalMs) {
 }
 unsigned LiveBezel::cadenceDivisor() const {
     return impl_->cadence.divisor();
+}
+bool LiveBezel::refreshedFrame() const {
+    return impl_->refreshed;
 }
 bool LiveBezel::available() const {
     return impl_->effect && !impl_->failed;
@@ -287,6 +291,7 @@ void LiveBezel::update(const std::string &game, PresentationState state, double 
 bool LiveBezel::draw(unsigned framebuffer, int width, int height, int x, int y, int w, int h,
                      int turns, bool exclusivePass) {
     auto &i = *impl_;
+    i.refreshed = false;
     if (!i.effect || i.failed)
         return false;
     try {
@@ -314,6 +319,7 @@ bool LiveBezel::draw(unsigned framebuffer, int width, int height, int x, int y, 
         // Advance animation clocks, then render each effect graph once. Late game
         // frames must not cause multiple GPU passes to recover elapsed time.
         i.effect->frameSampled(elapsed, destination);
+        i.refreshed = true;
         return true;
     } catch (const std::exception &e) {
         SDL_Log("Live bezel rendering failed: %s", e.what());

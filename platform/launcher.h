@@ -7,6 +7,7 @@
 #include "launcher_entrance.h"
 #include "launcher_launch.h"
 #include "settings.h"
+#include "shell_audio.h"
 #include "achievements.h"
 #include <array>
 #include <string>
@@ -35,6 +36,7 @@ class Launcher final : public Core {
     };
 
     void setPaths(const std::string &prefDir);
+    void setShellAudio(ShellAudio &audio) { audio_ = &audio; }
     void setPortrait(bool portrait);
     void refresh(); // Reload icons and bundled-resource availability; GL must be current.
     // GL must be current. Empty selects the built-in orientation pair; a failed external
@@ -223,6 +225,7 @@ class Launcher final : public Core {
     void quad(const MenuRect &, float u0, float v0, float u1, float v1, Colour top, Colour bottom);
 
     Host *host_ = nullptr;
+    ShellAudio *audio_ = nullptr;
     SurfaceInfo surface_;
     LauncherLayout layout_{false};
     std::string prefDir_;
