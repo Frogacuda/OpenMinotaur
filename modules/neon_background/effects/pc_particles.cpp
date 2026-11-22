@@ -16,8 +16,10 @@ float value(uint32_t x) {
     return v;
 }
 } // namespace
-CubeFace particleBillboards(const ShapeSettings &s,
-                            const std::array<PobParticle, 1024> &particles) {
+CubeFace particleBillboards(const ShapeSettings &s, const std::array<PobParticle, 1024> &particles,
+                            const std::array<int, 1024> *frames, int columns, int rows,
+                            float paletteTint, const std::array<SpriteParticleStyle, 1024> *styles,
+                            const std::map<int, std::array<float, 3>> *colours) {
     if (s.integers[14] != 0)
         throw std::runtime_error("POB object instances require another geometry path");
     CubeFace out;
@@ -28,10 +30,37 @@ CubeFace particleBillboards(const ShapeSettings &s,
         float hw = (s.floats[3] + 1) * a[9] * 128, hh = (s.floats[4] + 1) * a[10] * 128,
               c = std::cos(a[18]), sn = std::sin(a[18]), z = (s.integers[13] & 2) ? -a[2] : a[2];
         uint32_t colour = bits(a[16]);
+        if (frames) {
+            uint32_t tinted = colour & 255;
+            for (int shift : {24, 16, 8})
+                tinted |= uint32_t(std::lround(255 + (int((colour >> shift) & 255) - 255) *
+                                                         std::clamp(paletteTint, 0.f, 1.f)))
+                          << shift;
+            colour = tinted;
+        }
+        if (frames && styles && colours) {
+            auto source = colours->find((*styles)[i].colourSource);
+            if (source != colours->end()) {
+                uint32_t tinted = colour & 255;
+                for (int k = 0; k < 3; ++k) {
+                    int shift = 24 - k * 8;
+                    tinted |=
+                        uint32_t(std::clamp(
+                            std::lround(((colour >> shift) & 255) * source->second[k]), 0l, 255l))
+                        << shift;
+                }
+                colour = tinted;
+            }
+        }
         std::array<CubeVertex, 4> q;
         for (int k = 0; k < 4; k++) {
             float x = (k == 1 || k == 2) ? hw : -hw, y = k >= 2 ? hh : -hh,
                   u = k == 1 || k == 2 ? 1.f : 0.f, v = k >= 2 ? 1.f : 0.f;
+            if (frames) {
+                int frame = std::clamp((*frames)[i], 0, columns * rows - 1);
+                u = (frame % columns + u) / columns;
+                v = (frame / columns + v) / rows;
+            }
             q[k] = {colour, u, v, u, v, x * c - y * sn + a[0], y * c + x * sn + a[1], z};
         }
         for (int k : {0, 1, 2, 2, 3, 0})
@@ -40,6 +69,10 @@ CubeFace particleBillboards(const ShapeSettings &s,
     return out;
 }
 void ParticlePlayback::reset() {
+    sequence_.reset();
+    spriteFrames_ = {};
+    spriteStyles_ = {};
+    warming_ = false;
     particles_ = {};
     countdown_ = -1;
     rng_ = 1;
@@ -98,17 +131,20 @@ void ParticlePlayback::update(const ShapeSettings &s, const std::array<uint32_t,
         auto &a = p.data;
         if (int32_t(bits(a[15])) < 0 && countdown_ < 0 && created < n[1]) {
             spawn(p, s, palette);
+            auto emission = sequence_.nextEmission(!warming_);
+            spriteFrames_[i] = emission.frame;
+            spriteStyles_[i] = emission.style;
             ++created;
         }
         if (int32_t(bits(a[15])) >= 0) {
             for (int k = 0; k < 3; k++) {
-                a[k] += a[3 + k];
-                a[12 + k] += a[6 + k];
+                a[k] += a[3 + k] * spriteStyles_[i].speed;
+                a[12 + k] += a[6 + k] * spriteStyles_[i].speed;
             }
             float fade = a[5] * 16;
             if (a[2] > -f[2] || a[2] < f[2])
                 a[15] = value(0xffffffffu);
-            a[18] += a[19];
+            a[18] += a[19] * spriteStyles_[i].speed;
             if (fade != 0) {
                 if (fade <= 0) {
                     if (f[2] - fade <= a[2]) {
@@ -138,8 +174,10 @@ void ParticlePlayback::tick(const ShapeSettings &s, const std::array<uint32_t, 2
         for (auto &p : particles_)
             p.data[15] = value(0xffffffffu);
         countdown_ = -1;
+        warming_ = true;
         for (int i = 0; i < 600; i++)
             update(s, palette);
+        warming_ = false;
         ready_ = true;
     }
     update(s, palette);

@@ -63,6 +63,41 @@ class GoatStageCore final : public Core {
     using UI = goatup2::StageFrontend;
 
   public:
+    PresentationState presentationState() const override {
+        if (!world_ || !world_->goat)
+            return {};
+        PresentationState result;
+        for (int n = 0; n < 32; ++n) {
+            const auto &colour = world_->terrainPalette[size_t(n)];
+            result.colours.emplace(
+                n, std::array<float, 3>{float(colour.r), float(colour.g), float(colour.b)});
+        }
+        if (frontend_.page != UI::Page::Playing)
+            return result;
+        const auto &goat = *world_->goat;
+        if (observedWorld_ != world_.get() || observedStage_ != world_->stageIndex ||
+            goat.followingCount < observedFollowers_) {
+            ++presentationSession_;
+            observedWorld_ = world_.get();
+            observedStage_ = world_->stageIndex;
+        }
+        observedFollowers_ = goat.followingCount;
+        result.gameplay = true;
+        result.paused = frontend_.paused;
+        result.session = presentationSession_;
+        result.values = {{"player.hunger", double(goat.hunger)},
+                         {"power.invincible", goat.invulnerability > 0}};
+        auto &inventory = result.collections["inventory.pickups"];
+        for (auto *actor = world_->contactObjects; actor; actor = actor->next)
+            if (!actor->dead && actor->headbuttState == 1 && actor->serial > 0 &&
+                (dynamic_cast<const goatup2::PickupActor *>(actor) ||
+                 dynamic_cast<const goatup2::KidActor *>(actor)))
+                inventory.push_back({uint64_t(actor->serial), actor->sprite,
+                                     uint32_t(actor->paletteIndex) < 32U ? actor->paletteIndex
+                                     : actor->category == 14             ? 1
+                                                                         : -1});
+        return result;
+    }
     const CoreInfo &info() const override {
         return Info;
     }
@@ -898,6 +933,9 @@ class GoatStageCore final : public Core {
         backend_.execute(presentation_, *world_, mixer_);
         rendered_ = true;
     }
+    mutable const goatup2::StageRuntime *observedWorld_ = nullptr;
+    mutable int observedStage_ = -1, observedFollowers_ = 0;
+    mutable uint64_t presentationSession_ = 0;
     Host *host_ = nullptr;
     GoatAssetHost assets_;
     SurfaceInfo surface_;

@@ -6,9 +6,7 @@
 #include <stdexcept>
 namespace neon::pc {
 namespace {
-Point add(Point a, Point b) {
-    return {a.x + b.x, a.y + b.y, a.z + b.z};
-}
+Point add(Point a, Point b) { return {a.x + b.x, a.y + b.y, a.z + b.z}; }
 Point lerp(Point a, Point b, float t) {
     return {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t};
 }
@@ -77,9 +75,7 @@ void TunnelPlayback::scalar(size_t o, float f) {
     std::memcpy(&v, &f, 4);
     word(o, v);
 }
-Point TunnelPlayback::point(size_t o) const {
-    return {scalar(o), scalar(o + 4), scalar(o + 8)};
-}
+Point TunnelPlayback::point(size_t o) const { return {scalar(o), scalar(o + 4), scalar(o + 8)}; }
 void TunnelPlayback::point(size_t o, Point p) {
     scalar(o, p.x);
     scalar(o + 4, p.y);
@@ -208,7 +204,8 @@ Point TunnelPlayback::normal(uint32_t phase) const {
     float t = float(phase & 0xffffffc) * 3.7252903e-9f;
     return normalized(lerp(point(ring * 36 + 12), point(((ring + 1) & 31) * 36 + 12), t));
 }
-TunnelFrame TunnelPlayback::frame(const ShapeSettings &n, const Matrix4 &parent) const {
+TunnelFrame TunnelPlayback::frame(const ShapeSettings &n, const Matrix4 &parent, int sides,
+                                  float roundness) const {
     if (!initialized_)
         throw std::runtime_error("Tunnel must tick before drawing");
     TunnelFrame out;
@@ -222,10 +219,31 @@ TunnelFrame TunnelPlayback::frame(const ShapeSettings &n, const Matrix4 &parent)
                        translationMatrix(n.floats[7], -n.floats[8], n.floats[9]));
     model = multiplyMatrix(model, parent);
     out.modelView = multiplyMatrix(lookAtMatrix(out.eye, out.target, out.up), model);
+    sides = std::clamp(sides, 8, 128);
+    roundness = std::clamp(roundness, 0.f, 1.f);
+    auto sample = [&](int ring, int side) {
+        if (sides == 8)
+            return point((side * 65 + ring) * 36);
+        float phase = float(side) * 8 / sides;
+        int segment = int(phase);
+        float t = phase - segment;
+        auto at = [&](int index) { return point((((index % 8 + 8) % 8) * 65 + ring) * 36); };
+        auto a = at(segment - 1), b = at(segment), c = at(segment + 1), d = at(segment + 2);
+        auto curve = [&](float p0, float p1, float p2, float p3) {
+            float linear = p1 + (p2 - p1) * t;
+            float cubic = .5f * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+                                 (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
+            return linear + (cubic - linear) * roundness;
+        };
+        return Point{curve(a.x, b.x, c.x, d.x), curve(a.y, b.y, c.y, d.y),
+                     curve(a.z, b.z, c.z, d.z)};
+    };
     bool mirror = (n.integers[11] & 2) != 0;
     float uStep = scalar(0x271d4) * (mirror ? 2 : 1), vStep = scalar(0x271d8) * (mirror ? 2 : 1);
     float v0 = vStep * float(word(0x281fc) & 31), v1 = v0;
     int previousBand = 0;
+    if (sides != 8)
+        uStep *= 8.f / sides;
     for (int ring = 0; ring < 16; ring++) {
         int side = 8 - ring, band = (7 - std::min(std::abs(side), 7)) * 32;
         if (mirror) {
@@ -246,11 +264,10 @@ TunnelFrame TunnelPlayback::frame(const ShapeSettings &n, const Matrix4 &parent)
             drawNextV1 = reflect(nextV1);
         }
         if (side < 7 && int32_t(word(0x2821c)) > 0)
-            for (int corner = 1; corner < 9; corner++) {
-                auto current = point((corner * 65 + ring) * 36),
-                     previous = point(((corner - 1) * 65 + ring) * 36),
-                     last = point(((corner - 1) * 65 + ((ring - 1) & 15)) * 36),
-                     lastCurrent = point((corner * 65 + ((ring - 1) & 15)) * 36);
+            for (int corner = 1; corner <= sides; corner++) {
+                auto current = sample(ring, corner), previous = sample(ring, corner - 1),
+                     last = sample((ring - 1) & 15, corner - 1),
+                     lastCurrent = sample((ring - 1) & 15, corner);
                 Point delta = {(current.x - out.eye.x) * n.floats[4],
                                (current.y - out.eye.y) * n.floats[5],
                                (current.z - out.eye.z) * n.floats[6]};

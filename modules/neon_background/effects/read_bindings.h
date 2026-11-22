@@ -1,14 +1,22 @@
 #pragma once
+#include <array>
 #include "response_animation.h"
 #include <optional>
 #include <variant>
 namespace neon::effects {
 // Keep counters exact until conversion to a visual modulation value is requested.
 using ReadValue = std::variant<int64_t, uint64_t, double, bool, std::string>;
+struct ReadCollectionItem {
+    uint64_t id = 0;
+    int64_t value = 0;
+    int colourSource = -1;
+};
 struct ReadSnapshot {
     std::string game;
     uint64_t session = 0, sequence = 0;
     std::map<std::string, ReadValue> values; // full snapshot: omitted means unavailable
+    std::map<std::string, std::vector<ReadCollectionItem>> collections;
+    std::map<int, std::array<float, 3>> colours;
 };
 class ReadSource {
   public:

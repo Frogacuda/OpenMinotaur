@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/14.frag","gles/shaders/26.frag","gles/shaders/82.frag","gles/shaders/94.frag","reference/roots/11.argb","reference/roots/15.argb","reference/roots/22.argb","reference/roots/25.argb","reference/roots/27.argb","reference/roots/5.argb","reference/roots/8.argb"],
+"exports":[{"name":"material.rescueScroll","target":"node.8.f.3","unit":"texture-widths","minimum":-8,"maximum":8,"baseline":0.0009765625},{"name":"pipe.axis","target":"node.25.f.5","unit":"quarter-turns","minimum":0,"maximum":4,"baseline":0},{"name":"pipe.centre","target":"node.25.f.6","unit":"reference-coordinate","minimum":0,"maximum":1,"baseline":0.5},{"name":"scene.hue","target":"runtime.hue","unit":"turns","minimum":0,"maximum":1,"baseline":0},{"name":"wall.scroll","target":"node.18.f.7","unit":"texture-widths","minimum":-8,"maximum":8,"baseline":0},{"name":"wall.texture","target":"node.18.i.5","unit":"texture-selector","minimum":0,"maximum":350,"baseline":23}]
+}

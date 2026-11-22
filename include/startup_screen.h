@@ -15,6 +15,7 @@ class StartupScreen {
     std::unique_ptr<neon::render::NeonDevice> device_;
     neon::render::NeonBaseRender draw_;
     SurfaceInfo surface_;
+    Host *host_ = nullptr;
     Clock::time_point first_{};
     bool presented_ = false, waitNeutral_ = false;
     std::vector<uint32_t> blockedTouches_;
@@ -56,12 +57,11 @@ class StartupScreen {
     }
 
   public:
-    ~StartupScreen() {
-        release();
-    }
+    ~StartupScreen() { release(); }
     bool begin(Host &host, const SurfaceInfo &surface) {
         release();
         surface_ = surface;
+        host_ = &host;
         presented_ = waitNeutral_ = false;
         blockedTouches_.clear();
         device_ = std::make_unique<neon::render::NeonDevice>();
@@ -103,7 +103,10 @@ class StartupScreen {
             render();
             return true;
         }
+        auto *host = host_;
         release();
+        if (host)
+            host->startupPresentationFinished();
         dt = 1. / 60;
         return false; // Loading time is not simulation catch-up.
     }
@@ -139,6 +142,7 @@ class StartupScreen {
         return blocked;
     }
     void release() {
+        host_ = nullptr;
         if (device_) {
             draw_.device = nullptr;
             draw_.vertexBuffer = draw_.renderTarget = -1;

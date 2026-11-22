@@ -90,6 +90,9 @@ class controlBlock : public neon::input::TouchState<vec2d> {
     void processJoyMove(unsigned id, vec2d p);
     void addEntity(entity *e, entity **list);
     int collide(entity *a, entity *list, bool bounce);
+    // Optional read-only contact observation, after the original hit and bounce.
+    void (*presentationContact)(void *, const entity &, const entity &) = nullptr;
+    void *presentationContext = nullptr;
     int touch(entity *a, entity *list) {
         return collide(a, list, false);
     }

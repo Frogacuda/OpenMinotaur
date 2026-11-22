@@ -1,0 +1,4 @@
+NEONRIG 2
+# Existing VIC screen floating-ship coordinates; no simulation callbacks.
+value "component.4.4" "player.x" 1 21.9 -0.2 0.2 clamp -0.2 0.2
+value "component.4.5" "player.y" 8 18.9 0.3 0 clamp 0 0.3

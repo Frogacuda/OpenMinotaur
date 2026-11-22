@@ -1,0 +1,11 @@
+#version 300 es
+// Recovered source: sm3-88-wibblesphere_HLSL3.hlsl; program 88.
+precision highp float;
+uniform sampler2D image0,image1,image2;
+uniform vec4 c25,c26;uniform float materialGain;
+in vec4 diffuse;in vec2 t0,t1;out vec4 colour;
+#define saturate(x) clamp(x,0.0,1.0)
+vec4 sampleLod(sampler2D image,vec4 uv){return textureLod(image,uv.xy,uv.w);}
+void sincos(float x,out float s,out float c){s=sin(x);c=cos(x);}
+              vec3 getcoords(vec2 pos,vec2 pos2,vec4 diff,float r,vec4 parms)  {  vec3 rO;  vec3 rD;  vec3 sC;  vec3 pI;  vec3 pL;  vec3 n1;  vec3 n2;  float q;  float t;  float temp;    vec3 coords=vec3(vec3(-1.0));   pL.xy=2000.0*(pos-pos2);   pL.z=2000.0*(c25.a-0.5);   vec2 thIndex=vec2(vec2((pos-0.5)*100.0));   sC.xy=vec2(0.0);   sC.z=c25.b*500.0+r;   rD.xy=thIndex;   rD.z=10.0;   rD=vec3(normalize(rD)+0.0001);   rO=vec3(-rD*50.0);   rO-=sC;   pL-=sC;   float a=dot(rD,rD);   float b=dot(rD,rO);   float c=dot(rO,rO)-(r*r);   float disc=b*b-4.0*a*c;   if (disc<0.0) return vec3(-1.0);   float distsq=sqrt(disc);   if(b<0.0) q=(-b-distsq)/2.0;   if(b>=0.0) q=(-b+distsq)/2.0;   float t0=q/a;   float t1=c/q;   if(t0>t1)   {    temp=t0;    t0=t1;    t1=temp;   }   t=t0;   if(t0<0.0) t=t1;   pI=vec3((rO+rD*t));   coords.y=acos(pI.y/r)/3.141592654;   coords.x=acos(pI.x/(r*sin(3.141592654*coords.y)))/6.283185308;   coords.xy*=c26.rg*50.0;   coords.xy+=c26.ba*10.0;   if(parms.x<0.0)   {    coords.z=t;    return coords;   }   n1=vec3(normalize(pL-pI));   n2=vec3(normalize(pI));   coords.z=dot(n1,n2)*10.0*diff.a;   return coords;  }  vec4 wibblesphere_HLSL3(                       const vec2 TexCoord0,                          const vec2 TexCoord1,                          const vec4 Diffuse )    {  vec4 outpix;  vec4 inpix;    float rad=5000.0;   vec4 pram=vec4(vec4(-1.0));   vec3 coo=vec3(vec3(getcoords(TexCoord0,TexCoord1,Diffuse,rad,pram)));   rad=sin(coo.z*0.1*c25.r)*1000.0+sin(coo.x*22.1*c25.g)*1000.0+sin(coo.y*22.1*c25.g)*1000.0+3000.0;   pram.x=1.0;   coo=vec3(getcoords(TexCoord0,TexCoord1,Diffuse,rad,pram));   vec2 theTex=vec2(vec2(coo.xy));   if(coo.z<0.0) return vec4(0.0);   outpix=vec4(texture(image0,theTex));    return outpix;  } 
+void main(){colour=wibblesphere_HLSL3(t0,t1,diffuse)*materialGain;}

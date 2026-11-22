@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/0.frag","gles/shaders/1.frag","gles/shaders/11.frag","gles/shaders/12.frag","gles/shaders/13.frag","gles/shaders/16.frag","gles/shaders/26.frag","gles/shaders/4.frag","gles/shaders/5.frag","gles/shaders/73.frag","gles/shaders/83.frag","reference/literals/05.png","reference/literals/11.png","reference/literals/12.png","reference/literals/title-flight.png","reference/roots/10.argb","reference/roots/2.argb","reference/roots/6.argb","vectors/vector-beam.frag.glsl","vectors/vector-beam.vert.glsl"],
+"exports":[]
+}

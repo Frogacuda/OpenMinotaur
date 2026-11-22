@@ -1,6 +1,7 @@
 #include "startup_screen.h"
 #include "backend.h"
 #include "records.h"
+#include "fiveaday_presentation.h"
 #include "original_tables.h"
 #include "highscores.h"
 #include <filesystem>
@@ -42,6 +43,8 @@ class FiveADayCore final : public Core {
     std::string recordsPath_, scoresPath_, name_;
     std::array<std::string, 2> awardText_;
     bool clearLines_ = true;
+    uint64_t presentationSession_ = 0;
+    fiveaday::PresentationObserver presentation_;
     int clock_ = 0, day_ = 0, key_ = 0;
     bool recorded_ = false, motionAvailable_ = false;
     float previousX_ = 0, previousY_ = 0;
@@ -208,8 +211,11 @@ class FiveADayCore final : public Core {
             screen_ = Screen::Playing;
             restart();
         }
-        if (screen_ != Screen::Scores && screen_ != Screen::Name)
+        if (screen_ != Screen::Scores && screen_ != Screen::Name) {
+            presentation_.beforeTick(*world_);
             world_->tick(input());
+            presentation_.afterTick(*world_);
+        }
         if (!world_->demo) {
             if (records_.planes != world_->lifetimePlanes) {
                 records_.planes = world_->lifetimePlanes;
@@ -287,6 +293,8 @@ class FiveADayCore final : public Core {
             }
         const auto &d = records_.days[size_t(day_)];
         world_->start(day_, d.lives, d.score, screen_ != Screen::Playing);
+        ++presentationSession_;
+        presentation_.reset();
         while (letters) {
             auto *e = letters;
             letters = e->next;
@@ -559,6 +567,18 @@ class FiveADayCore final : public Core {
     }
 
   public:
+    PresentationState presentationState() const override {
+        if (!world_ || screen_ != Screen::Playing || world_->demo)
+            return {};
+        // The ship's displayed angle is already in radians, wrapped at +/-pi.
+        return {true,
+                world_->paused || suspended_.load(),
+                presentationSession_,
+                {{"player.rotation", double(world_->ship.angle)},
+                 {"levels.completed", presentation_.completed()},
+                 {"minotaurs.rescued", presentation_.rescued()},
+                 {"fruit.trail", int64_t(presentation_.trail())}}};
+    }
     const CoreInfo &info() const override {
         return Info;
     }

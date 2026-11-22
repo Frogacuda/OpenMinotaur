@@ -1,0 +1,13 @@
+NHML 1
+# Host-observed deflector turns, in logical update order. No game counters are added.
+collection "ball.turns"
+input "ball.shell" number "remaining-fraction"
+input "level.number" integer "one-based-level"
+parameter "reflection.rotation" "node.11.f.4" "radians"
+parameter "timer.field" "node.18.f.4" "shader-constant"
+parameter "level.shader" "node.20.i.2" "shader-id"
+
+steps "ball.turns" "reflection.rotation" 0.5 0 1.5707963267948966 -3.141592653589793 3.141592653589793 linear
+value "timer.field" "ball.shell" 0 1 0.15 0.305299997 clamp 0.15 0.305299997
+# Resolve the absolute level immediately on entry. Later changes fade through zero.
+fadeindex "level.shader" "level.number" 1 12 5 12 13 14 15 16 "timer.field" 0.15 0.15

@@ -140,7 +140,12 @@ void controlBlock::addEntity(entity *e, entity **list) {
 // entity is told (wasShot if a's flags & 3, then hitBy). With `bounce` both
 // are pushed apart and exchange momentum by mass and elasticity.
 int controlBlock::collide(entity *a, entity *b, bool bounce) {
-    return neon::entities::collideEarly(a, b, bounce, [](const entity &target) { return false; });
+    return neon::entities::collideEarly(
+        a, b, bounce, [](const entity &) { return false; },
+        [this](const entity &source, const entity &target) {
+            if (presentationContact)
+                presentationContact(presentationContext, source, target);
+        });
 }
 
 vec2d controlBlock::attract(entity *a, entity *list, float strength) {

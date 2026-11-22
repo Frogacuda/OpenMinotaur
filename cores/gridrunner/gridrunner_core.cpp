@@ -1,34 +1,34 @@
 // Platform shell for the source reconstruction and the separate VIC Classic
 // game. Controls, local records and text menus are deliberate port extensions.
-#include "neon/backend_setup.h"
-#include "startup_screen.h"
-#include "neon/controller_session.h"
-#include "gridrunner_game_host.h"
-#include "core_api.h"
 #include "../../platform/build_info.h"
-#include "controls.h"
-#include "modern_profile.h"
-#include "../../reconstruction/gridrunner/native_levels.h"
 #include "../../reconstruction/gridrunner/native_classic.h"
-#include "native_view.h"
+#include "../../reconstruction/gridrunner/native_levels.h"
+#include "../../reconstruction/gridrunner/native_star.h"
+#include "controls.h"
+#include "core_api.h"
+#include "engine/game.h"
 #include "game_format.h"
+#include "gridrunner_game_host.h"
+#include "highscores.h"
+#include "modern_profile.h"
+#include "native_view.h"
+#include "neon/backend_setup.h"
+#include "neon/controller_session.h"
+#include "neon_audio.h"
+#include "neon_modules.h"
+#include "neon_resources.h"
 #include "original_frontend.h"
 #include "original_messages.h"
-#include "../../reconstruction/gridrunner/native_star.h"
-#include "text_menus.h"
 #include "sample_audio.h"
-#include "engine/game.h"
-#include "neon_modules.h"
-#include "neon_audio.h"
-#include "neon_resources.h"
-#include "highscores.h"
-#include <glad/gl.h>
+#include "startup_screen.h"
+#include "text_menus.h"
 #include <algorithm>
 #include <climits>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <glad/gl.h>
 #include <memory>
 
 namespace gridrunner {
@@ -59,12 +59,42 @@ class GridrunnerCore final : public Core {
           shaderHistory_(history) {
         renderState_.shaderCycles = history;
     }
-    const CoreInfo &info() const override {
-        return classic_ ? kClassicInfo : kInfo;
-    }
+    const CoreInfo &info() const override { return classic_ ? kClassicInfo : kInfo; }
     NativeFormat nativeFormat() const override {
         return gridrunner::nativeFormat(classic_ ? gridrunner::GameVersion::ClassicVic20
                                                  : gridrunner::GameVersion::Enhanced);
+    }
+    // Read-only host contract; no renderer, rig destinations or game callbacks.
+    PresentationState presentationState() const override {
+        if (classic_) {
+            PresentationState state{active_, paused_ || suspended_, presentationSession_, {}};
+            if (active_ &&
+                classicGame_.state() == gr::reconstruction::ios::Classic::State::Playing) {
+                const auto &screen = classicGame_.screen();
+                for (size_t i = 0; i < screen.cells.size(); ++i)
+                    if (screen.cells[i] == (0x10000 | 0x502) && screen.floats[i].ink == 0x502) {
+                        state.values["player.x"] = double(screen.floats[i].x) + .5;
+                        state.values["player.y"] = double(screen.floats[i].y) + .5;
+                        break;
+                    }
+            }
+            return state;
+        }
+        if (!native_ || demo_)
+            return {};
+        PresentationState state{
+            active_,
+            paused_ || suspended_,
+            presentationSession_,
+            {{"power.slow", native_->ac.powers[6] > 0},
+             {"power.multishot", native_->ac.powers[1] > 0 || native_->ac.powers[2] > 0},
+             {"power.allAround", native_->ac.powers[4] > 0},
+             {"lives", int64_t(native_->ac.lives)}}};
+        if (const auto *ship = native_->currentShip()) {
+            state.values["player.x"] = ship->position.x;
+            state.values["player.y"] = ship->position.y;
+        }
+        return state;
     }
     bool init(Host &host, const SurfaceInfo &surface) override {
         // Classic had no independent launch image in the original release.
@@ -371,9 +401,7 @@ class GridrunnerCore final : public Core {
         if (suspended && !paused_)
             openPause();
     }
-    void mixAudio(float *output, int frames) override {
-        mixer_.mix(output, frames);
-    }
+    void mixAudio(float *output, int frames) override { mixer_.mix(output, frames); }
     void save() override {
         auto bind = renderState_.bind();
         if (!host_)
@@ -457,9 +485,7 @@ class GridrunnerCore final : public Core {
         return !classic_ && !active_ && !frontend_.levelSelect() && !paused_ && !scoresOpen_ &&
                !nameEntry_;
     }
-    int startLevel() const {
-        return devStart_ ? devLevel_ : survival_ ? 0 : selectedLevel_;
-    }
+    int startLevel() const { return devStart_ ? devLevel_ : survival_ ? 0 : selectedLevel_; }
     gridrunner::GameMode mode() const {
         if (classic_)
             return gridrunner::GameMode::Pure;
@@ -480,9 +506,7 @@ class GridrunnerCore final : public Core {
                : devStart_ ? 3
                            : progress_.at(startLevel()).lives;
     }
-    int best() const {
-        return std::max(shownScore(), scores_.entry(int(mode()), 0).score);
-    }
+    int best() const { return std::max(shownScore(), scores_.entry(int(mode()), 0).score); }
     void cancelInput() {
         controllerFrame_.clear();
         pad_ = {};
@@ -617,6 +641,7 @@ class GridrunnerCore final : public Core {
                 if (!active_ && !paused_ && !scoresOpen_) {
                     messages_.clear();
                     classicGame_.start();
+                    ++presentationSession_;
                     active_ = true;
                     recorded_ = false;
                     pauseAlpha_ = 1;
@@ -655,10 +680,10 @@ class GridrunnerCore final : public Core {
         }
         rebuildButtons();
     }
-    void startGame() {
-        startNative(false);
-    }
+    void startGame() { startNative(false); }
     void startNative(bool demo) {
+        if (!demo)
+            ++presentationSession_;
         messages_.clear();
         const int nativeStart = demo ? 0 : startLevel();
         native_ = std::make_unique<NativeGrid>(
@@ -1279,6 +1304,7 @@ class GridrunnerCore final : public Core {
     int entryRank_ = -1, entryBoard_ = 0;
     std::string entryName_;
     const int kW, kH;
+    uint64_t presentationSession_ = 0;
     gr::reconstruction::ios::Classic classicGame_{&sessionRandom_};
     neon::input::ControllerFrame controllerFrame_;
     Host *host_ = nullptr;

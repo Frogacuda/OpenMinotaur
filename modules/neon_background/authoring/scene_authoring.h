@@ -19,6 +19,7 @@ struct ReferenceControl {
     bool applicable = true;
     int shaderBank = 0, layer = -1;
     bool retained = false;
+    std::string cycleSource; // Shared recovered driver key; derived from preset routes.
 };
 // Shared editor contract: no graphics API or native window dependency.
 class SceneAuthoring {
@@ -31,6 +32,7 @@ class SceneAuthoring {
     virtual void sceneName(int, const std::string &) = 0;
     virtual std::vector<std::pair<int, std::string>> layers(int) const = 0;
     virtual std::string validateAuthoring(int) = 0;
+    virtual std::string prepareMaterialEdit(int, const std::string &) { return {}; }
     virtual void writeEdits(std::ostream &) const = 0;
     virtual void readEdits(std::istream &) = 0;
 };

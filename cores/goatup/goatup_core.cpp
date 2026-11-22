@@ -42,6 +42,7 @@ class GoatUpCore final : public Core {
     double accumulator_ = 0;
     bool rendered_ = false, canSave_ = true;
     int menu_ = 0, best_ = 0;
+    uint64_t presentationSession_ = 0;
     float pauseAlpha_ = 0;
     bool revealPause_ = true, pauseTouchInside_ = false, gameOverArmed_ = false;
     bool anyTouch() const {
@@ -158,6 +159,7 @@ class GoatUpCore final : public Core {
         // module continue to affect the next run's platform/actor stream.
         const uint32_t stream = world_ ? world_->random.state() : 1u;
         world_ = std::make_unique<goatup::World>(records_, stream, gameplay);
+        ++presentationSession_;
         auto &w = *world_;
         w.game.stopSound = [this](int n) { mixer_.stop(n); };
         w.actors.sound = [this](int n, int shift) { mixer_.play(n, 8 << shift, 0); };
@@ -286,6 +288,19 @@ class GoatUpCore final : public Core {
     }
 
   public:
+    PresentationState presentationState() const override {
+        if (!world_ || (front_.screen != goatup::Frontend::Screen::Playing && !world_->paused))
+            return {};
+        return {true,
+                world_->paused || suspended_.load(),
+                presentationSession_,
+                {{"player.x", world_->goat.position.x},
+                 {"screen.elevation", double(world_->tower.scroll) - double(-.2f)},
+                 {"kids", uint64_t(std::max(0, world_->goat.kids))},
+                 {"zone", int64_t(std::max(0, world_->game.lastTheme))},
+                 {"mushroom.active", world_->actors.poison > 0},
+                 {"billyGoats.kissed", uint64_t(std::max(0, world_->actors.runBillyGoats))}}};
+    }
     const CoreInfo &info() const override {
         return Info;
     }

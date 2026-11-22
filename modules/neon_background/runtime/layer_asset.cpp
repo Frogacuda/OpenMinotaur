@@ -1,6 +1,7 @@
 #include "layer_asset.h"
 #include "primitive_mesh.h"
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -15,14 +16,15 @@ void need(bool ok, const char *s) {
 }
 void validate(const LayerAsset &a) {
     need(!a.name.empty() && a.name.size() <= 128 && a.notes.size() <= 2048 &&
-             a.scene.size() <= 1048576 && !a.scene.empty() && int(a.kind) >= 0 && int(a.kind) <= 1,
+             a.scene.size() <= 67108864 && !a.scene.empty() && int(a.kind) >= 0 && int(a.kind) <= 1,
          "Invalid layer asset metadata");
     need(a.kind == LayerAssetKind::Recovered ? (a.root >= -1 && a.root < 16)
                                              : (a.root >= 0 && a.root <= 100000),
          "Invalid layer asset root");
 }
 } // namespace
-LayerAsset LayerAsset::capture(Runtime &effect, std::string name, int layer, int component) {
+LayerAsset LayerAsset::capture(Runtime &effect, std::string name, int layer, int component,
+                               double playbackRate) {
     LayerAsset a;
     a.name = std::move(name);
     a.kind = (effect.selectedPreset() == 18 || effect.selectedPreset() == 21)
@@ -32,10 +34,58 @@ LayerAsset LayerAsset::capture(Runtime &effect, std::string name, int layer, int
     if (a.kind == LayerAssetKind::Components && component)
         effect.components().at(component);
     std::ostringstream out;
-    effect.writeScene(out);
+    effect.writeScene(out, playbackRate);
     a.scene = out.str();
     validate(a);
     return a;
+}
+double LayerAsset::playbackRate() const {
+    std::istringstream input(scene);
+    std::string magic;
+    int version, id;
+    double exposure, rate;
+    need(bool(input >> magic >> version >> id >> exposure >> rate) && magic == "NEONGLES" &&
+             std::isfinite(rate) && rate >= 0 && rate <= 4,
+         "Invalid asset playback rate");
+    return rate;
+}
+LayerAsset LayerAsset::captureNode(Runtime &effect, std::string name, size_t node, double rate) {
+    const int mode = effect.selectedPreset();
+    need(mode >= 7 && mode <= neon::pc::lastJukeboxPreset && mode != 18 && mode != 21 &&
+             !neon::pc::isStudy(mode),
+         "Select a generated or geometry node in a recovered scene");
+    const auto &nodes = effect.authoring().composition(mode).nodes;
+    need(node < nodes.size(), "Selected node does not exist");
+    auto result = capture(effect, std::move(name), nodes[node].stack, 0, rate);
+    Runtime source(effect.dataPath());
+    std::istringstream input(result.scene);
+    source.readScene(input);
+    bool endpoint = false;
+    for (auto &field : source.authoring().controls(mode)) {
+        if (field.key == "scene.node") {
+            need(std::any_of(field.choices.begin(), field.choices.end(),
+                             [&](const auto &choice) { return choice.value == int(node); }),
+                 "This node is a controller or settings block; save its layer instead");
+            field.enabled = true;
+            field.motion = 0;
+            field.value = float(node);
+            endpoint = true;
+        }
+        if (field.key == "scene.output") {
+            field.enabled = true;
+            field.motion = 0;
+            field.value = float(nodes[node].stack);
+        }
+    }
+    need(endpoint, "Node output selection is unavailable");
+    source.authoring().refreshControls(mode);
+    result.notes = "Output through node " + std::to_string(node) +
+                   "; input layers, preceding passes and controllers are included.";
+    std::ostringstream output;
+    source.writeScene(output, rate);
+    result.scene = output.str();
+    validate(result);
+    return result;
 }
 void LayerAsset::loadPreview(Runtime &effect) const {
     validate(*this);
@@ -63,7 +113,7 @@ void LayerAsset::updateFromPreview(Runtime &effect) {
     if (kind == LayerAssetKind::Components && root)
         effect.components().at(root);
     std::ostringstream out;
-    effect.writeScene(out);
+    effect.writeScene(out, playbackRate());
     auto candidate = *this;
     candidate.scene = out.str();
     validate(candidate);
@@ -91,7 +141,7 @@ LayerAsset LayerAsset::read(std::istream &in) {
     return a;
 }
 LayerAsset LayerAsset::open(const std::filesystem::path &file) {
-    need(std::filesystem::file_size(file) <= 2200000, "Layer asset file is too large");
+    need(std::filesystem::file_size(file) <= 134217728, "Layer asset file is too large");
     std::ifstream in(file, std::ios::binary);
     need(bool(in), "Cannot open layer asset");
     return read(in);
@@ -102,7 +152,8 @@ void LayerAsset::save(const std::filesystem::path &file) const {
     need(bool(out), "Cannot write layer asset");
     write(out);
 }
-int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, int primitive) {
+int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, int primitive,
+                     double destinationRate) {
     // Work against a CPU-only copy. Any invalid graph, resource budget or nested payload
     // leaves the destination untouched; no graphics is allocated during import.
     std::ostringstream saved;
@@ -111,8 +162,24 @@ int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, 
     // Runtime data directory is exposed explicitly, not inferred from executable paths.
     Runtime candidate(destination.dataPath());
     candidate.readScene(read);
-    if (candidate.selectedPreset() != 18 && candidate.selectedPreset() != 21)
+    const bool promote = candidate.selectedPreset() != 18 && candidate.selectedPreset() != 21;
+    if (promote) {
+        auto base =
+            LayerAsset::capture(destination, "Original effect / base", -1, 0, destinationRate);
         candidate.selectPreset(18);
+        candidate.components().items.clear();
+        candidate.responses().sequences.clear();
+        candidate.responses().rebuild();
+        auto layer = Component::make(ComponentKind::Layer, candidate.components().nextId++);
+        layer.name = base.name;
+        layer.layerScene = base.scene;
+        layer.layerOutput = -1;
+        layer.values[Speed] = float(destinationRate);
+        candidate.components().items.push_back(std::move(layer));
+        candidate.parameters().exposure = 1;
+        candidate.parameters().hueShift = 0;
+        candidate.parameters().yaw = candidate.parameters().pitch = 0;
+    }
     Runtime source(destination.dataPath());
     asset.loadPreview(source);
     auto &scene = candidate.components();
@@ -133,6 +200,8 @@ int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, 
         else
             for (auto &c : source.components().items)
                 visit(c.id);
+        auto imageIds = candidate.authoring().images.merge(source.imageAssets());
+        candidate.authoring().setImages(candidate.authoring().images);
         std::map<int, int> ids;
         for (auto &c : source.components().items)
             if (needed.count(c.id))
@@ -147,6 +216,8 @@ int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, 
                 for (auto p : {&c.source, &c.sourceB, &c.sourceC})
                     if (*p >= 10000)
                         *p = 10000 + ids.at(*p - 10000);
+                    else if (importedImageSelector(*p))
+                        *p = imageIds.at(*p);
                 if (c.kind == ComponentKind::Vector && c.profile == 3 && c.vectorDocument.empty()) {
                     std::ostringstream vectors;
                     neon::vectors::writeObjects(vectors, source.vectorObjects());
@@ -189,6 +260,7 @@ int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, 
         Component layer = Component::make(ComponentKind::Layer, scene.nextId++);
         layer.name = asset.name;
         layer.layerScene = asset.scene;
+        layer.values[Speed] = float(asset.playbackRate());
         layer.layerOutput = asset.kind == LayerAssetKind::Recovered ? asset.root : -1;
         layer.layerComponent = asset.kind == LayerAssetKind::Components ? asset.root : -1;
         layer.visible = !target && primitive < 0;
@@ -220,10 +292,13 @@ int importLayerAsset(Runtime &destination, const LayerAsset &asset, int target, 
     validation.readScene(check);
     if (destination.selectedPreset() != 18 && destination.selectedPreset() != 21)
         destination.selectPreset(18);
+    destination.setImageAssets(candidate.imageAssets());
+    destination.parameters() = candidate.parameters();
     destination.components() = std::move(scene);
     destination.responses() = std::move(bank);
     destination.parameters().componentPreviewId = 0;
     destination.parameters().layerPreview = -1;
+    destination.parameters().previewStage = 0;
     return imported;
 }
 } // namespace neon::effects

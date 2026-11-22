@@ -1,0 +1,16 @@
+NHML 1
+input "player.hunger" number "normalized"
+input "power.invincible" boolean "state"
+collection "inventory.pickups"
+emitter "items.flight" 24 2 source
+insert "inventory.pickups" "items.flight" 8 28 19 10 20 11 22 12 23 13 24 14 51 15 52 16 53 17 54 18 71 19 73 20 74 21 75 22 76 23 77 24 78 25 79 26 80 27 81 28 82 29 83 30 107 31 120 32 152 33 153 34 163 35 165 36 175 37
+parameter "hunger.field" "node.11.f.5" "normalized"
+parameter "hunger.saturation" "colour.10.saturation" "gain"
+parameter "invincible.field" "node.32.f.4" "normalized"
+parameter "invincible.green" "colour.31.green" "gain"
+parameter "invincible.hue" "runtime.hue" "turns"
+value "hunger.field" "player.hunger" 0 1 0 1 clamp 0 1
+value "hunger.saturation" "player.hunger" 0 0.5 0.25 1 clamp 0.25 1
+select "invincible.field" 0.136491 1 "power.invincible" 1 0.4
+select "invincible.green" 1 1 "power.invincible" 1 0.4
+cycle "power.invincible" "invincible.hue" 1 1 0

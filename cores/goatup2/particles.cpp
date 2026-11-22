@@ -109,6 +109,8 @@ void emitHeadbuttParticles(HeadbuttEmissionView actor, ParticleSoundSettings sou
         birth.colourRamp = headbuttColourRamp();
         birth.savedVelocity = birth.velocity;
         birth.solidCollisionEnabled = true; // no source override of inherited setting
+        // Fart particles deal one point per enemy contact (original +0x1f4).
+        birth.projectileContactGate = 1.f;
         output.adoptHeadbuttParticle(birth);
     }
 }

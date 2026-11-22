@@ -2,10 +2,10 @@
 // traces: the recovery must retain game/audio state and the next rendered frames.
 #define MINOTAUR_SHELL_TEST
 #include "../platform/main.cpp"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <filesystem>
 #define REQUIRE(x)                                                                                 \
     do {                                                                                           \
         if (!(x))                                                                                  \
@@ -92,6 +92,14 @@ int main(int argc, char **argv) {
         const bool launchLoss = argc > 3 && std::string(argv[3]) == "--launch-loss";
         const bool launchControl = argc > 3 && std::string(argv[3]) == "--launch-control";
 #endif
+        const std::string neonMode = argc > 6 ? argv[6] : "";
+        const bool forcedNeon = neonMode.rfind("--neon", 0) == 0;
+        const bool forceHalf = neonMode.find("30") != std::string::npos;
+        const bool portraitTest = neonMode.find("portrait") != std::string::npos;
+        const double frameElapsed = neonMode.find("slow") != std::string::npos ? 1. / 30 : 1. / 60;
+        const bool wideTest = neonMode.find("wide") != std::string::npos;
+        const int windowWidth = portraitTest ? 360 : wideTest ? 960 : 640;
+        const int windowHeight = portraitTest ? 640 : wideTest ? 540 : 480;
         const bool es = argc > 4 && std::string(argv[4]) == "--gles";
         REQUIRE(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD));
         App app;
@@ -107,6 +115,12 @@ int main(int argc, char **argv) {
             if (mode == "--crt" || mode == "--crt2")
                 app.settings.set("global", "screen_mode", mode == "--crt2" ? "crt2" : "crt");
         }
+#ifdef MINO_LIVE_BEZELS
+        if (id == "goatup" || forcedNeon)
+            app.settings.set(id, "backdrop", "neon");
+        if (forcedNeon)
+            app.settings.set(id, "neon_quality", "lq");
+#endif
         app.core = &app.launcher;
         app.gameId = "launcher";
 #else
@@ -114,11 +128,43 @@ int main(int argc, char **argv) {
         app.core = findCore(id)->create();
         app.gameId = id;
 #endif
-        app.window = SDL_CreateWindow("Application resume checks", 640, 480,
+        app.window = SDL_CreateWindow("Application resume checks", windowWidth, windowHeight,
                                       SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
         REQUIRE(app.window);
         REQUIRE(createContext(app, es));
         REQUIRE(app.display.init(app.glES));
+#ifndef MINO_NO_PRESENTATION_FILTERS
+        {
+            DisplaySettings settings;
+            settings.backdrop = Backdrop::Neon;
+            settings.backdropColour = 0xff00ff;
+            settings.aspect = AspectMode::Original;
+            int width = 0, height = 0;
+            SDL_GetWindowSizeInPixels(app.window, &width, &height);
+            app.display.configure(width, height, {320, 480, 2.f / 3, 2.f / 3}, settings);
+            app.display.backgroundPass(
+                [](unsigned, int, int, int, int, int, int, int) { return false; });
+            app.display.beginFrame();
+            glClearColor(0, 0, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            app.display.present();
+            unsigned char corner[4];
+            glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, corner);
+            REQUIRE(corner[0] == 0 && corner[1] == 0 && corner[2] == 0);
+            settings.backdrop = Backdrop::Plasma;
+            app.display.configure(width, height, {320, 480, 2.f / 3, 2.f / 3}, settings);
+            app.display.present();
+            std::vector<unsigned char> border(16 * height * 4);
+            glReadPixels(0, 0, 16, height, GL_RGBA, GL_UNSIGNED_BYTE, border.data());
+            bool lit = false;
+            for (size_t n = 0; n < border.size(); n += 4)
+                lit |= border[n] || border[n + 1] || border[n + 2];
+            REQUIRE(lit);
+            app.display.backgroundPass({});
+            std::cout << "PASS: Neon unavailable stays black; explicit Plasma remains separate.\n";
+        }
+#endif
+
 #ifdef MINO_STANDALONE_GAME
         REQUIRE(startGame(app, id));
         SDL_DestroyAudioStream(app.audio);
@@ -136,14 +182,27 @@ int main(int argc, char **argv) {
             SDL_GL_DestroyContext(app.gl);
             SDL_DestroyWindow(app.window);
             SDL_Quit();
-            std::cout
-                << "Selected target, retained program and disabled shader constants survived recovery\n";
+            std::cout << "Selected target, retained program and disabled shader constants survived "
+                         "recovery\n";
             return 0;
         }
 #ifdef MINO_COLLECTION_TITLE
-        if (id == "title")
+        if (id == "title") {
             REQUIRE(startCollectionTitle(app));
-        else
+#ifdef MINO_LIVE_BEZELS
+            if (app.titleSmokeTest) {
+                for (int n = 0; n < 140; ++n)
+                    observeNeonPerformance(app, {20, 33.3});
+                REQUIRE(!app.titleSmokeTest && !app.settings.neonHighQuality("global"));
+                app.settings.set("global", "neon_quality", "hq");
+                for (int n = 0; n < 140; ++n)
+                    observeNeonPerformance(app, {20, 33.3});
+                REQUIRE(app.settings.neonHighQuality("global"));
+                std::cout << "PASS: first desktop smoke selects LQ; explicit quality remains owned "
+                             "by user.\n";
+            }
+#endif
+        } else
 #endif
             if (id != "launcher") {
             bool injected = false;
@@ -213,7 +272,7 @@ int main(int argc, char **argv) {
             }
             app.core->pads(&pad, 1);
             app.display.beginFrame();
-            app.core->frame(1. / 60);
+            app.core->frame(frameElapsed);
             std::array<float, 1470> audio{};
             app.core->mixAudio(audio.data(), 735);
             if (frame >= 190) {
@@ -225,13 +284,75 @@ int main(int argc, char **argv) {
                 trace << frame << '\t' << std::hex << hashBytes(pixels.data(), pixels.size())
                       << '\t' << hashBytes(audio.data(), sizeof audio);
             }
+#ifdef MINO_LIVE_BEZELS
+            if (id == "goatup" || forcedNeon) {
+                app.bezel.update(id, app.core->presentationState(), frameElapsed, forcedNeon);
+                if (forceHalf && frame >= 2 && app.bezel.cadenceDivisor() != 2) {
+                    app.bezel.beginCadenceAssessment();
+                    for (int n = 0; n < 40; ++n)
+                        app.bezel.observeFrame(20, 33.3);
+                    app.bezel.finishCadenceAssessment();
+                    REQUIRE(app.bezel.cadenceDivisor() == 2);
+                }
+                REQUIRE(app.bezel.available());
+                app.display.backgroundPass(
+                    [&](unsigned f, int w, int h, int x, int y, int vw, int vh, int turns) {
+                        return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
+                    });
+            }
+#endif
             app.display.present();
+#ifdef MINO_LIVE_BEZELS
+            if (id == "goatup" || forcedNeon)
+                REQUIRE(app.bezel.available());
+#endif
+
             REQUIRE(glGetError() == GL_NO_ERROR);
+#ifdef MINO_LIVE_BEZELS
+            if (id == "goatup" && frame == 210)
+                REQUIRE(saveScreenshot(app, (out + "/live-bezel.png").c_str()));
+#endif
             REQUIRE(!app.quit);
             if (frame >= 190) {
-                std::vector<uint8_t> pixels(640 * 480 * 4);
+                std::vector<uint8_t> pixels(size_t(windowWidth) * windowHeight * 4);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                glReadPixels(0, 0, 640, 480, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+                glReadPixels(0, 0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE,
+                             pixels.data());
+                if (forcedNeon) {
+                    const auto viewport = app.display.viewport();
+                    size_t gameLit = 0, bezelLit = 0;
+                    for (int y = 0; y < windowHeight; ++y)
+                        for (int x = 0; x < windowWidth; ++x) {
+                            size_t n = (size_t(y) * windowWidth + x) * 4;
+                            bool lit = pixels[n] || pixels[n + 1] || pixels[n + 2];
+                            if (x >= viewport.x && x < viewport.x + viewport.w &&
+                                windowHeight - 1 - y >= viewport.y &&
+                                windowHeight - 1 - y < viewport.y + viewport.h)
+                                gameLit += lit;
+                            else
+                                bezelLit += lit;
+                        }
+                    if (gameLit <= 100 || bezelLit <= 100) {
+                        std::cerr << "Visibility frame=" << frame << " game=" << gameLit
+                                  << " bezel=" << bezelLit
+                                  << " requested=" << app.display.liveBackgroundRequested()
+                                  << " gameId=" << app.gameId
+#ifndef MINO_STANDALONE_GAME
+                                  << " backdrop="
+                                  << app.settings.get(app.gameId, "backdrop", "missing")
+#endif
+                                  << " view=" << viewport.x << "," << viewport.y << ","
+                                  << viewport.w << "," << viewport.h << "\n";
+                        saveScreenshot(app, (out + "/visibility-failure.png").c_str());
+                    }
+                    REQUIRE(gameLit > 100);
+                    const bool recovering =
+                        (frame >= 200 && frame < 208) || (frame >= 280 && frame < 288);
+                    if (!recovering)
+                        REQUIRE(bezelLit > 100);
+                    if (frame == 210)
+                        REQUIRE(saveScreenshot(app, (out + "/forced-neon30.png").c_str()));
+                }
                 if (id == "title") {
                     size_t lit = 0;
                     for (size_t i = 0; i < pixels.size(); i += 4)
@@ -239,9 +360,19 @@ int main(int argc, char **argv) {
                     REQUIRE(lit > pixels.size() / 400);
                     REQUIRE(!app.returnRequested);
                 }
-                trace << '\t' << hashBytes(pixels.data(), pixels.size()) << std::dec << '\n';
+                const auto view = app.display.viewport();
+                uint64_t gameHash = 14695981039346656037ull;
+                for (int y = view.y; y < view.y + view.h; ++y) {
+                    size_t offset = (size_t(windowHeight - 1 - y) * windowWidth + view.x) * 4;
+                    gameHash = hashBytes(pixels.data() + offset, size_t(view.w) * 4, gameHash);
+                }
+                trace << '\t' << hashBytes(pixels.data(), pixels.size()) << '\t' << gameHash
+                      << std::dec << '\n';
             }
         }
+        if (forcedNeon)
+            std::cout
+                << "PASS: selected bezel cadence kept game and bezel visible through graphics recovery.\n";
         stopGame(app);
 #ifndef MINO_STANDALONE_GAME
         app.launcher.shutdown();

@@ -19,23 +19,15 @@ struct OverlayTextFrame {
 // Text primitives and font support only. No score/achievement/widget logic.
 class OverlayTextLayer {
   public:
-    vectors::FontRegistry &fonts() {
-        return fonts_;
-    }
-    const vectors::FontRegistry &fonts() const {
-        return fonts_;
-    }
+    vectors::FontRegistry &fonts() { return fonts_; }
+    const vectors::FontRegistry &fonts() const { return fonts_; }
     void set(const std::string &id, OverlayText);
     bool remove(const std::string &id);
     void clear();
     const OverlayText *find(const std::string &id) const;
     const OverlayTextFrame &prepare(int nativeWidth, int nativeHeight);
-    const OverlayTextStatistics &statistics() const {
-        return stats_;
-    }
-    vectors::BeamStyle &beamStyle() {
-        return beam_;
-    }
+    const OverlayTextStatistics &statistics() const { return stats_; }
+    vectors::BeamStyle &beamStyle() { return beam_; }
     void write(std::ostream &) const;
     void read(std::istream &); // transactional; fonts must be registered first
   private:

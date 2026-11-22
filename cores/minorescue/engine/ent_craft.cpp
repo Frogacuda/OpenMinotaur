@@ -377,8 +377,9 @@ void spaceCraft::doAutoPilot() {
 
 // ======================================================== spaceCraftGun ====
 
-// Fire rate rises with the weapon level (always maximum near a black hole)
-// and with speed; faster ships also fire slower shots.
+// Rescues shorten the firing interval. Both the interval and relative shot speed
+// depend on distance from the centre, not ship velocity (original owner +0x54).
+// A black hole fixes the cadence's weapon level at 10; shot power stays unchanged.
 void spaceCraftGun::run() {
     craft *c = static_cast<craft *>(owner);
     spaceWars *g = c->game;
@@ -391,9 +392,9 @@ void spaceCraftGun::run() {
         return;
     int r = 30 - 2 * w;
     float f = r < 5 ? 5.0f : float(r);
-    float speedNow = float(c->vel.length());
-    timer = int(float(base) + speedNow * f);
-    speed = speedNow * -0.5f + 0.5f;
+    float distance = float(c->pos.length());
+    timer = int(float(base) + distance * f);
+    speed = distance * -0.5f + 0.5f;
     shoot();
 }
 

@@ -16,9 +16,10 @@ const char *componentKindName(ComponentKind k) {
     return int(k) >= 0 && int(k) < 8 ? names[int(k)] : "Unknown component";
 }
 const std::vector<int> &componentShaders() {
-    static const std::vector<int> ids = {26, 12, 14, 46, 80, 0,  1,  2,  4,  5,  6,  8,  11,
-                                         13, 15, 16, 18, 29, 39, 40, 47, 48, 49, 57, 59, 61,
-                                         69, 70, 71, 72, 73, 74, 79, 81, 83, 84, 3,  85, 34};
+    static const std::vector<int> ids = {
+        26, 12, 14, 46, 80, 0,  1,  2,  4,  5,  6,  8,  11, 13, 15, 16, 18, 29, 39, 40, 47, 48,
+        49, 57, 59, 61, 69, 70, 71, 72, 73, 74, 79, 81, 83, 84, 3,  85, 34, 32, 82, 19, 28, 45,
+        50, 52, 53, 67, 68, 87, 9,  17, 20, 31, 33, 44, 55, 56, 60, 66, 88, 23, 92, 93, 94, 95};
     return ids;
 }
 const std::vector<ComponentFieldSpec> &componentFields(ComponentKind kind) {
@@ -60,6 +61,8 @@ const std::vector<ComponentFieldSpec> &componentFields(ComponentKind kind) {
         {RepeatX, "Texture repeats around", 1, 16},
         {RepeatY, "Texture repeats along", 1, 32},
         {Morph, "Profile morph", 0, 1},
+        {TunnelSides, "Mesh sides around", 8, 128},
+        {TunnelRoundness, "Corner rounding", 0, 1},
         {DeformX, "X distortion", -.25f, .25f},
         {DeformY, "Y distortion", -.25f, .25f},
         {DeformZ, "Z distortion", -.25f, .25f}};
@@ -89,7 +92,8 @@ const std::vector<ComponentFieldSpec> &componentFields(ComponentKind kind) {
                        {OuterRadius, "Outer radius", 0, 1200},
                        {MiddleDepth, "Middle depth", -1000, 1000},
                        {OuterDepth, "Outer depth", -1000, 1000},
-                       {Segments, "Segments", 3, 1024},
+                       {Segments, "Segments", 3, 2048},
+                       {Phase, "Angular phase", 0, 1},
                        {FlowerMode, "Mode: 0 flowing, 1 reflected, 2 folded UV, 3 both", 0, 3},
                        {Opacity, "Opacity", 0, 1},
                        {RepeatX, "Angular texture repeats", 1, 32},
@@ -209,11 +213,24 @@ const std::vector<ComponentFieldSpec> &componentFields(ComponentKind kind) {
                            {SourceOpacity, "Source / opacity", 0, 1}})
                 fields.push_back(f);
         }
+        static const char *sampling[3][3] = {
+            {"Input 1 / filter", "Input 1 / U addressing", "Input 1 / V addressing"},
+            {"Input 2 / filter", "Input 2 / U addressing", "Input 2 / V addressing"},
+            {"Input 3 / filter", "Input 3 / U addressing", "Input 3 / V addressing"}};
+        for (auto &fields : result)
+            for (int i = 0; i < 3; ++i)
+                for (int part = 0; part < 3; ++part)
+                    fields.push_back({ComponentField(Input0Filter + i * 3 + part),
+                                      sampling[i][part], 0, part == 0 ? 2.f : 3.f});
         for (auto f : {ComponentFieldSpec{GridColumns, "Grid / columns", 2, 48},
                        {GridRows, "Grid / rows", 2, 48},
                        {GridFade, "Grid / distant brightness", 0, 1},
                        {GridFadePower, "Grid / distance fade curve", .1f, 4}})
             result[int(ComponentKind::Vector)].push_back(f);
+        result[int(ComponentKind::Layer)].push_back(
+            {LayerInputA, "Source routing / replace layer A (-1 off)", -1, 15});
+        result[int(ComponentKind::Layer)].push_back(
+            {LayerInputB, "Source routing / replace layer B (-1 off)", -1, 15});
         return result;
     }();
     return all.at(int(kind));
@@ -222,12 +239,15 @@ Component Component::make(ComponentKind kind, int id) {
     if (int(kind) < 0 || int(kind) > 7)
         throw std::runtime_error("Unsupported component kind.");
     Component c;
+    c.values[LayerInputA] = c.values[LayerInputB] = -1;
     c.kind = kind;
     c.id = id;
     c.name = std::string(componentKindName(kind)) + " " + std::to_string(id);
     c.values[Scale] = c.values[Opacity] = c.values[Gain] = c.values[Colour] = 1;
     c.values[RepeatX] = c.values[RepeatY] = 2;
     c.values[Speed] = kind == ComponentKind::Tunnel ? 1 : .1f;
+    c.values[TunnelSides] = 8;
+    c.values[TunnelRoundness] = 1;
     c.values[PrimitiveNearClip] = 16;
     c.values[PrimitiveWidth] = c.values[PrimitiveHeight] = c.values[PrimitiveDepth] = 1;
     c.values[PrimitiveSegments] = 24;
@@ -422,7 +442,7 @@ std::string ComponentScene::validate() const {
             (c.resolution != 128 && c.resolution != 256 && c.resolution != 512 &&
              c.resolution != 1024))
             return "Invalid component material or quality.";
-        if (c.vectorDocument.size() > 131072 || c.layerScene.size() > 1048576 ||
+        if (c.vectorDocument.size() > 131072 || c.layerScene.size() > 67108864 ||
             c.layerOutput < -1 || c.layerOutput > 15 || c.layerComponent < -1 ||
             c.layerComponent > 100000)
             return "Invalid embedded layer/vector data.";
@@ -435,11 +455,16 @@ std::string ComponentScene::validate() const {
                     return "A texture source must appear before the component that uses it. "
                            "Forward "
                            "reads and cycles are not allowed.";
-            } else if (input != 1 && input != 2 && input != 3 && input != 4 && input != 5 &&
-                       input != 6 && input != 8 && input != 9 && input != 147)
+            } else if (!importedImageSelector(input) && input != 147 &&
+                       std::find(neon::pc::rootTextureSelectors.begin(),
+                                 neon::pc::rootTextureSelectors.end(),
+                                 input) == neon::pc::rootTextureSelectors.end() &&
+                       std::none_of(std::begin(componentLiteralSlots),
+                                    std::end(componentLiteralSlots),
+                                    [&](int slot) { return input == 47 + slot; }))
                 return "Unavailable source texture.";
         }
-        if (c.kind == ComponentKind::Vector && (c.profile > 4 || c.shader != 26))
+        if (c.kind == ComponentKind::Vector && (c.profile > 5 || c.shader != 26))
             return "Vector layers use the beam material and one of four vector scenes.";
         if (c.kind == ComponentKind::Shape &&
             (!neon::pc::recoveredShapeKind(c.profile) || !neon::pc::recoveredShapeKind(c.profileB)))
@@ -447,9 +472,17 @@ std::string ComponentScene::validate() const {
         for (float f : c.values)
             if (!std::isfinite(f))
                 return "Non-finite component parameter.";
-        for (auto f : componentFields(c.kind))
+        for (auto f : componentFields(c.kind)) {
+            if (c.shader == 94 || c.shader == 95) {
+                if (f.field == C1) f.maximum = 4;
+                if (f.field == C4 || f.field == C5) { f.minimum = -4; f.maximum = 4; }
+            }
             if (c.values[f.field] < f.minimum || c.values[f.field] > f.maximum)
                 return "Component parameter outside supported range.";
+        }
+        for (int field = Input0Filter; field < FieldCount; ++field)
+            if (c.values[field] != std::round(c.values[field]))
+                return "Image sampling choices must be integers.";
         if (c.producer()) {
             producers.insert(c.id);
             if (++textures > 8)
@@ -462,7 +495,7 @@ void ComponentScene::write(std::ostream &out) const {
     auto error = validate();
     if (!error.empty())
         throw std::runtime_error(error);
-    out << "COMPONENTS 6\n"
+    out << "COMPONENTS 9\n"
         << std::quoted(name) << ' ' << items.size() << ' ' << nextId << '\n'
         << std::setprecision(9);
     for (auto &c : items) {
@@ -482,7 +515,7 @@ ComponentScene ComponentScene::read(std::istream &in) {
     scene.nextId = 1;
     std::string magic;
     int version, count;
-    if (!(in >> magic >> version) || magic != "COMPONENTS" || (version < 1 || version > 6) ||
+    if (!(in >> magic >> version) || magic != "COMPONENTS" || (version < 1 || version > 9) ||
         !(in >> std::quoted(scene.name) >> count) || count < 0 || count > 24)
         throw std::runtime_error("Invalid component scene header.");
     if (version >= 4 && (!(in >> scene.nextId) || scene.nextId < 1 || scene.nextId > 100001))
@@ -506,6 +539,9 @@ ComponentScene ComponentScene::read(std::istream &in) {
                                      : version == 3 ? int(PrimitiveWidth)
                                      : version == 4 ? int(Input0ScaleU)
                                      : version == 5 ? int(PrimitiveNearClip)
+                                     : version == 6 ? int(TunnelSides)
+                                     : version == 7 ? int(Input0Filter)
+                                     : version == 8 ? int(LayerInputA)
                                                     : int(FieldCount));
              ++field)
             if (!(in >> c.values[field]))
@@ -527,6 +563,14 @@ ComponentScene ComponentScene::read(std::istream &in) {
 // Names and constant usage from the local recovered shader ports.
 const char *componentShaderName(int id) {
     switch (id) {
+    case 92:
+        return "Barrel Concave (one axis)";
+    case 93:
+        return "Barrel Convex (one axis)";
+    case 94:
+        return "Barrel Concave (single surface)";
+    case 95:
+        return "Barrel Convex (single surface)";
     case 34:
         return "Vertex colour / original modulation";
     case 3:
@@ -599,18 +643,112 @@ const char *componentShaderName(int id) {
         return "zomg sm3";
     case 79:
         return "Lisspoint";
+    case 23:
+        return "Three texture warp";
+    case 32:
+        return "Overbright";
+    case 82:
+        return "Glargle2";
     case 81:
         return "GalacticaAlt sm3";
     case 83:
         return "Glargle3 sm3";
     case 84:
         return "Planet";
+    case 19:
+        return "Copydrive";
+    case 28:
+        return "Channel_select";
+    case 45:
+        return "ThingyDisplace2";
+    case 50:
+        return "Fluff3";
+    case 52:
+        return "ColourMixer3";
+    case 53:
+        return "Clipscale";
+    case 67:
+        return "RoundTunnel";
+    case 68:
+        return "RoundTunnel2";
+    case 87:
+        return "Planet3a";
+    case 9:
+        return "Blurripple";
+    case 17:
+        return "RGBINV";
+    case 20:
+        return "Blurradial_fix";
+    case 31:
+        return "Cut2";
+    case 33:
+        return "Overbright_cut";
+    case 44:
+        return "ThingyDisplace";
+    case 55:
+        return "Disturbed_SIN";
+    case 56:
+        return "SoftMix3";
+    case 60:
+        return "RGBSplitA";
+    case 66:
+        return "VerticalPlanes";
+    case 88:
+        return "wibblesphere";
     default:
         return "Unknown";
     }
 }
 unsigned componentConstantMask(int id) {
+    if (id == 94 || id == 95)
+        return 3;
     switch (id) {
+    case 9:
+        return 0;
+    case 17:
+        return 0;
+    case 20:
+        return 0;
+    case 31:
+        return 0;
+    case 33:
+        return 1;
+    case 44:
+        return 0;
+    case 55:
+        return 1;
+    case 56:
+        return 1;
+    case 60:
+        return 1;
+    case 66:
+        return 1;
+    case 88:
+        return 3;
+
+    case 19:
+        return 0;
+    case 28:
+        return 1;
+    case 45:
+        return 0;
+    case 50:
+        return 1;
+    case 52:
+        return 1;
+    case 53:
+        return 0;
+    case 67:
+        return 1;
+    case 68:
+        return 1;
+    case 87:
+        return 3;
+
+    case 32:
+        return 15;
+    case 82:
+        return 255;
     case 34:
         return 15;
     case 3:
@@ -700,13 +838,46 @@ std::vector<ComponentFieldSpec> editableComponentFields(const Component &c) {
                                 "Orbit radius",    "Phase increment X", "Phase increment Y",
                                 "Radius change X", "Radius change Y"};
     for (auto f : componentFields(c.kind)) {
+        if ((c.shader == 94 || c.shader == 95) && (f.field == C6 || f.field == C7))
+            continue;
+        if ((c.shader == 94 || c.shader == 95) && f.field >= C0 && f.field <= C5) {
+            static const char *labels[] = {
+                "Barrel strength",           "Cross-section angle (0 horizontal, 1 vertical)",
+                "Barrel centre U",           "Barrel centre V",
+                "Barrel width (0=1x, 1=2x)", "Barrel height (0=1x, 1=2x)"};
+            f.label = labels[f.field - C0];
+            if (f.field == C1) {
+                f.minimum = 0;
+                f.maximum = 4;
+            }
+            if (f.field == C4 || f.field == C5) {
+                f.minimum = -4;
+                f.maximum = 4;
+            }
+        }
+
+        if ((c.shader == 92 || c.shader == 93) && f.field >= C0 && f.field <= C3) {
+            static const char *labels[] = {"Barrel strength",
+                                           "Cross-section angle (0 horizontal, 1 vertical)",
+                                           "Barrel centre U", "Barrel centre V"};
+            f.label = labels[f.field - C0];
+        }
+
+        if (f.field >= Input0Filter && f.field < LayerInputA) {
+            int input = (f.field - Input0Filter) / 3;
+            if (c.kind == ComponentKind::Vector || !(componentSamplerMask(c.shader) & (1 << input)))
+                continue;
+        }
         if (f.field >= Input0ScaleU && f.field < Input0ScaleU + 30) {
             int input = (f.field - Input0ScaleU) / 10;
             if (c.kind == ComponentKind::Vector || !(componentSamplerMask(c.shader) & (1 << input)))
                 continue;
         }
+        if (c.kind == ComponentKind::Vector && c.profile == 5 &&
+            (f.field == GridFade || f.field == GridFadePower))
+            continue;
         if (f.field >= GridColumns && f.field <= GridFadePower &&
-            (c.kind != ComponentKind::Vector || c.profile != 4))
+            (c.kind != ComponentKind::Vector || (c.profile != 4 && c.profile != 5)))
             continue;
         if (c.kind == ComponentKind::Shape) {
             int field = int(f.field), family = -1;
@@ -781,7 +952,57 @@ std::vector<ComponentFieldSpec> editableComponentFields(const Component &c) {
 }
 
 unsigned componentSamplerMask(int id) {
+    if (id == 94 || id == 95)
+        return 1;
     switch (id) {
+    case 23:
+        return 7;
+    case 9:
+        return 3;
+    case 17:
+        return 3;
+    case 20:
+        return 1;
+    case 31:
+        return 3;
+    case 33:
+        return 1;
+    case 44:
+        return 1;
+    case 55:
+        return 3;
+    case 56:
+        return 7;
+    case 60:
+        return 1;
+    case 66:
+        return 1;
+    case 88:
+        return 1;
+
+    case 19:
+        return 1;
+    case 28:
+        return 3;
+    case 45:
+        return 3;
+    case 50:
+        return 7;
+    case 52:
+        return 7;
+    case 53:
+        return 1;
+    case 67:
+        return 1;
+    case 68:
+        return 3;
+    case 87:
+        return 7;
+
+    case 32:
+        return 1;
+    case 82:
+        return 3;
     case 34:
         return 0;
     case 3:

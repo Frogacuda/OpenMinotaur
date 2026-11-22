@@ -3,8 +3,8 @@
 #include "presentation_assets.h"
 #include "title_presenter.h"
 #include <SDL3/SDL.h>
-#include <glad/gl.h>
 #include <cmath>
+#include <glad/gl.h>
 #include <set>
 #include <sstream>
 namespace mino {
@@ -18,8 +18,10 @@ bool effectRead(const std::filesystem::path &name, std::vector<uint8_t> &bytes) 
 }
 } // namespace
 struct CollectionTitle::Impl {
+    std::filesystem::path shaderCache;
     Host *host = nullptr;
     SurfaceInfo surface{};
+    bool highQuality = true;
     bool paused = false, buttons = false, begun = false;
     std::set<uint32_t> pointers;
     std::unique_ptr<neon::widgets::TitleSequence> sequence;
@@ -28,8 +30,9 @@ struct CollectionTitle::Impl {
 };
 CollectionTitle::CollectionTitle() : impl_(std::make_unique<Impl>()) {}
 CollectionTitle::~CollectionTitle() = default;
-const CoreInfo &CollectionTitle::info() const {
-    return info_;
+const CoreInfo &CollectionTitle::info() const { return info_; }
+void CollectionTitle::setShaderCacheDirectory(const std::filesystem::path &path) {
+    impl_->shaderCache = path;
 }
 bool CollectionTitle::init(Host &host, const SurfaceInfo &surface) {
     auto &i = *impl_;
@@ -48,12 +51,12 @@ bool CollectionTitle::init(Host &host, const SurfaceInfo &surface) {
         i.sequence = std::make_unique<neon::widgets::TitleSequence>(
             neon::widgets::Value::parse(std::string(bytes.begin(), bytes.end())));
         i.presenter.assets(*i.sequence, widgetRead);
-        i.background =
-            std::make_unique<neon::effects::Runtime>(std::filesystem::path{}, effectRead);
-        if (!readPresentationAsset("Vaporwave.neongles", bytes))
+        if (!readPresentationAsset("Vaporwave.neonb", bytes))
             return false;
         std::istringstream scene(std::string(bytes.begin(), bytes.end()));
-        i.background->readScene(scene);
+        i.background = neon::effects::Runtime::loadBaked(scene, {}, effectRead);
+        i.background->setShaderCacheDirectory(i.shaderCache);
+        i.background->parameters().renderScale = i.highQuality ? 1.f : .5f;
         return true;
     } catch (const std::exception &e) {
         host.log("Collection title unavailable: %s", e.what());
@@ -61,9 +64,12 @@ bool CollectionTitle::init(Host &host, const SurfaceInfo &surface) {
         return false;
     }
 }
-void CollectionTitle::resize(const SurfaceInfo &surface) {
-    impl_->surface = surface;
+void CollectionTitle::setHighQuality(bool high) {
+    impl_->highQuality = high;
+    if (impl_->background)
+        impl_->background->parameters().renderScale = high ? 1.f : .5f;
 }
+void CollectionTitle::resize(const SurfaceInfo &surface) { impl_->surface = surface; }
 void CollectionTitle::pads(const PadState *pads, int count) {
     auto &i = *impl_;
     i.buttons = false;
@@ -128,9 +134,7 @@ uint64_t CollectionTitle::framePeriodNs() const {
     const double rate = impl_->sequence ? impl_->sequence->maxFrameRate() : 0;
     return rate >= 1 && rate <= 1000 ? uint64_t(std::ceil(1e9 / rate)) : 0;
 }
-void CollectionTitle::pause(bool paused) {
-    impl_->paused = paused;
-}
+void CollectionTitle::pause(bool paused) { impl_->paused = paused; }
 bool CollectionTitle::back() {
     auto &i = *impl_;
     if (i.sequence && i.begun) {

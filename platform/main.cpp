@@ -6,27 +6,34 @@
 //            [--inject-touch nx,ny[@frame[+frames]]]...
 //            [--inject-pad lx,ly,buttons[@frame[+frames]]]... (isolated test input)
 //            [--inject-motion x,y,z] (simulated gravity in g, test only)
-#include "core_api.h"
 #include "achievements.h"
-#include "display.h"
 #include "bundled_assets.h"
+#include "build_info.h"
+#include "core_api.h"
+#include "display.h"
 #ifndef MINO_STANDALONE_GAME
+#include "about_screen.h"
 #include "launcher.h"
 #include "launcher_transition.h"
-#include "about_screen.h"
 #include "ui_assets.h"
 #endif
 #include "input.h"
 #ifdef MINO_COLLECTION_TITLE
 #include "collection_title.h"
 #endif
-#include "settings.h"
-#include "stb_image.h"
+#ifdef MINO_LIVE_BEZELS
+#include "audio_level.h"
+#include "live_bezel.h"
+#include "neon_performance.h"
+#endif
 #include "neon/render_device.h"
+#include "settings.h"
+#include "submission_pacing.h"
+#include "stb_image.h"
 
-#include <glad/gl.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <glad/gl.h>
 #ifdef SDL_PLATFORM_ANDROID
 #include <jni.h>
 #endif
@@ -36,8 +43,8 @@
 
 #include <algorithm>
 #include <atomic>
-#include <cstdarg>
 #include <cmath>
+#include <cstdarg>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -94,6 +101,7 @@ class HostImpl : public Host {
     void unlockAudio() override;
     void requestQuit() override;
     bool presentStartupFrame() override;
+    void startupPresentationFinished() override;
     bool enableMotion(bool enabled) override;
     MotionState motion() const override;
     bool touchControlsAvailable() const override;
@@ -108,6 +116,15 @@ struct App {
     SDL_AudioStream *audio = nullptr;
     std::vector<float> mixBuf;
     Display display;
+#ifdef MINO_LIVE_BEZELS
+    LiveBezel bezel;
+    AudioLevel audioLevel;
+    NeonFrameTimer neonTimer;
+    NeonCadence titleAssessment;
+    bool titleSmokeTest = false;
+    std::string neonLoadGame;
+    Uint64 neonAssessmentDeadline = 0;
+#endif
     Input input;
 #ifndef MINO_STANDALONE_GAME
     Settings settings;
@@ -150,9 +167,32 @@ bool HostImpl::touchControlsAvailable() const {
     return count > 0 && app->input.touchEnabled();
 }
 bool HostImpl::presentStartupFrame() {
+#ifdef MINO_LIVE_BEZELS
+    if (app->display.liveBackgroundRequested()) {
+        app->bezel.update(app->gameId, {}, 0, !app->settings.neonHighQuality(app->gameId));
+        if (!app->coreReady && app->neonLoadGame != app->gameId && app->bezel.available()) {
+            app->neonLoadGame = app->gameId;
+            app->neonAssessmentDeadline = SDL_GetTicksNS() + 1000000000ull;
+            app->bezel.beginCadenceAssessment();
+        }
+        app->display.backgroundPass(
+            [this](unsigned f, int w, int h, int x, int y, int vw, int vh, int turns) {
+                app->bezel.setGameplayTexture(app->display.gameplayTexture(),
+                                              app->display.surface().width,
+                                              app->display.surface().height);
+                return app->bezel.draw(f, w, h, x, y, vw, vh, turns, true);
+            });
+    }
+#endif
     app->display.present();
     SDL_GL_SwapWindow(app->window);
     return true;
+}
+void HostImpl::startupPresentationFinished() {
+#ifdef MINO_LIVE_BEZELS
+    app->bezel.finishCadenceAssessment();
+    app->neonAssessmentDeadline = 0;
+#endif
 }
 std::shared_ptr<FileSelection> HostImpl::chooseDataFile() {
     auto picker = std::make_shared<FileSelection>();
@@ -209,6 +249,9 @@ void SDLCALL audioCallback(void *user, SDL_AudioStream *stream, int additional, 
     app->mixBuf.assign(size_t(frames) * 2, 0.0f);
     if (app->core && !app->paused)
         app->core->mixAudio(app->mixBuf.data(), frames);
+#ifdef MINO_LIVE_BEZELS
+    app->audioLevel.submit(app->mixBuf.data(), app->mixBuf.size());
+#endif
     SDL_PutAudioStreamData(stream, app->mixBuf.data(), frames * int(sizeof(float) * 2));
 }
 
@@ -498,6 +541,17 @@ bool fullscreenShortcut(App &app, const SDL_KeyboardEvent &key) {
 #ifdef MINO_COLLECTION_TITLE
 bool startCollectionTitle(App &app) {
     auto title = std::make_unique<CollectionTitle>();
+    title->setShaderCacheDirectory(std::filesystem::path(app.prefDir) / "cache/neon-programs");
+    title->setHighQuality(app.settings.neonHighQuality("global"));
+#ifdef MINO_LIVE_BEZELS
+    app.titleAssessment.reset();
+    app.titleSmokeTest = kDesktop && app.settings.get("global", "neon_quality", "").empty() &&
+                         app.settings.get("global", "neon_smoke_done", "").empty();
+    if (app.titleSmokeTest) {
+        app.settings.set("global", "neon_smoke_done", "on");
+        app.settings.save();
+    }
+#endif
     app.coreReady = false;
     app.core = title.get();
     app.gameId = "title";
@@ -548,6 +602,9 @@ bool SDLCALL lifecycleWatch(void *userdata, SDL_Event *event) {
     if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND && app.core &&
         SDL_GL_GetCurrentContext() == app.gl && !app.graphicsCheckpointed) {
         setPaused(app, true);
+#ifdef MINO_LIVE_BEZELS
+        app.neonTimer.reset();
+#endif
         const bool captured = neon::render::NeonDevice::checkpointAllGraphics();
         app.graphicsCheckpointed = true;
         if (!captured)
@@ -583,6 +640,10 @@ bool synchronizeGraphics(App &app) {
         app.launchTransition.abandonGraphics();
         app.launcher.abandonGraphics();
 #endif
+#ifdef MINO_LIVE_BEZELS
+        app.neonTimer.reset();
+        app.bezel.abandonGraphics();
+#endif
         app.display.abandonGraphics();
         if (!app.display.init(app.glES))
             return failed();
@@ -608,6 +669,28 @@ bool synchronizeGraphics(App &app) {
     return true;
 }
 
+#ifdef MINO_LIVE_BEZELS
+void observeNeonPerformance(App &app, const NeonFrameTimer::Sample &sample) {
+    app.bezel.observeFrame(sample.workMs, sample.intervalMs);
+#ifdef MINO_COLLECTION_TITLE
+    if (app.gameId == "title" && app.titleSmokeTest) {
+        app.titleAssessment.observe(sample.workMs, sample.intervalMs);
+        if (app.titleAssessment.sampleCount() >= 60)
+            app.titleAssessment.finish();
+        if (app.titleAssessment.finished()) {
+            const bool high = app.titleAssessment.divisor() == 1;
+            if (app.settings.get("global", "neon_quality", "").empty()) {
+                app.settings.set("global", "neon_quality", high ? "hq" : "lq");
+                app.settings.save();
+                static_cast<CollectionTitle *>(app.core)->setHighQuality(high);
+            }
+            app.titleSmokeTest = false;
+        }
+    }
+#endif
+}
+#endif
+
 void stopGame(App &app) {
     // Destroying the stream waits for its callback before core pointers,
     // samples or game state can be destroyed/replaced.
@@ -623,6 +706,12 @@ void stopGame(App &app) {
     app.input.cancelTouches(app.core);
     app.core->save();
     app.host.flushAchievements();
+#ifdef MINO_LIVE_BEZELS
+    app.neonTimer.reset();
+    app.bezel.reset();
+    app.neonLoadGame.clear();
+    app.neonAssessmentDeadline = 0;
+#endif
     app.core->shutdown();
     delete app.core;
     app.core = nullptr;
@@ -721,7 +810,40 @@ bool startGame(App &app, const std::string &requestedId, bool animate = false,
     if (app.launchTransition.pending()) {
         app.display.beginFrame();
         app.core->frame(0);
+#ifdef MINO_LIVE_BEZELS
+        const bool classicAssessment =
+            id == "gridrunner-classic" && app.display.liveBackgroundRequested();
+        auto lastNeon = std::make_shared<Uint64>(SDL_GetTicksNS());
+        Uint64 lastSample = *lastNeon;
+        if (classicAssessment) {
+            app.bezel.update(id, {}, 0, !app.settings.neonHighQuality(id));
+            app.bezel.beginCadenceAssessment();
+            app.display.backgroundPass([&app, id, lastNeon](unsigned f, int w, int h, int x, int y,
+                                                            int vw, int vh, int turns) {
+                const auto now = SDL_GetTicksNS();
+                const double elapsed = double(now - *lastNeon) / 1e9;
+                *lastNeon = now;
+                app.bezel.update(id, {}, elapsed, !app.settings.neonHighQuality(id));
+                app.bezel.setGameplayTexture(app.display.gameplayTexture(),
+                                             app.display.surface().width,
+                                             app.display.surface().height);
+                return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
+            });
+        }
+        app.launchTransition.playRendered(app.display, app.window, app.quit, [&](float progress) {
+            if (classicAssessment) {
+                const auto now = SDL_GetTicksNS();
+                app.bezel.observeFrame(0, double(now - lastSample) / 1e6);
+                lastSample = now;
+            }
+            if (observer)
+                observer(progress);
+        });
+        if (classicAssessment)
+            app.host.startupPresentationFinished();
+#else
         app.launchTransition.playRendered(app.display, app.window, app.quit, observer);
+#endif
         int width = 0, height = 0;
         SDL_GetWindowSizeInPixels(app.window, &width, &height);
         if (width != launchWidth || height != launchHeight)
@@ -820,7 +942,10 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
         auto next = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
-        if (a == "--game")
+        if (a == "--version") {
+            SDL_Log("OpenMinotaur %s", kReleaseVersion);
+            return 0;
+        } else if (a == "--game")
             gameArg = next();
         else if (a == "--data-dir") {
             dataDirArg = next();
@@ -905,6 +1030,9 @@ int main(int argc, char **argv) {
     const std::string savesRoot = prefDir + "saves/";
     SDL_CreateDirectory(savesRoot.c_str());
     app.prefDir = prefDir;
+#ifdef MINO_LIVE_BEZELS
+    app.bezel.setShaderCacheDirectory(std::filesystem::path(prefDir) / "cache/neon-programs");
+#endif
     app.savesRoot = savesRoot;
     app.host.achievementPath = prefDir + "achievements.txt";
     if (!app.host.achievements.load(app.host.achievementPath))
@@ -1042,7 +1170,22 @@ int main(int argc, char **argv) {
     Uint64 last = SDL_GetTicksNS();
     SDL_AddEventWatch(lifecycleWatch, &app);
     int frameCount = 0;
+#if defined(SDL_PLATFORM_ANDROID) && defined(MINO_LIVE_BEZELS)
+    SubmissionPacer submissionPacer;
+#endif
     while (!app.quit) {
+#if defined(SDL_PLATFORM_ANDROID) && defined(MINO_LIVE_BEZELS)
+        // Limit submission before polling input so visible Neon stays on a
+        // steady 60-Hz schedule without accumulating catch-up frames.
+        if (!app.paused && app.display.liveBackgroundRequested() && app.bezel.available() &&
+            !app.bezel.assessingCadence()) {
+            if (const auto delay = submissionPacer.remaining(SDL_GetTicksNS(), 16666667ull))
+                SDL_DelayPrecise(delay);
+            submissionPacer.started(SDL_GetTicksNS());
+        } else
+            submissionPacer.reset();
+#endif
+
         if (app.returnRequested && !app.paused && SDL_GL_GetCurrentContext()) {
 #ifdef MINO_STANDALONE_GAME
             app.quit = true;
@@ -1327,9 +1470,45 @@ int main(int argc, char **argv) {
             titleFramePeriod = static_cast<CollectionTitle *>(app.core)->framePeriodNs();
 #endif
         const Uint64 titleFrameStart = titleFramePeriod ? SDL_GetTicksNS() : 0;
+#ifdef MINO_LIVE_BEZELS
+        if (app.bezel.assessingCadence() && app.neonAssessmentDeadline &&
+            SDL_GetTicksNS() >= app.neonAssessmentDeadline)
+            app.host.startupPresentationFinished();
+        const bool timedNeon =
+            screenshot.empty() &&
+            (app.bezel.assessingCadence() || (app.gameId == "title" && app.titleSmokeTest));
+        if (timedNeon)
+            app.neonTimer.begin(dt);
+        else
+            app.neonTimer.reset();
+#endif
         app.display.beginFrame();
         app.core->frame(screenshot.empty() ? dt : 1.0 / 60.0);
+#ifdef MINO_LIVE_BEZELS
+        if (app.display.neonSelected() &&
+            (app.display.liveBackgroundRequested() || app.bezel.available())) {
+            auto state = app.core->presentationState();
+            state.values["audio.level"] = double(app.audioLevel.value());
+            app.bezel.update(app.gameId, std::move(state), screenshot.empty() ? dt : 1. / 60.,
+                             !app.settings.neonHighQuality(app.gameId));
+            if (!app.display.liveBackgroundRequested())
+                app.bezel.discardPendingFrame();
+        } else
+            app.bezel.update("", {}, 0, false);
+        app.display.backgroundPass([&](unsigned f, int w, int h, int x, int y, int vw, int vh,
+                                       int turns) {
+            app.bezel.setGameplayTexture(app.display.gameplayTexture(), app.display.surface().width,
+                                         app.display.surface().height);
+            return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
+        });
+#endif
         app.display.present();
+#ifdef MINO_LIVE_BEZELS
+        if (timedNeon) {
+            if (auto sample = app.neonTimer.end())
+                observeNeonPerformance(app, *sample);
+        }
+#endif
         if (app.host.achievementWritePending)
             app.host.flushAchievements();
 

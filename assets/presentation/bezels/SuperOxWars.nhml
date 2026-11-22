@@ -1,0 +1,16 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "player.followers" integer "count"
+input "score.redShare" number "ratio"
+input "score.blueShare" number "ratio"
+input "world.tilt" number "normalized"
+
+parameter "rings.scrollSpeed" "clock.20.6.speed" "multiplier"
+parameter "polarity.red" "colour.7.red" "gain"
+parameter "polarity.blue" "colour.10.blue" "gain"
+parameter "field.tilt" "node.20.f.2" "texture-widths"
+
+value "rings.scrollSpeed" "player.followers" 0 5 1 4 clamp 1 4
+value "polarity.red" "score.redShare" 0 1 1.25 3 clamp 1.25 3
+value "polarity.blue" "score.blueShare" 0 1 1.25 3 clamp 1.25 3
+smoothvalue "field.tilt" "world.tilt" -1 1 -0.2 0.2 clamp -0.2 0.2

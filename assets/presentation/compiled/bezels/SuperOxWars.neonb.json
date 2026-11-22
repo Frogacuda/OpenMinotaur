@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/11.frag","gles/shaders/13.frag","gles/shaders/26.frag","gles/shaders/67.frag","gles/shaders/73.frag","reference/literals/19.png","reference/roots/0.argb","reference/roots/9.argb"],
+"exports":[{"name":"field.tilt","target":"node.20.f.2","unit":"texture-widths","minimum":-8,"maximum":8,"baseline":0.0009765625},{"name":"polarity.blue","target":"colour.10.blue","unit":"gain","minimum":0,"maximum":4,"baseline":1},{"name":"polarity.red","target":"colour.7.red","unit":"gain","minimum":0,"maximum":4,"baseline":1},{"name":"rings.scrollSpeed","target":"clock.20.6.speed","unit":"multiplier","minimum":0,"maximum":8,"baseline":1}]
+}

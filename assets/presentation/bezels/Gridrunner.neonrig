@@ -1,0 +1,9 @@
+NEONRIG 2
+# Source clocks remain authored; slow motion multiplies the scrolling cycle by 0.5.
+select "layer.3/clock.8.6.speed" 1 1 "power.slow" 1 0.5
+# Raw ship limits in the original gameplay coordinate system. Tilt only the grid plane.
+value "component.4.4" "player.x" -0.4 0.43 -0.2 0.2 clamp -0.2 0.2
+value "component.4.5" "player.y" -0.228 0.428 0.3 0 clamp 0 0.3
+select "layer.3/node.18.i.2" 14 1 "power.multishot" 1 13
+stateenvelope "power.allAround" "layer.3/colour.18.brightness" 0.5 0.5 1 2
+turn "lives" "runtime.hue" 1 0 1 0 1 linear

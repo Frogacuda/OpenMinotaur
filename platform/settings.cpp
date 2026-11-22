@@ -99,9 +99,10 @@ DisplaySettings Settings::display(const std::string &game) const {
                     : o == "portrait_right" || o == "vertical_right" ? Orientation::PortraitRight
                     : o == "bestfit"                                 ? Orientation::BestFit
                                                                      : Orientation::Auto;
-    const auto bg = get(game, "backdrop", "colour");
+    const auto bg = get(game, "backdrop", "neon");
     d.backdrop = bg == "image"     ? Backdrop::Image
                  : bg == "neon"    ? Backdrop::Neon
+                 : bg == "plasma"  ? Backdrop::Plasma
                  : bg == "widgets" ? Backdrop::Widgets
                                    : Backdrop::Colour;
     const auto mode = get(game, "screen_mode", "hires");
@@ -116,6 +117,13 @@ DisplaySettings Settings::display(const std::string &game) const {
         0xffffffu;
     d.backdropImage = get(game, "backdrop_image", "");
     return d;
+}
+
+bool Settings::neonHighQuality(const std::string &game) const {
+    const std::string platform = SDL_GetPlatform();
+    const bool mobile = platform == "Android" || platform == "iOS";
+    const auto value = get(game, "neon_quality", "");
+    return value == "hq" || (value != "lq" && !mobile);
 }
 
 InputSettings Settings::input(const std::string &game) const {

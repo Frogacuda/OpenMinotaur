@@ -1,10 +1,10 @@
+#include "control_mapping.h"
 #include "launcher.h"
 #include "ui_assets.h"
-#include "control_mapping.h"
-#include <glad/gl.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <glad/gl.h>
 namespace mino {
 namespace {
 const char *wallpaperNames[] = {"Waterdrop", "Vaporsheep", "Llama XP", "Wooly Sweater"};
@@ -42,8 +42,8 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
     };
     if (optionsScreen_.tab == 0) {
         auto aspect = get("aspect", "ipad");
-        rows.push_back({"Aspect ratio",
-                        aspect == "fill"   ? "Fit to screen"
+        rows.push_back({"Aspect Ratio",
+                        aspect == "fill"   ? "Fit to Screen"
                         : aspect == "ipad" ? "4:3"
                                            : "2:3 (iPhone)",
                         aspect == "fill" ? "Developers of this game not responsible for any pixels "
@@ -91,26 +91,35 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
                         {"landscape", "portrait", "portrait_right", "bestfit"}});
         auto screen = get("screen_mode", "hires");
         const std::vector<std::string> modes = {"hires",     "smooth", "sharp",
-                                                "scanlines", "crt",    "crt2"};
+                                                "scanlines", "crt2",   "crt"};
         int i = int(std::find(modes.begin(), modes.end(), screen) - modes.begin());
         if (i == int(modes.size()))
             i = 0;
         const char *labels[] = {
-            "Hi-res", "Original (smooth)", "Original (sharp)", "Scanlines", "CRT 1", "CRT 2"};
+            "Hi-Res", "Original (Smooth)", "Original (Sharp)", "Scanlines", "CRT 1", "CRT 2"};
         const char *tips[] = {"Lovely hi-res rendering of the same old pixelated sprites.",
                               "Original res with bilinear upscale.",
                               "Don't cut yourself on the jagged edges.",
                               "Because pixels need elbow room.",
-                              "Glowy retro tube TV. May impact performance on low-end devices.",
-                              "Lightweight retro tube TV with S-Video."};
+                              "Lightweight retro tube TV with S-Video.",
+                              "Glowy retro tube TV. May impact performance on low-end devices."};
         rows.push_back({"Filters", labels[i], tips[i], "screen_mode", modes});
-        auto bg = get("backdrop", "colour");
-        rows.push_back(
-            {"Letterboxing",
-             bg == "neon" ? "Neon" : "Black",
-             bg == "neon" ? "Trippy fuzzy colors. Very on-brand." : "Standard issue black bars.",
-             "backdrop",
-             {"colour", "neon"}});
+        auto bg = get("backdrop", "neon");
+        rows.push_back({"Letterboxing",
+                        bg == "neon"     ? "LiveSynth"
+                        : bg == "plasma" ? "Plasma"
+                                         : "Black",
+                        bg == "plasma" ? "Generic swirly colors. Less fancy."
+                        : bg == "neon"
+                            ? "Reactive light synthesizer bezels inspired by the Neon Engine."
+                            : "Standard issue black bars.",
+                        "backdrop",
+                        {"colour", "plasma", "neon"}});
+        rows.push_back({"LiveSynth Quality", settings_->neonHighQuality("global") ? "HQ" : "LQ",
+                        "LQ recommended on lower end mobile devices", "neon_quality",
+                        settings_->neonHighQuality("global") ? std::vector<std::string>{"hq", "lq"}
+                                                             : std::vector<std::string>{"lq", "hq"},
+                        bg == "neon"});
         int wp = std::clamp(std::atoi(get("wallpaper", "0").c_str()), 0, 3);
         rows.push_back(
             {"iOX Wallpaper", wallpaperNames[wp], "Change your iOS Wallpaper.", "wallpaper", {}});
@@ -126,25 +135,25 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
                             {"off", "on"},
                             controllers_ > 0});
         }
-        rows.push_back({"Remap controls",
-                        "Choose player...",
+        rows.push_back({"Remap Controls",
+                        "Choose Player...",
                         "Choose a player, then assign the D-pad, face buttons, sticks, triggers, "
                         "Start and Select. Release each input between prompts.",
                         "remap",
                         {}});
         rows.push_back(
             {"Tilt Calibration",
-             "Set neutral position",
+             "Set Neutral Position",
              "Hold the device comfortably, then tap or press a button to set neutral tilt.",
              "calibrate_tilt",
              {}});
         rows.push_back({"Reset Control Mapping",
-                        "Restore defaults",
+                        "Restore Defaults",
                         "Reset all controllers to default.",
                         "reset_mapping",
                         {}});
         auto rotate = get("rotate_controls", "off");
-        rows.push_back({"Rotate controls to match screen",
+        rows.push_back({"Rotate Controls",
                         rotate == "on" ? "On" : "Off",
                         "Rotate controls when game is rotated, perfect for weirdos who want to "
                         "play Gridrunner as a side-scroller.",
@@ -231,7 +240,8 @@ void Launcher::activateOption() {
         request_ = {Action::ResetMapping, {}};
         return;
     }
-    auto old = settings_->get("global", row.key, row.values.front());
+    auto old =
+        settings_->get("global", row.key, row.key == "backdrop" ? "neon" : row.values.front());
     auto found = std::find(row.values.begin(), row.values.end(), old);
     int next = found == row.values.end()
                    ? 0
@@ -249,7 +259,7 @@ void Launcher::mappingFinished(const std::string &message) {
     // before presenting its result, retaining the originating remap row.
     while (page() == Page::Mapping || page() == Page::Players)
         close();
-    showMessage("Controller mapping", message);
+    showMessage("Controller Mapping", message);
 }
 void Launcher::drawOptions() {
     const Colour ink{.06f, .07f, .08f}, valueInk{.23f, .34f, .49f};
@@ -271,7 +281,7 @@ void Launcher::drawOptions() {
     rect({0, headerBottom - 1, width, 1}, {.22f, .30f, .41f}, {.22f, .30f, .41f});
     rect({0, headerBottom, width, 2}, {0, 0, 0, .20f}, {0, 0, 0, 0});
     const std::string title = page() == Page::Wallpapers ? "iOX Wallpaper"
-                              : page() == Page::Players  ? "Choose player"
+                              : page() == Page::Players  ? "Choose Player"
                               : page() == Page::Mapping
                                   ? "Remap Player " + std::to_string(mappingScreen_.player + 1)
                                   : "Settings";

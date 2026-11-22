@@ -1,0 +1,27 @@
+NHML 1
+# Absolute level selection also handles starting or continuing at a later cavern.
+input "level.number" integer "one-based-level"
+input "screen.scroll" number "gameplay-screen-heights-down"
+parameter "wall.texture" "node.18.i.5" "texture-selector"
+parameter "wall.scroll" "node.18.f.7" "texture-widths"
+parameter "scene.hue" "runtime.hue" "turns"
+
+# Root labels are zero-based; selector 1 is Root 0.
+indexed "wall.texture" "level.number" 1 23 0 1 31 6 23 26 28 16 12 6
+indexed "scene.hue" "level.number" 1 0 0.1388888888888889 0 1 6 0 0 0 0 0 0
+value "wall.scroll" "screen.scroll" 0 1 0 1 wrap 0 1
+
+input "minotaurs.rescued" integer "count"
+input "game.phase" integer "state"
+input "gravity.influence" number "capped-game-influence"
+parameter "material.rescueScroll" "node.8.f.3" "texture-widths"
+parameter "pipe.centre" "node.25.f.6" "reference-coordinate"
+
+# Mirror addressing repeats after two UV units.
+turn "minotaurs.rescued" "material.rescueScroll" 1 0.0009765625 2 -8 8 linear
+# Read the already dead-zoned/clamped game influence, including controller input.
+smoothvalue "pipe.centre" "gravity.influence" -0.3 0.3 0.4 0.6 clamp 0.4 0.6
+
+parameter "pipe.axis" "node.25.f.5" "quarter-turns"
+event "level.completed" "game.phase" enter "i:5" 0 0
+turn "level.completed" "pipe.axis" 2 0 4 0 4 linear

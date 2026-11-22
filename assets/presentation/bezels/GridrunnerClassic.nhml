@@ -1,0 +1,10 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "player.x" number "cells"
+input "player.y" number "cells"
+
+parameter "grid.yaw" "component.4.4" "radians"
+parameter "grid.pitch" "component.4.5" "radians"
+
+value "grid.yaw" "player.x" 1 21.9 -0.2 0.2 clamp -0.2 0.2
+value "grid.pitch" "player.y" 8 18.9 0.3 0 clamp 0 0.3

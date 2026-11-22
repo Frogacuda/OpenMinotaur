@@ -2,6 +2,7 @@
 #include "backend.h"
 #include "scene.h"
 #include "controls.h"
+#include "superoxwars_presentation.h"
 #include "frontend.h"
 #include "original_tables.h"
 #include "neon/controller_session.h"
@@ -30,6 +31,7 @@ class SuperOxWarsCore final : public Core {
     std::atomic<bool> suspended_{false};
     bool rendered_ = false;
     double accumulator_ = 0;
+    uint64_t presentationSession_ = 0;
     uint32_t directions_ = 0, sessionAchievements_ = 0;
     struct Finger {
         uint32_t id = 0;
@@ -291,6 +293,15 @@ class SuperOxWarsCore final : public Core {
                     break;
                 }
     }
+    PresentationState presentationState() const override {
+        if (!world_)
+            return {};
+        return superoxwars::presentationSnapshot(
+            *world_, presentationSession_,
+            front_.phase == superoxwars::Frontend::Phase::Play &&
+                (front_.screen == Screen::Playing || front_.screen == Screen::Paused),
+            suspended_ || world_->paused);
+    }
     void frame(double dt) override {
         if (startup_.frame(dt))
             return;
@@ -328,8 +339,12 @@ class SuperOxWarsCore final : public Core {
             while (accumulator_ >= 1. / 60) {
                 accumulator_ -= 1. / 60;
                 const auto oldScreen = front_.screen;
+                const auto oldPhase = front_.phase;
                 const bool oldTilt = front_.records.tiltEnabled;
                 world_->tick(input());
+                if (oldPhase != superoxwars::Frontend::Phase::Play &&
+                    front_.phase == superoxwars::Frontend::Phase::Play)
+                    ++presentationSession_;
                 // A sensor open during activity startup may fail temporarily.
                 // Retry on entering play, without polling/opening absent hardware
                 // every frame. A successful existing subscription is unchanged.

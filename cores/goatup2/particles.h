@@ -18,7 +18,7 @@ struct StageParticleBirth {
     std::optional<ColourRampView> colourRamp;
     uint32_t tileInteractionMask = 0x440000U;
     int32_t ledgeResponse = 0;
-    float projectileContactGate = 0;
+    float projectileContactGate = 0; // attack power; positive values also enable enemy contacts
     bool solidCollisionEnabled = false;
     bool restingContact = true;
     neon::vec2d savedDrawScale{1, 1}; // copied from source child constructor scale

@@ -11,11 +11,11 @@
 #include <cstdint>
 #include <cstring>
 
-#include "neon_base.h"
-#include "neon/touch_slots.h"
 #include "../controller_input.h"
-#include "neon_sprite.h"
 #include "highscores.h"
+#include "neon/touch_slots.h"
+#include "neon_base.h"
+#include "neon_sprite.h"
 
 #include <string>
 
@@ -35,9 +35,7 @@ class bull; // only ever an entity in practice (the parameter type of wasShot)
 int *extractScore(int *buf, int n, int value, int suffix);
 
 // Float lerp used by particles: a + (b - a) * t.
-inline float lerp(float a, float b, float t) {
-    return a + (b - a) * t;
-}
+inline float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
 // --------------------------------------------------------- controlBlock ----
 
@@ -63,14 +61,10 @@ class controlBlock : public neon::input::TouchState<vec2d> {
     void addEntity(entity *e, entity **list);
     void joyWatchdog();
     int collide(entity *a, entity *list, bool bounce);
-    int touch(entity *a, entity *list) {
-        return collide(a, list, false);
-    }
+    int touch(entity *a, entity *list) { return collide(a, list, false); }
 
     // save data (the shell owns the buffer; see MinotronSave)
-    int &sd(int off) {
-        return *reinterpret_cast<int *>(saveData + off);
-    }
+    int &sd(int off) { return *reinterpret_cast<int *>(saveData + off); }
 
     int bgLayer = -1;                 // 0x08 cellGrid background layer (-1 none)
     float fbColour[4] = {0, 0, 0, 0}; // 0x0c feedback tint (Mixer shader 1)

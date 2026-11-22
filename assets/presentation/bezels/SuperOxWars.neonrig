@@ -1,0 +1,5 @@
+NEONRIG 2
+value "clock.20.6.speed" "player.followers" 0 5 1 4 clamp 1 4
+value "colour.7.red" "score.redShare" 0 1 1.25 3 clamp 1.25 3
+value "colour.10.blue" "score.blueShare" 0 1 1.25 3 clamp 1.25 3
+smoothvalue "node.20.f.2" "world.tilt" -1 1 -0.2 0.2 clamp -0.2 0.2

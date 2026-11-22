@@ -16,6 +16,28 @@ struct GoatUpTouchChecks {
         core.surface_.height = 480;
         core.world_ = std::make_unique<goatup::World>(core.records_, 17, false);
         core.front_.screen = goatup::Frontend::Screen::Playing;
+        const auto originalPosition = core.world_->goat.position;
+        const auto originalScroll = core.world_->tower.scroll;
+        core.world_->goat.position.x = .25;
+        core.world_->goat.kids = 3;
+        core.world_->actors.runBillyGoats = 2;
+        core.world_->tower.scroll = .8f;
+        auto observed = core.presentationState();
+        auto random = core.world_->random.state();
+        check(observed.gameplay && std::get<double>(observed.values.at("player.x")) == .25 &&
+                  std::abs(std::get<double>(observed.values.at("screen.elevation")) - 1) < 1e-6 &&
+                  std::get<uint64_t>(observed.values.at("kids")) == 3 &&
+                  std::get<uint64_t>(observed.values.at("billyGoats.kissed")) == 2,
+              "Live presentation uses projected X, camera elevation and current kids");
+        core.world_->goat.position.y = -.3;
+        auto bounced = core.presentationState();
+        check(bounced.values.at("screen.elevation") == observed.values.at("screen.elevation") &&
+                  core.world_->random.state() == random,
+              "Read-only presentation must ignore goat bounce and preserve RNG");
+        core.world_->goat.position = originalPosition;
+        core.world_->goat.kids = 0;
+        core.world_->actors.runBillyGoats = 0;
+        core.world_->tower.scroll = originalScroll;
         auto event = [&](TouchPhase phase, unsigned id, float x, float y) {
             core.touch({phase, id, x * 320, y * 480});
         };

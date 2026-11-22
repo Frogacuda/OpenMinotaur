@@ -13,6 +13,7 @@
 #include "neon/controller_session.h"
 #include "neon/sample_audio.h"
 #include "rescue_game_host.h"
+#include "rescue_presentation.h"
 #include "core_api.h"
 #include "engine/game.h"
 #include "engine/neon_audio.h"
@@ -66,6 +67,9 @@ class RescueCore final : public Core {
         renderState_.shaderCycles = history;
     }
     const CoreInfo &info() const override;
+    PresentationState presentationState() const override {
+        return presentation_.sample(game());
+    }
 
     bool init(Host &host, const SurfaceInfo &s) override {
         if (!startup_.begin(host, s))
@@ -387,7 +391,9 @@ class RescueCore final : public Core {
         dev_.SetCurrenRT(-1);
         dev_.alphaEnable(true);
         dev_.SetAlphaBlend(1, 1);
+        presentation_.beforeTick(*g);
         g->run();
+        presentation_.afterTick(*g);
         if (g->hs.dirty)
             saveScores();
         if (padMode_ && g->grid && menuState(g))
@@ -482,6 +488,7 @@ class RescueCore final : public Core {
     neon::ShaderCycleState &shaderHistory_;
     RenderSession renderState_;
     minorescue::module::GameHost gameHost_;
+    minorescue::module::PresentationObserver presentation_;
     NeonEffect *effect_ = nullptr;
     WaveState waves_;
     SampleMixer mixer_{{16, neon::audio::MixArithmetic::ReverseQ16Saturating,

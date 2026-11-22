@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/12.frag","gles/shaders/13.frag","gles/shaders/14.frag","gles/shaders/15.frag","gles/shaders/16.frag","gles/shaders/19.frag","gles/shaders/26.frag","gles/shaders/28.frag","gles/shaders/81.frag","reference/literals/11.png","reference/literals/34.jpg","reference/roots/12.argb","reference/roots/2.argb"],
+"exports":[{"name":"level.shader","target":"node.20.i.2","unit":"shader-id","minimum":0,"maximum":255,"baseline":16},{"name":"reflection.rotation","target":"node.11.f.4","unit":"radians","minimum":-6.28318548,"maximum":6.28318548,"baseline":0},{"name":"timer.field","target":"node.18.f.4","unit":"shader-constant","minimum":0,"maximum":1,"baseline":0.305299997}]
+}

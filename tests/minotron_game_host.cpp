@@ -1,8 +1,9 @@
 #include "minotron_game_host.h"
-#include "minotron_menu_input.h"
 #include "engine/neon_modules.h"
-#include "neon_resources.h"
 #include "grid_menus.h"
+#include "minotron_menu_input.h"
+#include "minotron_presentation.h"
+#include "neon_resources.h"
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -228,6 +229,54 @@ int main() {
         effect.gameHost = &host;
     }
     CHECK(!host.hasGame());
+    {
+        theGame game;
+        minotron::module::PresentationObserver observer;
+        game.running = true;
+        game.demo = false;
+        game.state = 4;
+        game.level = 3;
+        observer.beforeTick(game);
+        observer.afterTick(game);
+        auto first = observer.sample(&game);
+        CHECK(first.gameplay);
+        CHECK(!first.values.count("enemies.destroyed"));
+        observer.beforeTick(game);
+        ++game.bombsCollected;
+        ++game.lives[0];
+        observer.afterTick(game);
+        auto pickup = observer.sample(&game);
+        CHECK(std::get<uint64_t>(pickup.values.at("bombs.used")) == 1);
+        CHECK(std::get<uint64_t>(pickup.values.at("extraLives.gained")) == 1);
+        observer.beforeTick(game);
+        game.state = 9;
+        ++game.level;
+        observer.afterTick(game);
+        auto complete = observer.sample(&game);
+        CHECK(std::get<uint64_t>(complete.values.at("levels.completed")) == 1);
+        game.spreadShots = true;
+        game.fiveWayShots = true;
+        CHECK(std::get<int64_t>(observer.sample(&game).values.at("player.shots")) == 5);
+        playerMinotaur player;
+        player.type = 3;
+        player.invincible = true;
+        game.players = &player;
+        CHECK(std::get<bool>(observer.sample(&game).values.at("player.invincible")));
+        game.players = nullptr;
+        observer.beforeTick(game);
+        game.state = 7;
+        game.paused = true;
+        observer.afterTick(game);
+        CHECK(observer.sample(&game).paused && observer.sample(&game).session == first.session);
+        game.paused = false;
+        game.state = 3;
+        observer.afterTick(game);
+        game.state = 8;
+        observer.beforeTick(game);
+        observer.afterTick(game);
+        CHECK(observer.sample(&game).session > first.session &&
+              std::get<uint64_t>(observer.sample(&game).values.at("levels.completed")) == 0);
+    }
     std::cout
         << "Minotron host: lifecycle, feedback, grid ownership and partial DNA checks passed\n";
 }

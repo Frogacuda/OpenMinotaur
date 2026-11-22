@@ -63,6 +63,10 @@ class OrdinaryParticle final : public StageActor {
             stagePosition.y > double(owner().bounds.halfHeight) * 1.5 ||
             stagePosition.y < double(owner().bounds.halfHeight) * -1.5)
             dead = true;
+        // The original goatPoop update wrapper (0x5b7c0) checks enemies after
+        // movement/lifetime handling. Zero-power decorative particles skip it.
+        if (attackPower > 0)
+            owner().collide(*this, owner().enemies);
     }
     neon::vec2d savedVelocity;
     float fade, opacity, spin, phase, rate;

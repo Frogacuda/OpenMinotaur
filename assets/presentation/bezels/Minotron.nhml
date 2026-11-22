@@ -1,0 +1,23 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "levels.completed" integer "count"
+input "player.invincible" boolean "boolean"
+input "player.shots" integer "count"
+input "level" integer "count"
+input "audio.level" number "rms"
+input "bombs.used" integer "count"
+input "extraLives.gained" integer "count"
+
+parameter "rings.opacity" "node.7.i.1" "byte"
+parameter "rings.speed" "clock.10.6.speed" "multiplier"
+parameter "source.colourShader" "node.4.i.2" "shader-id"
+parameter "source.hue" "colour.1.hue" "degrees"
+parameter "source.brightness" "colour.1.brightness" "gain"
+
+envelope "levels.completed" "rings.opacity" 0.5 1.5 0.25 0 200
+easesweep "levels.completed" "rings.speed" 2.25 1 8
+select "source.colourShader" 59 2 "player.invincible" 1 46 "player.shots" 3 61
+advance "level" "source.hue" 0.5 0 25 -180 180 smooth
+value "source.brightness" "audio.level" 0 1 0.7 1.9 clamp 0.7 1.9
+pulsemax "bombs.used" "source.brightness" 0.1 0.4 0.7 3
+turn "extraLives.gained" "source.hue" 1 0 360 -180 180 linear

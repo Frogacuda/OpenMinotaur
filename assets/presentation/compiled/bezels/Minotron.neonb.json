@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/14.frag","gles/shaders/26.frag","gles/shaders/3.frag","gles/shaders/46.frag","gles/shaders/49.frag","gles/shaders/59.frag","gles/shaders/61.frag","gles/shaders/67.frag","gles/shaders/81.frag","reference/literals/31.jpg","reference/literals/32.jpg","reference/roots/6.argb","reference/roots/9.argb"],
+"exports":[{"name":"rings.opacity","target":"node.7.i.1","unit":"byte","minimum":0,"maximum":255,"baseline":0},{"name":"rings.speed","target":"clock.10.6.speed","unit":"multiplier","minimum":0,"maximum":8,"baseline":1},{"name":"source.brightness","target":"colour.1.brightness","unit":"gain","minimum":0,"maximum":4,"baseline":1},{"name":"source.colourShader","target":"node.4.i.2","unit":"shader-id","minimum":0,"maximum":255,"baseline":59},{"name":"source.hue","target":"colour.1.hue","unit":"degrees","minimum":-180,"maximum":180,"baseline":0}]
+}

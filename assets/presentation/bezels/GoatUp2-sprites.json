@@ -1,0 +1,344 @@
+{
+  "source_catalog": "assets/games/goatup2/NeonResources.xml",
+  "base_and_rare_frames": 10,
+  "columns": 8,
+  "rows": 8,
+  "pickups": [
+    {
+      "artwork_id": 19,
+      "catalog_frame": 21,
+      "atlas_frame": 10,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        35,
+        88,
+        29,
+        20
+      ]
+    },
+    {
+      "artwork_id": 20,
+      "catalog_frame": 22,
+      "atlas_frame": 11,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        66,
+        88,
+        29,
+        20
+      ]
+    },
+    {
+      "artwork_id": 22,
+      "catalog_frame": 24,
+      "atlas_frame": 12,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        307,
+        50,
+        25,
+        26
+      ]
+    },
+    {
+      "artwork_id": 23,
+      "catalog_frame": 25,
+      "atlas_frame": 13,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        333,
+        50,
+        26,
+        26
+      ]
+    },
+    {
+      "artwork_id": 24,
+      "catalog_frame": 26,
+      "atlas_frame": 14,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        360,
+        50,
+        26,
+        26
+      ]
+    },
+    {
+      "artwork_id": 51,
+      "catalog_frame": 53,
+      "atlas_frame": 15,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        180,
+        79,
+        14,
+        14
+      ]
+    },
+    {
+      "artwork_id": 52,
+      "catalog_frame": 54,
+      "atlas_frame": 16,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        196,
+        80,
+        11,
+        11
+      ]
+    },
+    {
+      "artwork_id": 53,
+      "catalog_frame": 55,
+      "atlas_frame": 17,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        208,
+        79,
+        8,
+        12
+      ]
+    },
+    {
+      "artwork_id": 54,
+      "catalog_frame": 56,
+      "atlas_frame": 18,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        162,
+        94,
+        10,
+        16
+      ]
+    },
+    {
+      "artwork_id": 71,
+      "catalog_frame": 73,
+      "atlas_frame": 19,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        0,
+        183,
+        16,
+        18
+      ]
+    },
+    {
+      "artwork_id": 73,
+      "catalog_frame": 75,
+      "atlas_frame": 20,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        190,
+        94,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 74,
+      "catalog_frame": 76,
+      "atlas_frame": 21,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        17,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 75,
+      "catalog_frame": 77,
+      "atlas_frame": 22,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        35,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 76,
+      "catalog_frame": 78,
+      "atlas_frame": 23,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        54,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 77,
+      "catalog_frame": 79,
+      "atlas_frame": 24,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        72,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 78,
+      "catalog_frame": 80,
+      "atlas_frame": 25,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        91,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 79,
+      "catalog_frame": 81,
+      "atlas_frame": 26,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        108,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 80,
+      "catalog_frame": 82,
+      "atlas_frame": 27,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        127,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 81,
+      "catalog_frame": 83,
+      "atlas_frame": 28,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        145,
+        183,
+        16,
+        18
+      ]
+    },
+    {
+      "artwork_id": 82,
+      "catalog_frame": 84,
+      "atlas_frame": 29,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        161,
+        183,
+        16,
+        18
+      ]
+    },
+    {
+      "artwork_id": 83,
+      "catalog_frame": 85,
+      "atlas_frame": 30,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        177,
+        183,
+        18,
+        18
+      ]
+    },
+    {
+      "artwork_id": 107,
+      "catalog_frame": 109,
+      "atlas_frame": 31,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        158,
+        223,
+        30,
+        26
+      ]
+    },
+    {
+      "artwork_id": 120,
+      "catalog_frame": 122,
+      "atlas_frame": 32,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        218,
+        209,
+        34,
+        44
+      ]
+    },
+    {
+      "artwork_id": 152,
+      "catalog_frame": 154,
+      "atlas_frame": 33,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        249,
+        272,
+        40,
+        26
+      ]
+    },
+    {
+      "artwork_id": 153,
+      "catalog_frame": 155,
+      "atlas_frame": 34,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        187,
+        296,
+        50,
+        38
+      ]
+    },
+    {
+      "artwork_id": 163,
+      "catalog_frame": 165,
+      "atlas_frame": 35,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        265,
+        146,
+        23,
+        21
+      ]
+    },
+    {
+      "artwork_id": 165,
+      "catalog_frame": 167,
+      "atlas_frame": 36,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        34,
+        359,
+        45,
+        57
+      ]
+    },
+    {
+      "artwork_id": 175,
+      "catalog_frame": 177,
+      "atlas_frame": 37,
+      "source": "assets/games/goatup2/grunt.png",
+      "rectangle": [
+        274,
+        0,
+        26,
+        24
+      ]
+    }
+  ]
+}

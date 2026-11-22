@@ -1,4 +1,5 @@
 #include "response_animation.h"
+#include "jukebox_expansion.h"
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -15,9 +16,7 @@ bool text(const std::string &s, size_t max) {
     return !s.empty() && s.size() <= max &&
            std::none_of(s.begin(), s.end(), [](unsigned char c) { return c < 32; });
 }
-bool range(float x, float a, float b) {
-    return std::isfinite(x) && x >= a && x <= b;
-}
+bool range(float x, float a, float b) { return std::isfinite(x) && x >= a && x <= b; }
 float curve(float t, ResponseCurve c) {
     t = std::clamp(t, 0.f, 1.f);
     switch (c) {
@@ -239,7 +238,7 @@ std::map<int, ResponseBank> readResponseBanks(std::istream &in) {
     std::map<int, ResponseBank> result;
     for (size_t i = 0; i < count; ++i) {
         int id;
-        require(bool(in >> id) && id >= 0 && id <= 104 && !result.count(id),
+        require(bool(in >> id) && id >= 0 && id <= neon::pc::lastJukeboxPreset && !result.count(id),
                 "Invalid or duplicate response preset");
         result.emplace(id, ResponseBank::read(in));
     }

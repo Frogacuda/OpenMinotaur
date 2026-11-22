@@ -36,6 +36,11 @@ original Llamasoft materials. The HAMMRF raster atlas and vector font sources
 are attributed in modules/live_widgets/FONT-NOTICES.txt. The title and its
 background remain separate from game code and game resource archives.
 
+GoatUp live bezels: the supplied authored scene uses recovered Gridrunner
+Revolution effect data and literal textures 31, 32 and 34. These Llamasoft
+materials remain outside the project-contribution license. The host shares the
+collection title's Light Synth runtime and presentation archive.
+
 Project contributors' own original contributions are offered under 0BSD to the
 extent they hold the necessary rights; see LICENSES/0BSD.txt and LICENSE.txt.
 Existing component terms and attribution are preserved. This grant does not

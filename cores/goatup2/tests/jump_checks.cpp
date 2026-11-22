@@ -365,7 +365,7 @@ void emissions(const char *fixture) {
             CHECK(b.savedVelocity.x == b.velocity.x && b.savedVelocity.y == b.velocity.y);
             CHECK(b.solidCollisionEnabled && b.opacity == 1 && b.phase == 0);
             CHECK(b.savedDrawScale.x == 1 && b.savedDrawScale.y == 1 && b.ledgeResponse == 0);
-            CHECK(b.tileInteractionMask == 0x440000U && b.projectileContactGate == 0);
+            CHECK(b.tileInteractionMask == 0x440000U && b.projectileContactGate == 1.f);
             CHECK(b.colourRamp && b.colourRamp->segments == 11 && b.colourRamp->stops[11] == 14);
             ++index;
             ++births;

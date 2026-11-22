@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/20.frag","gles/shaders/26.frag","gles/shaders/70.frag","gles/shaders/81.frag","reference/roots/5.argb"],
+"exports":[{"name":"background.dimensionSpeed","target":"clock.14.3.speed","unit":"multiplier","minimum":0,"maximum":8,"baseline":1},{"name":"background.rotation","target":"node.14.f.4","unit":"radians","minimum":-6.28318548,"maximum":6.28318548,"baseline":0},{"name":"foreground.rotation","target":"node.17.f.4","unit":"radians","minimum":-6.28318548,"maximum":6.28318548,"baseline":6.28318548},{"name":"scene.hue","target":"runtime.hue","unit":"turns","minimum":0,"maximum":1,"baseline":0},{"name":"secondary.rotation","target":"node.4.f.4","unit":"radians","minimum":-6.28318548,"maximum":6.28318548,"baseline":0}]
+}

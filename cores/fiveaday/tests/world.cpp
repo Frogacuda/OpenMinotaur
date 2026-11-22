@@ -1,6 +1,7 @@
 #include "world.h"
 #include "original_tables.h"
 #include "records.h"
+#include "fiveaday_presentation.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -12,6 +13,36 @@ void check(bool value, const char *why) {
 }
 int main() {
     try {
+        {
+            World observed;
+            observed.start();
+            observed.ship.state = Ship::State::Flying;
+            PresentationObserver presentation;
+            Attacker carrier(observed);
+            auto *minotaur = new Fruit(observed, carrier);
+            minotaur->minotaur = true;
+            minotaur->frame = 32;
+            minotaur->state = Fruit::State::Loose;
+            observed.add(observed.fruits, minotaur);
+            presentation.beforeTick(observed);
+            minotaur->hitBy(observed.ship);
+            observed.bossDefeated = true;
+            presentation.afterTick(observed);
+            check(presentation.rescued() == 1 && presentation.completed() == 1 &&
+                      presentation.trail() == 1,
+                  "Presentation pickup/completion transition");
+            presentation.beforeTick(observed);
+            presentation.afterTick(observed);
+            check(presentation.rescued() == 1 && presentation.completed() == 1,
+                  "Presentation cues do not repeat on retained states");
+            presentation.beforeTick(observed);
+            minotaur->state = Fruit::State::Loose;
+            presentation.afterTick(observed);
+            check(presentation.trail() == 0, "Lost fruit no longer brightens the trail");
+            presentation.reset();
+            check(presentation.rescued() == 0 && presentation.completed() == 0,
+                  "Presentation counters reset for a new run");
+        }
         {
             World restart;
             restart.start();

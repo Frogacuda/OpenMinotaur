@@ -106,6 +106,83 @@ void headbuttBirthsRunAndRetire() {
         w->advanceEffects();
     CHECK(!w->ordinaryEffects && !w->foregroundEffects);
 }
+void fartEnemyContacts() {
+    // Exercise the real emission factory, owned particle update and enemy
+    // damage/reward callbacks together, rather than calling hitBy directly.
+    for (bool inverted : {false, true}) {
+        for (double facing : {-1., 1.}) {
+            auto w = arena();
+            w->goat->gravity = inverted ? -.0002f : .0002f;
+            w->goat->drawScale = {facing, inverted ? -1. : 1.};
+            w->emitHeadbuttParticles(.01f, 1.f, w->random);
+            CHECK(count(w->ordinaryEffects) == 1);
+            auto *particle = w->ordinaryEffects;
+            CHECK(particle->attackPower == 1.f);
+            auto *enemy = new EnemyActor(*w, particle->stagePosition, 4, 0);
+            enemy->worldPosition = particle->worldPosition;
+            enemy->contactHealth = 2;
+            enemy->velocity = enemy->maximumSpeed = {0, 0};
+            enemy->gravity = 0;
+            enemy->policy.solidCollisions = false;
+            neon::entities::prepend<StageActor>(w->enemies, *enemy);
+            w->advanceEffects();
+            CHECK(w->enemies == enemy && enemy->contactHealth == 1 && enemy->freezeTicks > 0);
+            CHECK(w->score == 0 && !particle->dead);
+            w->preparePresentation();
+            w->advanceEffects();
+            CHECK(!w->enemies && w->score > 0);
+        }
+    }
+
+    {
+        auto w = arena();
+        w->emitHeadbuttParticles(.01f, 1.f, w->random);
+        auto *particle = w->ordinaryEffects;
+        auto *enemy = new EnemyActor(*w, particle->stagePosition, 4, 0);
+        enemy->worldPosition = particle->worldPosition;
+        enemy->headbuttState = 1;
+        w->enemies = enemy;
+        particle->run();
+        CHECK(!enemy->dead && enemy->contactHealth == 1 && w->score == 0);
+    }
+
+    class Target final : public StageActor {
+      public:
+        explicit Target(StageRuntime &w) : StageActor(w, w.allocation, 0, false) {}
+        void run() override {}
+        void hitBy(StageActor *) override {
+            ++contacts;
+        }
+        int contacts = 0;
+    };
+    // The wrapper admits positive attack power only; collision traversal also
+    // rejects delayed, inactive, dead and non-overlapping targets.
+    for (int scenario = 0; scenario < 8; ++scenario) {
+        auto w = arena();
+        w->emitHeadbuttParticles(.01f, 1.f, w->random);
+        auto *particle = w->ordinaryEffects;
+        auto *target = new Target(*w);
+        target->worldPosition = particle->worldPosition;
+        if (scenario == 1)
+            particle->attackPower = 0;
+        if (scenario == 2)
+            particle->attackPower = -1;
+        if (scenario == 3)
+            target->drawDelay = 1;
+        if (scenario == 4)
+            target->active = false;
+        if (scenario == 5)
+            target->dead = true;
+        if (scenario == 6)
+            target->worldPosition.x += 1;
+        if (scenario == 7)
+            particle->drawDelay = 1;
+        w->enemies = target;
+        // Run just the particle so a dead target remains available to inspect.
+        particle->run();
+        CHECK(target->contacts == (scenario == 0 ? 1 : 0));
+    }
+}
 void waterBirthsAndListScheduling() {
     auto w = arena(true);
     w->goat->resting = false;
@@ -129,6 +206,49 @@ void waterBirthsAndListScheduling() {
     for (unsigned i = 0; i < 100; ++i)
         w->advanceEffects();
     CHECK(!w->ordinaryEffects);
+}
+void liveCarryAttackAndExitRoutes() {
+    {
+        auto w = arena();
+        w->goat->zoom = 0;
+        w->goat->activeTicks = 20;
+        w->spawnKid({0, 0}, false);
+        w->preparePresentation();
+        w->advanceLocomotion(0, 0, 0, 0);
+        CHECK(w->goat->followingCount == 1 && w->multiplier == 2);
+        auto *enemy = new EnemyActor(*w, {.1, .005}, 4, 0);
+        enemy->velocity = enemy->maximumSpeed = {0, 0};
+        enemy->gravity = 0;
+        enemy->policy.solidCollisions = false;
+        w->enemies = enemy;
+        w->preparePresentation();
+        w->advanceLocomotion(0, 1, 1, 1);
+        CHECK(w->headbuttEvent && w->goat->followingCount == 0 && w->multiplier == 1);
+        for (uint32_t tick = 2; tick < 25 && w->enemies; ++tick)
+            w->advanceLocomotion(0, 0, tick, uint8_t(tick));
+        CHECK(!w->enemies && w->score == 1000 && w->goat->state == 0);
+    }
+    {
+        auto w = arena(false, true);
+        w->goat->zoom = 0;
+        w->goat->activeTicks = 20;
+        w->bestStageTime = 108000;
+        w->spawnExit({0, .05});
+        auto *exit = w->contactObjects;
+        w->spawnPickup({.3, .05}, 0);
+        w->preparePresentation();
+        StageSession session; StageHud hud;
+        session.beginRun(*w);
+        for (uint32_t tick = 0; tick < 600 && session.phase() == StageSession::Phase::Playing; ++tick) {
+            session.prepareOuterFrame(*w, hud, tick);
+            const double move = tick >= 10 && tick < 40 ? .1 : tick >= 40 && tick < 70 ? -.1 : 0;
+            w->advanceLocomotion(move, 0, tick, uint8_t(tick));
+            if (tick < 10) CHECK(exit->headbuttState == 0 && w->goat->state == 0);
+        }
+        CHECK(session.phase() == StageSession::Phase::BetweenLevels);
+        CHECK(w->requiredFruit == 0 && w->score == 1200 && w->exitBonus == 1100);
+        CHECK(w->lives == 3 && w->newBestStageTime && w->activeFollowers == 0);
+    }
 }
 void mirroredGravityAndInput() {
     auto w = arena();
@@ -1531,6 +1651,8 @@ int main(int argc, char **argv) {
         frontendLifecycle();
         groundJumpAndEffects();
         headbuttBirthsRunAndRetire();
+        fartEnemyContacts();
+        liveCarryAttackAndExitRoutes();
         waterBirthsAndListScheduling();
         mirroredGravityAndInput();
         kidContactsHistoryAndHeadbutt();

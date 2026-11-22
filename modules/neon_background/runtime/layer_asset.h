@@ -7,7 +7,10 @@ struct LayerAsset {
     std::string name = "Saved layer", notes, scene;
     LayerAssetKind kind = LayerAssetKind::Recovered;
     int root = -1;
-    static LayerAsset capture(Runtime &, std::string, int recoveredLayer = -1, int component = 0);
+    static LayerAsset capture(Runtime &, std::string, int recoveredLayer = -1, int component = 0,
+                              double playbackRate = 1);
+    static LayerAsset captureNode(Runtime &, std::string, size_t node, double playbackRate = 1);
+    double playbackRate() const;
     void loadPreview(Runtime &) const;
     void updateFromPreview(Runtime &);
     void write(std::ostream &) const;
@@ -17,5 +20,6 @@ struct LayerAsset {
 };
 // Copies dependencies and remaps component/animation IDs. Read bindings remain host-owned.
 // materialTarget: existing consumer ID; primitive: 0..4 creates a new textured primitive.
-int importLayerAsset(Runtime &, const LayerAsset &, int materialTarget = 0, int primitive = -1);
+int importLayerAsset(Runtime &, const LayerAsset &, int materialTarget = 0, int primitive = -1,
+                     double destinationRate = 1);
 } // namespace neon::effects

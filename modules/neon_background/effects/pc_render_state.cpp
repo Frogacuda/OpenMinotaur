@@ -5,9 +5,7 @@
 #include <stdexcept>
 #include <string>
 namespace neon::pc {
-Matrix4 identityMatrix() {
-    return {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-}
+Matrix4 identityMatrix() { return {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}; }
 Matrix4 multiplyMatrix(const Matrix4 &a, const Matrix4 &b) {
     Matrix4 out{};
     for (int r = 0; r < 4; r++)
@@ -71,9 +69,7 @@ Matrix4 originalPerspective(float top, float bottom, float left, float right, fl
             nearZ * farZ / (nearZ - farZ),
             0};
 }
-Matrix4 originalStackView() {
-    return lookAtMatrix({0, 0, -100}, {0, 0, 100}, {0, 1, 0});
-}
+Matrix4 originalStackView() { return lookAtMatrix({0, 0, -100}, {0, 0, 100}, {0, 1, 0}); }
 Matrix4 originalStackProjection(int width, int height, bool mixer) {
     if (width < 1 || height < 1 || width > 8192 || height > 8192)
         throw std::runtime_error("Invalid original viewport");

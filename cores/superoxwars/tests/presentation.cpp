@@ -1,4 +1,5 @@
 #include "world.h"
+#include "superoxwars_presentation.h"
 #include "scene.h"
 #include "ground.h"
 #include "air_enemy.h"
@@ -36,6 +37,20 @@ struct SoundProducer : Entity {
 } // namespace
 int main() {
     try {
+        {
+            World world;
+            auto values = presentationSnapshot(world, 4, true, false);
+            check(std::get<double>(values.values.at("score.redShare")) == .5, "Zero-score balance");
+            world.redScore = 300;
+            world.blueScore = 100;
+            world.layerTilt = -.75;
+            values = presentationSnapshot(world, 4, true, false);
+            check(std::get<double>(values.values.at("score.redShare")) == .75 &&
+                      std::get<double>(values.values.at("score.blueShare")) == .25 &&
+                      std::get<double>(values.values.at("world.tilt")) == -.75 &&
+                      values.session == 4,
+                  "Read-only bezel snapshot");
+        }
         auto contact = std::make_unique<World>();
         Entity source(*contact);
         auto *later = new ContactTarget(*contact);

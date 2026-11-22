@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/14.frag","gles/shaders/20.frag","gles/shaders/26.frag","gles/shaders/4.frag","gles/shaders/5.frag","gles/shaders/50.frag","gles/shaders/59.frag","gles/shaders/71.frag","reference/roots/14.argb","reference/roots/2.argb","reference/roots/6.argb"],
+"exports":[{"name":"hunger.field","target":"node.11.f.5","unit":"normalized","minimum":0,"maximum":1,"baseline":1},{"name":"hunger.saturation","target":"colour.10.saturation","unit":"gain","minimum":0,"maximum":2,"baseline":1},{"name":"invincible.field","target":"node.32.f.4","unit":"normalized","minimum":0,"maximum":1,"baseline":0.13649115},{"name":"invincible.green","target":"colour.31.green","unit":"gain","minimum":0,"maximum":4,"baseline":1},{"name":"invincible.hue","target":"runtime.hue","unit":"turns","minimum":0,"maximum":1,"baseline":0}]
+}

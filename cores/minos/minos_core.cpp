@@ -139,6 +139,20 @@ class MinosCore final : public Core {
         renderState_.shaderCycles = history;
     }
     const CoreInfo &info() const override;
+    PresentationState presentationState() const override {
+        const auto *g = game();
+        if (!g || g->state < 4 || g->state > 6)
+            return {};
+        // The map camera is measured in cells: 25 cells span the gameplay screen.
+        return {true,
+                g->play.paused || suspended_,
+                1,
+                {{"level.number", int64_t(g->play.cavernIndex) + 1},
+                 {"screen.scroll", g->play.cameraY / 25.0},
+                 {"minotaurs.rescued", int64_t(g->play.minosSavedTotal)},
+                 {"game.phase", int64_t(g->play.runState)},
+                 {"gravity.influence", double(g->play.shotDrift)}}};
+    }
 
     bool init(Host &host, const SurfaceInfo &s) override {
         if (!startup_.begin(host, s))

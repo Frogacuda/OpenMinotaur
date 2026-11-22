@@ -1,4 +1,4 @@
-# CRT Consumer / CRT 2
+# CRT Consumer / CRT 1
 
 The preset and three GLSL files are unchanged upstream sources. The revision and
 hashes are recorded in provenance.json. The linear and NTSC module headers

@@ -1,0 +1,12 @@
+NEONRIG 2
+# target, read field, input anchors, output anchors, boundary, output limits
+value "node.25.f.3" "screen.elevation" 0 1 -0.506909966 -0.006909966 wrap -1 1
+value "camera.yaw" "player.x" -0.5 0.5 0.8 -0.8 clamp -0.8 0.8
+# field, target, attack seconds, decay seconds, baseline, peak (turns)
+pulse "billyGoats.kissed" "runtime.hue" 1 1 0 0.2777777777777778
+# field, target, duration seconds, baseline, end (turns)
+sweep "kids" "runtime.hue" 1 0 1
+# Zone steps retain their hue; mushroom turns are temporary offsets.
+advance "zone" "runtime.hue" 0.5 0 0.1388888888888889 0 1 smooth
+select "node.22.i.2" 12 1 "mushroom.active" 1 46
+cycle "mushroom.active" "runtime.hue" 2 1

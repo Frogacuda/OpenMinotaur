@@ -7,7 +7,27 @@ title=root/"modules/live_widgets/assets/title"
 document="Minotaur-Title.widgetml"
 assets=json.loads((title/document).read_text(encoding="utf-8"))["assets"].values()
 files={"title/"+name:title/name for name in [document,*assets]}
-files.update({p.relative_to(root/"assets/presentation").as_posix():p for p in (root/"assets/presentation").rglob("*") if p.is_file()})
+presentation=root/"assets/presentation"
+compiled=presentation/"compiled"
+manifest=json.loads((compiled/"MANIFEST.json").read_text(encoding="utf-8"))
+assert manifest["format"]==1
+from bake_presentation_scenes import compiler_signature
+if manifest.get("compiler_signature")!=compiler_signature():
+ raise RuntimeError("Prepared Neon scenes need rebuilding after compiler/data changes; run tools/bake_presentation_scenes.py")
+import hashlib
+def check(path,expected):
+ if hashlib.sha256(path.read_bytes()).hexdigest()!=expected:
+  raise RuntimeError("Stale prepared Neon asset: "+str(path)+"; run tools/bake_presentation_scenes.py")
+for entry in manifest["scenes"]:
+ check(presentation/entry["source"],entry["source_sha256"])
+ check(compiled/entry["file"],entry["sha256"])
+ files[entry["file"]]=compiled/entry["file"]
+ if "harness" in entry:
+  check(presentation/entry["harness"],entry["harness_sha256"])
+  files[entry["harness"]]=presentation/entry["harness"]
+ for name,digest in entry["resources"].items():
+  path=presentation/"neon"/name;check(path,digest);files["neon/"+name]=path
+
 buffer=io.BytesIO()
 with zipfile.ZipFile(buffer,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
  for name,path in sorted(files.items()):

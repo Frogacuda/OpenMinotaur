@@ -28,3 +28,12 @@ target_link_libraries(mino_minotron_host_checks PRIVATE mino_core_minotron)
 
 # Match source floating-point operation boundaries in shared template consumers.
 target_link_libraries(mino_core_minotron PRIVATE neon_source_numeric)
+
+if(BUILD_TESTING)
+    add_executable(mino_minotron_gameplay_checks EXCLUDE_FROM_ALL tests/gameplay.cpp)
+    target_compile_definitions(mino_minotron_gameplay_checks PRIVATE NEON_GAME=minotron)
+    target_include_directories(mino_minotron_gameplay_checks PRIVATE engine)
+    target_link_libraries(mino_minotron_gameplay_checks PRIVATE mino_core_minotron neon_source_numeric)
+    add_test(NAME minotron_gameplay_original COMMAND mino_minotron_gameplay_checks
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+endif()

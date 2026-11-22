@@ -362,11 +362,15 @@ void collectible::run() {
     g->bounceOff(this, g->planets);
 }
 
-// Rescued: points (more the closer to the edge), a heart, a grunt.
+// Rescued: points (more the closer to the centre in solar mode), a heart, a grunt.
 void collectible::hitBy(entity *by) {
     spaceWars *g = game;
     float d = float(by->pos.length());
-    float edge = d <= 0.5f ? (0.51f - d) + (0.51f - d) : 0.02f;
+    // The radius is rounded to float first, but this edge multiplier is formed
+    // in double precision before storing as float. Float-only subtraction can
+    // lose a rescue point at the boundary (22 becomes 21 on the first level).
+    double inward = 0.51 - double(d);
+    float edge = d <= 0.5f ? float(inward + inward) : 0.02f;
     float pts = float(double(float(g->level + 1)) * 1.1 * 1000.0);
     if (!g->sunOn)
         pts = pts / 10.0f;
@@ -702,12 +706,14 @@ void theSun::run() {
     if (!g->levelDone)
         return;
     float s = size;
-    if (0.02f < s) {
-        s = s * 0.98f;
+    // These comparisons and adjustments are double operations around float
+    // stores. In particular, binary32 0.02 lies just below the double threshold.
+    if (0.02 < double(s)) {
+        s = float(double(s) * 0.98);
         size = s;
     }
-    if (s < 0.02f)
-        size = s + 0.001f;
+    if (double(s) < 0.02)
+        size = float(double(s) + 0.001);
     collapsed = false;
     mass = 150000.0f;
     if (g->blackHole)
@@ -742,9 +748,11 @@ void theSun::hitBy(entity *by) {
         if (!collapsed) {
             if (!g->demo) {
                 float k = float(lv) * 0.0625f;
-                mass = mass * (k * 0.03f + 1.03f);
-                size = size * (k * 0.1f + 1.1f);
-                if (0.18f < size) {
+                // The level factor is binary32; growth and collapse comparisons
+                // use binary64 around the stored mass and radius values.
+                mass = float(double(mass) * (double(k) * 0.03 + 1.03));
+                size = float(double(size) * (double(k) * 0.1 + 1.1));
+                if (0.18 < double(size)) {
                     size = 0.0001f;
                     collapsed = true;
                     g->playSample(0x16);
@@ -753,7 +761,7 @@ void theSun::hitBy(entity *by) {
                 }
             }
         } else if (!g->demo) {
-            mass = mass * 1.1f;
+            mass = float(double(mass) * 1.1);
             if (2e6f < mass)
                 mass = 2000000.0f;
         }

@@ -11,12 +11,8 @@
 namespace neon::pc {
 namespace {
 constexpr float tau = 6.2831855f;
-bool supported(int kind) {
-    return kind == 1 || kind == 2 || kind == 5 || kind == 7 || kind == 31;
-}
-float cycle(float p) {
-    return p - std::floor(p);
-}
+bool supported(int kind) { return kind == 1 || kind == 2 || kind == 5 || kind == 7 || kind == 31; }
+float cycle(float p) { return p - std::floor(p); }
 uint32_t mixColour(uint32_t a, uint32_t b, float t) {
     uint32_t out = 0;
     for (int s = 0; s < 32; s += 8)

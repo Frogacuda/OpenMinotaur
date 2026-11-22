@@ -1,5 +1,11 @@
 #include "effect_runtime.h"
+#include "baked_io.h"
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 #include "pc_flower.h"
+#include "pc_texture_bindings.h"
 #include "primitive_mesh.h"
 #include "recovered_scene.h"
 #include "shape_component.h"
@@ -14,6 +20,8 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
+#include <limits>
 #include <map>
 #include <regex>
 #include <stb_image.h>
@@ -24,6 +32,15 @@ namespace {
 using namespace pc;
 using ClearDepthFunction = void(GLAD_API_PTR *)(GLfloat);
 ClearDepthFunction clearDepth = nullptr;
+using GetProgramBinaryFunction = void(GLAD_API_PTR *)(GLuint, GLsizei, GLsizei *, GLenum *, void *);
+using ProgramBinaryFunction = void(GLAD_API_PTR *)(GLuint, GLenum, const void *, GLsizei);
+using ProgramParameteriFunction = void(GLAD_API_PTR *)(GLuint, GLenum, GLint);
+GetProgramBinaryFunction getProgramBinary = nullptr;
+ProgramBinaryFunction loadProgramBinary = nullptr;
+ProgramParameteriFunction programParameteri = nullptr;
+constexpr GLenum programBinaryLength = 0x8741, numProgramBinaryFormats = 0x87fe,
+                 programBinaryFormats = 0x87ff, programBinaryRetrievableHint = 0x8257;
+
 GLuint compile(GLenum type, const std::string &text) {
     GLuint s = glCreateShader(type);
     auto *p = text.c_str();
@@ -39,11 +56,153 @@ GLuint compile(GLenum type, const std::string &text) {
     }
     return s;
 }
-GLuint program(const std::string &vs, const std::string &ps) {
+struct ProgramCache {
+    std::filesystem::path directory;
+    uint64_t compilations = 0, hits = 0;
+};
+std::string programKey(const std::string &vertex, const std::string &fragment) {
+    uint64_t a = 1469598103934665603ull, b = 1099511628211ull;
+    auto mix = [&](const std::string &text) {
+        for (unsigned char c : text) {
+            a = (a ^ c) * 1099511628211ull;
+            b = (b ^ c) * 0x100000001b3ull + 0x9e3779b97f4a7c15ull;
+        }
+        a ^= text.size();
+        b ^= text.size();
+    };
+    mix("Neon program cache 1");
+    mix(vertex);
+    mix(fragment);
+    for (GLenum kind : {GL_VENDOR, GL_RENDERER, GL_VERSION, GL_SHADING_LANGUAGE_VERSION}) {
+        auto text = glGetString(kind);
+        mix(text ? reinterpret_cast<const char *>(text) : "");
+    }
+    std::ostringstream out;
+    out << std::hex << std::setfill('0') << std::setw(16) << a << std::setw(16) << b;
+    return out.str();
+}
+GLuint cachedProgram(ProgramCache *cache, const std::string &key) {
+    if (!cache)
+        return 0;
+    try {
+        std::ifstream file(cache->directory / (key + ".nglp"), std::ios::binary);
+        if (!file)
+            return 0;
+        char magic[8];
+        file.read(magic, 8);
+        if (!file || std::string(magic, 8) != "NEONGL01")
+            return 0;
+        baked::IO io(file);
+        uint32_t format = 0;
+        io.value(format);
+        std::string bytes;
+        io.text(bytes, 16 * 1024 * 1024);
+        if (bytes.empty() || file.peek() != std::char_traits<char>::eof())
+            return 0;
+        GLint count = 0;
+        glGetIntegerv(numProgramBinaryFormats, &count);
+        if (count <= 0 || count > 256)
+            return 0;
+        std::vector<GLint> formats(size_t(count), 0);
+        glGetIntegerv(programBinaryFormats, formats.data());
+        if (std::find(formats.begin(), formats.end(), GLint(format)) == formats.end())
+            return 0;
+        GLuint program = glCreateProgram();
+        loadProgramBinary(program, format, bytes.data(), GLsizei(bytes.size()));
+        GLint linked = 0;
+        glGetProgramiv(program, GL_LINK_STATUS, &linked);
+        if (linked) {
+            ++cache->hits;
+            return program;
+        }
+        glDeleteProgram(program);
+        for (int n = 0; n < 4 && glGetError() != GL_NO_ERROR; ++n) {
+        }
+        std::error_code error;
+        std::filesystem::remove(cache->directory / (key + ".nglp"), error);
+    } catch (const std::exception &) {
+    }
+    return 0;
+}
+void storeProgram(ProgramCache *cache, const std::string &key, GLuint program) {
+    if (!cache)
+        return;
+    try {
+        GLint length = 0;
+        glGetProgramiv(program, programBinaryLength, &length);
+        if (length <= 0 || length > 16 * 1024 * 1024)
+            return;
+        std::string bytes(size_t(length), '\0');
+        GLsizei size = 0;
+        GLenum format = 0;
+        getProgramBinary(program, length, &size, &format, bytes.data());
+        if (size <= 0)
+            return;
+        bytes.resize(size);
+        std::filesystem::create_directories(cache->directory);
+        auto path = cache->directory / (key + ".nglp"),
+             temporary = cache->directory / (key + ".tmp");
+        {
+            std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
+            file.write("NEONGL01", 8);
+            baked::IO io(file);
+            uint32_t code = format;
+            io.value(code);
+            io.text(bytes);
+            if (!file)
+                return;
+        }
+        std::error_code error;
+        std::filesystem::remove(path, error);
+        error.clear();
+        std::filesystem::rename(temporary, path, error);
+        if (error)
+            std::filesystem::remove(temporary, error);
+    } catch (const std::exception &) {
+    }
+}
+GLuint program(const std::string &vs, const std::string &ps, ProgramCache *cache = nullptr) {
+    if (!loadProgramBinary || !getProgramBinary || !programParameteri)
+        cache = nullptr;
+    if (cache) {
+        const char *version = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+        bool supported = version && std::string(version).rfind("OpenGL ES", 0) == 0;
+        GLint major = 0, minor = 0;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        supported |= major > 4 || (major == 4 && minor >= 1);
+        if (!supported) {
+            GLint extensions = 0;
+            glGetIntegerv(GL_NUM_EXTENSIONS, &extensions);
+            for (GLint n = 0; n < extensions; ++n) {
+                const auto *name = glGetStringi(GL_EXTENSIONS, GLuint(n));
+                if (name && std::strcmp(reinterpret_cast<const char *>(name),
+                                        "GL_ARB_get_program_binary") == 0) {
+                    supported = true;
+                    break;
+                }
+            }
+        }
+        if (!supported)
+            cache = nullptr;
+    }
+    GLint formats = 0;
+    if (cache) {
+        glGetIntegerv(numProgramBinaryFormats, &formats);
+        if (formats <= 0)
+            cache = nullptr;
+    }
+    std::string key = cache ? programKey(vs, ps) : std::string{};
+    if (auto saved = cachedProgram(cache, key))
+        return saved;
+    if (cache)
+        ++cache->compilations;
     GLuint v = compile(GL_VERTEX_SHADER, vs), f = 0, p = 0;
     try {
         f = compile(GL_FRAGMENT_SHADER, ps);
         p = glCreateProgram();
+        if (cache)
+            programParameteri(p, programBinaryRetrievableHint, GL_TRUE);
         glAttachShader(p, v);
         glAttachShader(p, f);
         glLinkProgram(p);
@@ -64,6 +223,7 @@ GLuint program(const std::string &vs, const std::string &ps) {
     }
     glDeleteShader(v);
     glDeleteShader(f);
+    storeProgram(cache, key, p);
     return p;
 }
 struct State {
@@ -80,6 +240,9 @@ struct State {
         discard = glIsEnabled(GL_RASTERIZER_DISCARD);
         alphaCoverage = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE);
         sampleCoverage = glIsEnabled(GL_SAMPLE_COVERAGE);
+        prepareUploadState();
+    }
+    static void prepareUploadState() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         for (int i = 0; i < 6; i++)
             glPixelStorei(unpackNames[i], i == 0 ? 4 : 0);
@@ -109,7 +272,12 @@ struct State {
         tex[3]{}, sampler[3]{};
     GLboolean blend, depth, cull, clip, mask[4], dither;
     GLfloat clear[4], savedClearDepth = 1;
-    State() {
+    bool preserving;
+    explicit State(bool preserve = true) : preserving(preserve) {
+        if (!preserving) {
+            prepareUploadState();
+            return;
+        }
         captureUploadState();
         glGetIntegerv(GL_DEPTH_FUNC, &depthFunction);
         glGetBooleanv(GL_DEPTH_WRITEMASK, &depthWrite);
@@ -144,6 +312,8 @@ struct State {
         }
     }
     ~State() {
+        if (!preserving)
+            return;
         restoreUploadState();
         glDepthFunc(depthFunction);
         glDepthMask(depthWrite);
@@ -190,14 +360,14 @@ struct Target {
         texture = fbo = 0;
         width = height = 0;
     }
-    void create(int size, int glyphHeight = 0) {
-        if (!glyphHeight)
-            glyphHeight = size;
+    void create(int size, int height = 0) {
+        if (!height)
+            height = size;
         this->width = size;
-        this->height = glyphHeight;
+        this->height = height;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size, glyphHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                      nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -214,6 +384,7 @@ struct Target {
 };
 struct Vertex {
     float x, y, z, r, g, b, a, u, v, u1, v1;
+    float clipWeight = 1;
 };
 Matrix4 rotation(int axis, float angle) {
     auto m = identityMatrix();
@@ -238,10 +409,10 @@ Matrix4 rotation(int axis, float angle) {
 }
 const char *flatVS = R"(#version 300 es
 precision highp float;
-layout(location=0) in vec3 position;layout(location=1) in vec4 tint;layout(location=2) in vec2 uv0;layout(location=3) in vec2 uv1;
-uniform mat4 transform;uniform int spatial;uniform float outputSign;uniform vec2 pixelShift;
-out vec4 diffuse;out vec2 t0;out vec2 t1;
-void main(){vec4 p=spatial!=0?transform*vec4(position,1.0):vec4(position.xy*2.0-1.0,0.0,1.0);if(spatial!=0)p.z=2.0*p.z-p.w;p.y*=outputSign;p.xy+=pixelShift*p.w;gl_Position=p;diffuse=tint;t0=uv0;t1=uv1;})";
+layout(location=0) in vec3 position;layout(location=1) in vec4 tint;layout(location=2) in vec2 uv0;layout(location=3) in vec2 uv1;layout(location=4) in float clipWeight;
+uniform mat4 transform;uniform int spatial;uniform float outputSign;uniform vec2 pixelShift;uniform vec2 surfaceExtent;
+out vec4 diffuse;out vec2 t0;out vec2 t1;out vec2 surfaceUV;
+void main(){vec4 p=spatial!=0?transform*vec4(position,1.0):vec4((position.xy*2.0-1.0)*clipWeight,0.0,clipWeight);if(spatial!=0)p.z=2.0*p.z-p.w;p.y*=outputSign;p.xy+=pixelShift*p.w;gl_Position=p;diffuse=tint;t0=uv0;t1=uv1;surfaceUV=.5+(position.xy-.5)*surfaceExtent;})";
 const char *fragmentHeader = R"(#version 300 es
 precision highp float;
 uniform sampler2D image0;uniform sampler2D image1;uniform sampler2D image2;uniform vec4 c25;uniform vec4 c26;uniform float gain;
@@ -276,15 +447,48 @@ std::string builtInFragment(int id) {
     return std::string(fragmentHeader) + "void main(){" + body + "}";
 }
 } // namespace
+namespace {
+ComponentScene playbackComponents(ComponentScene scene) {
+    std::set<int> live;
+    for (const auto &c : scene.items)
+        if (c.enabled && c.visible)
+            live.insert(c.id);
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (const auto &c : scene.items)
+            if (live.count(c.id))
+                for (int source : {c.source, c.sourceB, c.sourceC})
+                    if (source >= 10000)
+                        changed |= live.insert(source - 10000).second;
+    }
+    scene.items.erase(std::remove_if(scene.items.begin(), scene.items.end(),
+                                     [&](const auto &c) { return !live.count(c.id); }),
+                      scene.items.end());
+    return scene;
+}
+std::unique_ptr<Runtime> documentRuntime(const std::filesystem::path &data, pc::AssetReader reader,
+                                         const std::string &document) {
+    std::istringstream input(document);
+    if (document.compare(0, 8, "NEONBK01") == 0)
+        return Runtime::loadBaked(input, data, std::move(reader));
+    auto result = std::make_unique<Runtime>(data, std::move(reader));
+    result->readScene(input);
+    return result;
+}
+} // namespace
 struct Runtime::Impl {
     AssetReader reader;
-    std::filesystem::path data;
     std::string read(const std::filesystem::path &p) const {
         return assetText(p, reader);
     }
+    GLuint gameplayTexture = 0;
+    int gameplayWidth = 0, gameplayHeight = 0;
+    std::filesystem::path data;
     RecoveredScene scene;
     std::array<bool, 16> baseReachable{};
     bool allocatedInspection = false;
+    bool allocatedRipple = true;
     TunnelProfiles profiles;
     bool editorAuthoring = false;
     AuthoringModel author;
@@ -306,6 +510,8 @@ struct Runtime::Impl {
         std::string layerDocument;
         uint64_t layerHash = 0;
         double layerTime = 0;
+        uint64_t forwardedKey = ~uint64_t(0);
+        std::vector<ResponseParameter> forwarded;
     };
     std::map<int, ComponentTarget> componentTargets;
     std::map<int, TunnelPlayback> componentTunnels;
@@ -322,12 +528,22 @@ struct Runtime::Impl {
     };
     OverlayCache overlayOverGameCache, overlayBezelCache;
     Statistics stats;
+    size_t importedPixelTotal = 0;
     std::vector<vectors::Object> objects;
     uint64_t objectRevision = 0;
+    uint64_t vectorSourceKey = ~uint64_t(0);
     vectors::Canvas canvas;
     vectors::BeamMesh beam;
     std::map<int, GLuint> programs, images;
-    std::map<GLuint, std::array<GLint, 31>> uniformLocations;
+    struct ExternalLayer {
+        GLuint texture;
+        bool expanded, flipY;
+    };
+    std::map<int, ExternalLayer> externalLayers;
+    std::map<int, uint64_t> imageKeys;
+    GLuint imageSamplers[3]{};
+    int samplerNode = -1;
+    std::map<GLuint, std::array<GLint, 39>> uniformLocations;
     enum Uniform {
         U_image0,
         U_image1,
@@ -359,12 +575,20 @@ struct Runtime::Impl {
         U_brightness2,
         U_outTone,
         U_outGain,
-        U_unused
+        U_hueShift,
+        U_saturation,
+        U_displacement,
+        U_radialScroll,
+        U_inputFloor,
+        U_address0,
+        U_address1,
+        U_address2,
+        U_surfaceExtent
     };
     GLint location(GLuint p, Uniform u) {
         auto it = uniformLocations.find(p);
         if (it == uniformLocations.end()) {
-            std::array<GLint, 31> values;
+            std::array<GLint, 39> values;
             const char *names[] = {"image0",
                                    "image1",
                                    "image2",
@@ -395,8 +619,16 @@ struct Runtime::Impl {
                                    "neonBrightness2",
                                    "neonOutput",
                                    "neonOutputGain",
-                                   "unused"};
-            for (int n = 0; n < 31; n++)
+                                   "neonHueShift",
+                                   "neonSaturation",
+                                   "neonDisplacement",
+                                   "neonRadialScroll",
+                                   "neonInputFloor",
+                                   "neonAddress0",
+                                   "neonAddress1",
+                                   "neonAddress2",
+                                   "surfaceExtent"};
+            for (int n = 0; n < int(values.size()); n++)
                 values[n] = glGetUniformLocation(p, names[n]);
             it = uniformLocations.emplace(p, values).first;
         }
@@ -421,7 +653,7 @@ struct Runtime::Impl {
             source = oldSource;
         }
     };
-    Target scratch, source, studyOutput, geometryFeed;
+    Target scratch, source, studyOutput, geometryFeed, nodeOutput;
     std::array<Target, 16> stacks;
     GLuint depthBuffer = 0;
     GLuint beamProgram = 0, vao = 0, vbo = 0, beamVao = 0, beamVbo = 0;
@@ -434,11 +666,24 @@ struct Runtime::Impl {
     unsigned sceneGeneration = 0, graphicsGeneration = ~0u;
     int extent = 0, sourceWidth = 0, sourceHeight = 0;
     double accumulator = 0;
+    bool sampledFrame = false, outputReady = false;
+    int readyWidth = 0, readyHeight = 0, readyTurns = 0;
+    float readyScale = 0;
     bool clearPending = false;
     uint64_t renderedKey = ~uint64_t(0);
-    explicit Impl(const std::filesystem::path &p, AssetReader read)
-        : reader(std::move(read)), data(p), scene(p, "r2-c13", true, reader),
-          profiles(TunnelProfiles::load(p / "reference/tunnel", reader)), author(p, reader) {
+    std::shared_ptr<ProgramCache> programCache;
+    bool playbackOnly = false;
+    std::vector<ResponseParameter> preparedParameters;
+    explicit Impl(const std::filesystem::path &p, AssetReader read, bool playback = false)
+        : reader(metadataReader(std::move(read))), data(p),
+          scene(playback ? RecoveredScene{} : RecoveredScene(p, "r2-c13", true, reader)),
+          profiles(playback ? TunnelProfiles{}
+                            : TunnelProfiles::load(p / "reference/tunnel", reader)),
+          author(playback ? pc::AuthoringModel(pc::AuthoringModel::PlaybackOnly{}, p, reader)
+                          : pc::AuthoringModel(p, reader)),
+          playbackOnly(playback) {
+        if (playback)
+            return;
         baseReachable = scene.reachable;
         auto shapeColours = assetStream(p / "reference/shape-palette.bin", reader);
         if (!shapeColours.read((char *)shapePalette.data(), sizeof shapePalette))
@@ -487,6 +732,7 @@ struct Runtime::Impl {
         release();
     }
     void release(bool keepShared = false) {
+        outputReady = false;
         if (!keepShared) {
             for (auto &p : componentTargets)
                 p.second.target.release();
@@ -498,7 +744,11 @@ struct Runtime::Impl {
         studyOutput.release();
         geometryFeed.release();
         scratch.release();
+        if (!keepShared)
+            externalLayers.clear();
+        nodeOutput.release();
         source.release();
+        vectorSourceKey = ~uint64_t(0);
         for (auto &t : stacks)
             t.release();
         if (!keepShared)
@@ -510,6 +760,11 @@ struct Runtime::Impl {
         if (!keepShared) {
             programs.clear();
             images.clear();
+            imageKeys.clear();
+            if (imageSamplers[0] || imageSamplers[1] || imageSamplers[2])
+                glDeleteSamplers(3, imageSamplers);
+            for (auto &sampler : imageSamplers)
+                sampler = 0;
         }
         uniformLocations.clear();
         if (beamProgram)
@@ -540,6 +795,7 @@ struct Runtime::Impl {
         beam.reset();
     }
     void abandon() {
+        outputReady = false;
         for (auto &entry : componentTargets) {
             entry.second.target = {};
             entry.second.key = ~uint64_t(0);
@@ -547,12 +803,19 @@ struct Runtime::Impl {
                 entry.second.layer->abandonGraphics();
         }
         programs.clear();
+        gameplayTexture = 0;
+        imageSamplers[0] = imageSamplers[1] = imageSamplers[2] = 0;
+        imageKeys.clear();
+        externalLayers.clear();
+        vectorSourceKey = ~uint64_t(0);
+        gameplayWidth = gameplayHeight = 0;
         images.clear();
         uniformLocations.clear();
         depthBuffer = beamProgram = overlayProgram = vao = vbo = beamVao = beamVbo = 0;
         studyOutput = {};
         geometryFeed = {};
         scratch = {};
+        nodeOutput = {};
         source = {};
         for (auto &target : stacks)
             target = {};
@@ -564,11 +827,18 @@ struct Runtime::Impl {
     void initialize(int width, int height) {
         scene.reachable = baseReachable;
         bool inspecting = params.layerPreview >= 0;
+        bool ripple = true;
+        if (selected == 5)
+            for (const auto &e : author.controls(5))
+                if (e.key == "tunnel.ripple.enabled" && e.enabled)
+                    ripple = e.value >= .5f;
         // Isolation selects an existing reachable output; keep its original dependency graph.
         int size = std::max(width, height);
         if (extent == size && sourceWidth == width && sourceHeight == height &&
             graphicsGeneration == sceneGeneration && allocatedFraming == params.framing.mode &&
-            allocatedInspection == inspecting)
+            allocatedInspection == inspecting && allocatedRipple == ripple &&
+            allocatedComponentDirect == directComponentOutput() &&
+            allocatedComponentVectors == (!directComponentOutput() || componentVectorSource()))
             return;
         release(true);
         GLint maxSize = 0;
@@ -579,20 +849,25 @@ struct Runtime::Impl {
         graphicsGeneration = sceneGeneration;
         allocatedFraming = params.framing.mode;
         allocatedInspection = inspecting;
+        allocatedRipple = ripple;
+        allocatedComponentDirect = directComponentOutput();
+        allocatedComponentVectors = !allocatedComponentDirect || componentVectorSource();
         sourceWidth = width;
         sourceHeight = height;
-        if (selected >= 100)
+        if (neon::pc::isStudy(selected))
             studyOutput.create(width, height);
         else
             scratch.create(params.framing.mode == Framing::LegacyStretch ? size : width,
                            params.framing.mode == Framing::LegacyStretch ? size : height);
-        source.create(width, height);
+        if (allocatedComponentVectors)
+            source.create(width, height);
         if (selected == 104)
             geometryFeed.create(width, height);
         stats.targets = 0;
         stats.targetBytes = 0;
         for (int i = 0; i < 16; i++)
-            if (scene.reachable[i]) {
+            if (scene.reachable[i] && !allocatedComponentDirect &&
+                !(selected == 5 && i == 1 && !ripple)) {
                 stacks[i].create(scratch.width, scratch.height);
             }
         auto account = [&](const Target &t) {
@@ -607,7 +882,7 @@ struct Runtime::Impl {
         account(geometryFeed);
         for (auto &t : stacks)
             account(t);
-        if (selected == 1 || selected == 18 || selected == 21) {
+        if (selected == 1 || selected == 18 || selected == 21 || scene.hasCubes) {
             glGenRenderbuffers(1, &depthBuffer);
             glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, scratch.width,
@@ -623,9 +898,9 @@ struct Runtime::Impl {
         glGenBuffers(1, &vbo);
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        int sizes[] = {3, 4, 2, 2};
-        int offsets[] = {0, 12, 28, 36};
-        for (int i = 0; i < 4; i++) {
+        int sizes[] = {3, 4, 2, 2, 1};
+        int offsets[] = {0, 12, 28, 36, 44};
+        for (int i = 0; i < 5; i++) {
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i, sizes[i], GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                   (void *)(intptr_t)offsets[i]);
@@ -651,7 +926,7 @@ struct Runtime::Impl {
         vs.replace(pos, 14, "vec2(2.0,2.0)");
         pos = vs.find("vec2(-1.0,1.0)");
         vs.replace(pos, 14, "vec2(-1.0,-1.0)");
-        beamProgram = program(vs, read(data / "vectors/vector-beam.frag.glsl"));
+        beamProgram = program(vs, read(data / "vectors/vector-beam.frag.glsl"), programCache.get());
     }
     GLuint shader(int id) {
         auto &p = programs[id];
@@ -661,7 +936,34 @@ struct Runtime::Impl {
                  assetExists(data / "gles/shaders" / (std::to_string(id) + ".frag"), reader))
                     ? read(data / "gles/shaders" / (std::to_string(id) + ".frag"))
                     : builtInFragment(id);
-            std::string helpers = "uniform vec2 neonUv0,neonUv1,neonUv2;\n";
+            if (id == 81) {
+                const std::string term = "thIndex+inpix.xy";
+                auto at = fragment.find(term);
+                if (at == std::string::npos)
+                    throw std::runtime_error("Missing Galactica displacement term");
+                fragment.replace(at, term.size(), "thIndex+inpix.xy*neonDisplacement");
+            }
+            if (id == 68) {
+                // Keep scrolling outside the nonlinear distortion, so a two-width
+                // mirrored repeat returns to the same source boundary.
+                const std::string before = "thIndex.x=zabs+offs.x;";
+                auto at = fragment.find(before);
+                if (at == std::string::npos)
+                    throw std::runtime_error("Unsupported radial scroll shader");
+                fragment.replace(at, before.size(),
+                                 "thIndex.x=zabs+(neonRadialScroll>0.5?0.0:offs.x);");
+                const std::string warp = "thIndex*=length(inpix)+1.0;";
+                at = fragment.find(warp);
+                if (at == std::string::npos)
+                    throw std::runtime_error("Unsupported radial distortion shader");
+                fragment.replace(at, warp.size(),
+                                 warp + "if(neonRadialScroll>0.5)thIndex.x+=offs.x/neonUv0.x;");
+            }
+            std::string helpers =
+                "uniform float neonDisplacement,neonRadialScroll,neonInputFloor;uniform vec2 "
+                "neonUv0,neonUv1,neonUv2;\n";
+            helpers +=
+                "float neonAddress(float x,float mode,float edge){if(mode<0.5)return x;if(mode<1.5)return fract(x);if(mode<2.5)x=1.0-abs(mod(x,2.0)-1.0);return clamp(x,edge,1.0-edge); }\n";
             for (int i = 0; i < 3; ++i) {
                 auto n = std::to_string(i);
                 fragment = std::regex_replace(fragment,
@@ -671,17 +973,32 @@ struct Runtime::Impl {
                                               std::regex("sampleLod\\s*\\(\\s*image" + n + "\\s*,"),
                                               "neonLod" + n + "(");
                 helpers += "uniform vec4 neonMap" + n + ",neonTone" + n +
-                           ";uniform vec2 neonAngle" + n + ";uniform float neonBrightness" + n +
-                           ";\n";
+                           ";uniform vec2 neonAngle" + n + ",neonAddress" + n +
+                           ";uniform float neonBrightness" + n + ";\n";
                 helpers += "vec2 neonCoord" + n + "(vec2 uv){vec2 p=(uv-.5)*neonMap" + n +
                            ".xy;vec2 a=neonAngle" + n + ";p=mat2(a.x,a.y,-a.y,a.x)*p+.5+neonMap" +
-                           n + ".zw;return (p-.5)*neonUv" + n + "+.5;}\n";
+                           n + ".zw;if(any(greaterThan(neonAddress" + n +
+                           ",vec2(0.5)))){vec2 e=min(vec2(0.5),vec2(0.5)/(vec2(textureSize(image" +
+                           n + ",0))*abs(neonUv" + n + ")));p=vec2(neonAddress(p.x,neonAddress" +
+                           n + ".x,e.x),neonAddress(p.y,neonAddress" + n +
+                           ".y,e.y));}return (p-.5)*neonUv" + n + "+.5;}\n";
                 helpers += "vec4 neonSample" + n + "(vec2 uv){vec4 t=neonTone" + n +
                            ";return texture(image" + n + ",neonCoord" + n +
                            "(uv))*vec4(t.rgb*neonBrightness" + n + "*t.a,t.a); }\n";
                 helpers += "vec4 neonLod" + n + "(vec4 uv){vec4 t=neonTone" + n +
                            ";return textureLod(image" + n + ",neonCoord" + n +
                            "(uv.xy),uv.w)*vec4(t.rgb*neonBrightness" + n + "*t.a,t.a); }\n";
+            }
+            if (id == 4) {
+                const std::string plain = "return texture(image0,neonCoord0(uv))*";
+                auto start = helpers.find(plain);
+                if (start == std::string::npos)
+                    throw std::runtime_error("Missing mask colour sample");
+                helpers.replace(start, plain.size(),
+                                "vec4 sampled=texture(image0,neonCoord0(uv));float "
+                                "light=max(sampled.r,max(sampled.g,sampled.b));if(neonInputFloor>0."
+                                "0)sampled.rgb=light>0.000001?sampled.rgb*max(light,neonInputFloor)"
+                                "/light:vec3(neonInputFloor);return sampled*");
             }
             auto at = fragment.find("void main");
             auto fn = fragment.find("vec4 sampleLod");
@@ -690,10 +1007,29 @@ struct Runtime::Impl {
             fragment.insert(at, helpers);
             fragment = std::regex_replace(fragment, std::regex("void main\\s*\\("),
                                           "void neonOriginalMain(");
-            fragment += "\nuniform vec4 neonOutput;uniform float neonOutputGain;void "
-                        "main(){neonOriginalMain();colour*=vec4(neonOutput.rgb*neonOutputGain*"
-                        "neonOutput.a,neonOutput.a); }\n";
-            p = program(flatVS, fragment);
+            fragment += R"HUE(
+uniform vec4 neonOutput;
+uniform float neonOutputGain;
+uniform float neonHueShift;
+uniform float neonSaturation;
+vec3 neonRotateHue(vec3 rgb,float shift){
+    vec4 k=vec4(0.0,-1.0/3.0,2.0/3.0,-1.0);
+    vec4 p=mix(vec4(rgb.bg,k.wz),vec4(rgb.gb,k.xy),step(rgb.b,rgb.g));
+    vec4 q=mix(vec4(p.xyw,rgb.r),vec4(rgb.r,p.yzx),step(p.x,rgb.r));
+    float delta=q.x-min(q.w,q.y);
+    float hue=abs(q.z+(q.w-q.y)/(6.0*delta+1e-10));
+    float saturation=delta/(q.x+1e-10);
+    vec3 wave=abs(fract(vec3(hue+shift)+vec3(0.0,2.0/3.0,1.0/3.0))*6.0-3.0);
+    return q.x*mix(vec3(1.0),clamp(wave-1.0,0.0,1.0),saturation);
+}
+void main(){
+    neonOriginalMain();
+    colour*=vec4(neonOutput.rgb*neonOutputGain*neonOutput.a,neonOutput.a);
+    if(neonSaturation!=1.0){float luma=dot(colour.rgb,vec3(.2126,.7152,.0722));colour.rgb=max(vec3(0.0),mix(vec3(luma),colour.rgb,neonSaturation));}
+    if(neonHueShift!=0.0)colour.rgb=neonRotateHue(colour.rgb,neonHueShift);
+}
+)HUE";
+            p = program(flatVS, fragment, programCache.get());
         }
         glUseProgram(p);
         glUniform1i(location(p, U_image0), 0);
@@ -711,20 +1047,74 @@ struct Runtime::Impl {
         }
         glUniform4f(location(p, U_outTone), 1, 1, 1, 1);
         glUniform1f(location(p, U_outGain), 1);
+        glUniform1f(location(p, U_hueShift), 0);
+        glUniform1f(location(p, U_saturation), 1);
+        glUniform1f(location(p, U_displacement), 1);
+        glUniform1f(location(p, U_radialScroll), 0);
         // GLES full-screen quads already cover pixel centers. Translating a full
         // target leaves a cleared edge which rotated/feedback layers sample as a seam.
         const float legacyShift = params.framing.mode == Framing::LegacyStretch ? 1.f / 512 : 0;
         glUniform2f(location(p, U_pixelShift), legacyShift, legacyShift);
+        for (int input = 0; input < 3; ++input)
+            glUniform2f(location(p, Uniform(U_address0 + input)), 0, 0);
+        glUniform2f(location(p, U_surfaceExtent), 1, 1);
         return p;
     }
     GLuint texture(int selector) {
+        if (selector == 202) {
+            if (gameplayTexture)
+                return gameplayTexture;
+            auto &black = images[202];
+            if (!black) {
+                const uint8_t pixel[] = {0, 0, 0, 255};
+                glGenTextures(1, &black);
+                glBindTexture(GL_TEXTURE_2D, black);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            }
+            return black;
+        }
         if (selector >= 10000)
             return componentTargets.at(selector - 10000).target.texture;
         if (selector == 201)
             return geometryFeed.texture;
         if (selector == 200)
             return source.texture;
+        if (importedImageSelector(selector)) {
+            const auto *asset = author.images.find(selector);
+            if (!asset)
+                throw std::runtime_error("Missing imported image");
+            auto &image = images[1000000 + selector];
+            auto revision = asset->contentHash ^ (asset->mipmaps ? 0x918f3a5770cbe281ull : 0);
+            if (image && imageKeys[selector] == revision)
+                return image;
+            if (image)
+                glDeleteTextures(1, &image);
+            image = 0;
+            auto pixels = asset->pixels();
+            int width = asset->width, height = asset->height;
+            bool mipmaps = asset->mipmaps;
+            glGenTextures(1, &image);
+            glBindTexture(GL_TEXTURE_2D, image);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         pixels.data());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            if (mipmaps)
+                glGenerateMipmap(GL_TEXTURE_2D);
+            imageKeys[selector] = revision;
+            stats.uploadedBytes += unsigned(pixels.size());
+            ++stats.imageUploads;
+            ++stats.totalImageUploads;
+            return image;
+        }
         auto b = originalTextureBinding(selector);
+        if (b.kind == TextureSourceKind::Stack) {
+            auto found = externalLayers.find(b.index);
+            if (found != externalLayers.end())
+                return found->second.texture;
+        }
         if (b.kind == TextureSourceKind::Stack) {
             if (!stacks[b.index].texture)
                 throw std::runtime_error("Missing GLES layer dependency");
@@ -733,28 +1123,32 @@ struct Runtime::Impl {
         // Legacy studies generate roots on the CPU; recovered scenes use the
         // original game's root images. They share selector numbers, not pixels.
         auto &image =
-            images[selector + (selected >= 100 && b.kind == TextureSourceKind::Root ? 1000 : 0)];
+            images[selector +
+                   (neon::pc::isStudy(selected) && b.kind == TextureSourceKind::Root ? 1000 : 0)];
         if (image)
             return image;
         int w = 64, h = 64;
         std::vector<unsigned char> pixels;
         if (b.kind == TextureSourceKind::Root) {
-            auto root = selected >= 100
+            auto root = neon::pc::isStudy(selected)
                             ? rootTexture(b.index)
                             : loadOriginalRoot(data / "reference/roots", b.index, reader);
             pixels.resize(root.size() * 4);
             for (size_t i = 0; i < root.size(); i++) {
-                pixels[i * 4] = uint8_t(root[i] >> 16);
-                pixels[i * 4 + 1] = uint8_t(root[i] >> 8);
-                pixels[i * 4 + 2] = uint8_t(root[i]);
+                pixels[i * 4] = root[i] >> 16;
+                pixels[i * 4 + 1] = root[i] >> 8;
+                pixels[i * 4 + 2] = root[i];
                 pixels[i * 4 + 3] = uint8_t(root[i] >> 24);
             }
         } else if (b.kind == TextureSourceKind::Alternate) {
-            auto name = b.index == 100
-                            ? std::string("title-flight.png")
-                            : (b.index < 10 ? std::string("0") : std::string()) +
-                                  std::to_string(b.index) + (b.index >= 31 ? ".jpg" : ".png");
-            auto bytes = read(data / "reference/literals" / name);
+            auto name = b.index == 100 ? std::string("title-flight.png")
+                                       : (b.index < 10 ? std::string("0") : std::string()) +
+                                             std::to_string(b.index) +
+                                             (b.index >= 31 && b.index <= 41 ? ".jpg" : ".png");
+            auto literalPath = data / "reference/literals" / name;
+            if (!assetExists(literalPath, reader) && b.index != 100)
+                literalPath = data / "reference/literals" / (std::to_string(b.index) + ".jpg");
+            auto bytes = read(literalPath);
             int channels;
             auto *rgba = stbi_load_from_memory((const unsigned char *)bytes.data(),
                                                int(bytes.size()), &w, &h, &channels, 4);
@@ -773,6 +1167,9 @@ struct Runtime::Impl {
     }
     void bind(GLuint program, int shaderId, const ShapeSettings &terminal,
               std::array<int, 3> selectors) {
+        bool logicalInputs[3]{};
+        glUniform2f(location(program, U_surfaceExtent), producerPass ? 1 : screen.extentX,
+                    producerPass ? 1 : screen.extentY);
         for (int i = 0; i < 3; ++i) {
             bool expanded =
                 selectors[i] == 200 || selectors[i] == 201 ||
@@ -781,11 +1178,37 @@ struct Runtime::Impl {
                 (selectors[i] < 10000 &&
                  originalTextureBinding(selectors[i]).kind == TextureSourceKind::Stack);
             bool renderedLayer =
-                selectors[i] >= 10000 &&
-                activeComponents().at(selectors[i] - 10000).kind == ComponentKind::Layer;
+                selectors[i] == 202 ||
+                (selectors[i] >= 10000 &&
+                 activeComponents().at(selectors[i] - 10000).kind == ComponentKind::Layer);
+            if (selectors[i] < 10000) {
+                auto binding = originalTextureBinding(selectors[i]);
+                if (binding.kind == TextureSourceKind::Stack) {
+                    auto external = externalLayers.find(binding.index);
+                    if (external != externalLayers.end()) {
+                        expanded = external->second.expanded;
+                        renderedLayer = external->second.flipY;
+                    }
+                }
+            }
+            // RoundTunnel's V coordinate is an angular material coordinate. Its
+            // wrap period must remain whole even when the screen extends vertically.
+            // Repeat and mirror are defined in authored texture units, before
+            // mapping those units into an expanded render target. Whole-scene
+            // copies retain their extended domain.
+            if (expanded && samplerNode >= 0 && !materialComponent &&
+                params.framing.mode != Framing::LegacyStretch) {
+                auto key =
+                    "sampling." + std::to_string(samplerNode) + "." + std::to_string(i) + ".3";
+                int domain = int(control(key.c_str()));
+                const bool sceneCopy = shaderId == 26;
+                logicalInputs[i] = domain == 1 || (domain == 0 && !sceneCopy);
+            }
+            const bool angularMaterial = shaderId == 67 && i == 0;
             glUniform2f(location(program, Uniform(U_uvScale0 + i)),
                         expanded ? 1 / screen.extentX : 1,
-                        (renderedLayer ? -1.f : 1.f) * (expanded ? 1 / screen.extentY : 1));
+                        (renderedLayer ? -1.f : 1.f) *
+                            (expanded && !angularMaterial ? 1 / screen.extentY : 1));
         }
         for (int i = 0; i < 3; ++i) {
             auto c = materialComponent;
@@ -799,12 +1222,12 @@ struct Runtime::Impl {
                   b = c ? c->values[n + 7] : 1, gain = c ? c->values[n + 8] : 1,
                   alpha = c ? c->values[n + 9] : 1;
             if (selectors[i] >= 10000) {
-                const auto &textureSource = activeComponents().at(selectors[i] - 10000);
-                r *= textureSource.values[SourceRed];
-                g *= textureSource.values[SourceGreen];
-                b *= textureSource.values[SourceBlue];
-                gain *= textureSource.values[SourceBrightness];
-                alpha *= textureSource.values[SourceOpacity];
+                const auto &source = activeComponents().at(selectors[i] - 10000);
+                r *= source.values[SourceRed];
+                g *= source.values[SourceGreen];
+                b *= source.values[SourceBlue];
+                gain *= source.values[SourceBrightness];
+                alpha *= source.values[SourceOpacity];
             }
             glUniform4f(location(program, Uniform(U_tone0 + i)), r, g, b, alpha);
             glUniform1f(location(program, Uniform(U_brightness0 + i)), gain);
@@ -816,20 +1239,91 @@ struct Runtime::Impl {
                     apply ? output->values[SourceGreen] : 1, apply ? output->values[SourceBlue] : 1,
                     apply ? output->values[SourceOpacity] : 1);
         glUniform1f(location(program, U_outGain), apply ? output->values[SourceBrightness] : 1);
+        if (!materialComponent && samplerNode >= 0) {
+            const auto key = "colour." + std::to_string(samplerNode) + ".";
+            glUniform4f(location(program, U_outTone), control((key + "red").c_str(), 1),
+                        control((key + "green").c_str(), 1), control((key + "blue").c_str(), 1), 1);
+            glUniform1f(location(program, U_outGain), control((key + "brightness").c_str(), 1));
+            glUniform1f(location(program, U_hueShift), control((key + "hue").c_str()) / 360);
+            glUniform1f(location(program, U_saturation), control((key + "saturation").c_str(), 1));
+            glUniform1f(location(program, U_displacement),
+                        control(("warp." + std::to_string(samplerNode) + ".amount").c_str(), 1));
+        }
+        glUniform1f(location(program, U_inputFloor),
+                    shaderId == 4 && samplerNode >= 0
+                        ? control(("colour." + std::to_string(samplerNode) + ".floor").c_str())
+                        : 0);
         auto setup = stackRenderSetup(terminal);
         glUniform4fv(location(program, U_c25), 1, setup.constant25.data());
         glUniform4fv(location(program, U_c26), 1, setup.constant26.data());
         // Original 0040a270 initializes MIRROR. TEXCON +b0/+b4 are stored
         // metadata, not sampler writes; 00497610 restores MIRROR after its draw.
         // The explicitly synthetic studies retain their authored REPEAT policy.
-        const GLint addressing = selected >= 100 ? GL_REPEAT : GL_MIRRORED_REPEAT;
+        const GLint addressing = neon::pc::isStudy(selected) ? GL_REPEAT : GL_MIRRORED_REPEAT;
         for (int i = 0; i < 3; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindSampler(i, 0);
             if ((shaderId >= 1000 ? 1 : scene.masks.at(shaderId)) & (1 << i)) {
                 glBindTexture(GL_TEXTURE_2D, texture(selectors[i]));
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, addressing);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, addressing);
+                if (selectors[i] != 202) {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, addressing);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, addressing);
+                }
+                auto asset = author.images.find(selectors[i]);
+                int filter = 0, u = 0, v = 0;
+                if (materialComponent) {
+                    int field = Input0Filter + i * 3;
+                    filter = int(materialComponent->values[field]);
+                    u = int(materialComponent->values[field + 1]);
+                    v = int(materialComponent->values[field + 2]);
+                } else if (samplerNode >= 0) {
+                    auto key =
+                        "sampling." + std::to_string(samplerNode) + "." + std::to_string(i) + ".";
+                    filter = int(control((key + "0").c_str()));
+                    u = int(control((key + "1").c_str()));
+                    v = int(control((key + "2").c_str()));
+                }
+                if (logicalInputs[i]) {
+                    const int defaultU = asset                         ? asset->wrapU + 1
+                                         : neon::pc::isStudy(selected) ? 1
+                                                                       : 2;
+                    const int defaultV = asset                         ? asset->wrapV + 1
+                                         : neon::pc::isStudy(selected) ? 1
+                                                                       : 2;
+                    glUniform2f(location(program, Uniform(U_address0 + i)),
+                                screen.extentX != 1 ? (u ? u : defaultU) : 0,
+                                screen.extentY != 1 && !(shaderId == 67 && i == 0)
+                                    ? (v ? v : defaultV)
+                                    : 0);
+                }
+                if (selectors[i] == 202 || asset || filter || u || v) {
+                    if (!imageSamplers[i])
+                        glGenSamplers(1, &imageSamplers[i]);
+                    bool linear = filter ? filter == 2 : asset ? asset->linear : true;
+                    bool mipmaps = asset && asset->mipmaps;
+                    auto wrap = [&](int overrideValue, int fallback) {
+                        int mode = overrideValue ? overrideValue - 1 : fallback;
+                        return mode == 0   ? GL_REPEAT
+                               : mode == 1 ? GL_MIRRORED_REPEAT
+                                           : GL_CLAMP_TO_EDGE;
+                    };
+                    glSamplerParameteri(imageSamplers[i], GL_TEXTURE_MAG_FILTER,
+                                        linear ? GL_LINEAR : GL_NEAREST);
+                    glSamplerParameteri(
+                        imageSamplers[i], GL_TEXTURE_MIN_FILTER,
+                        mipmaps ? (linear ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST)
+                                : (linear ? GL_LINEAR : GL_NEAREST));
+                    glSamplerParameteri(imageSamplers[i], GL_TEXTURE_WRAP_S,
+                                        wrap(u, asset                         ? asset->wrapU
+                                                : neon::pc::isStudy(selected) ? 0
+                                                                              : 1));
+                    glSamplerParameteri(imageSamplers[i], GL_TEXTURE_WRAP_T,
+                                        wrap(v, asset                         ? asset->wrapV
+                                                : neon::pc::isStudy(selected) ? 0
+                                                                              : 1));
+                    glBindSampler(i, imageSamplers[i]);
+                }
+
             } else
                 glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -855,9 +1349,23 @@ struct Runtime::Impl {
         for (int i = 0; i < 3; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(i, 0);
         }
     }
     void vectors() {
+        uint64_t revision = objectRevision;
+        auto mix = [&](float value) {
+            uint32_t bits;
+            std::memcpy(&bits, &value, 4);
+            revision = (revision ^ bits) * 1099511628211ull;
+        };
+        for (float value : {float(sourceWidth), float(sourceHeight), screen.extentX, screen.extentY,
+                            params.beam.width, params.beam.intensity, params.beam.halo,
+                            params.beam.spread, params.beam.colour, params.beam.whiteHot})
+            mix(value);
+        const bool fixedObjects = params.vectorScene == 3 && params.beam.persistenceMs == 0;
+        if (fixedObjects && vectorSourceKey == revision)
+            return;
         initializeBeam();
         canvas.clear();
         if (params.vectorScene == 3) {
@@ -893,6 +1401,7 @@ struct Runtime::Impl {
         ++stats.drawCalls;
         stats.triangles += unsigned(vertices.size() / 3);
         stats.uploadedBytes += vertices.size() * sizeof(vectors::Vertex);
+        vectorSourceKey = fixedObjects ? revision : ~uint64_t(0);
         glColorMask(1, 1, 1, 1);
     }
     float response(const char *key, float baseline, float low, float high) const {
@@ -904,6 +1413,9 @@ struct Runtime::Impl {
     float exposureValue() const {
         return response("runtime.exposure", params.exposure, 0, 2);
     }
+    float hueValue() const {
+        return std::fmod(response("runtime.hue", params.hueShift, 0, 1), 1.f);
+    }
     float yawValue() const {
         return response("runtime.yaw", params.yaw, -3.141593f, 3.141593f);
     }
@@ -914,11 +1426,51 @@ struct Runtime::Impl {
         return useResponseComponents ? responseComponents : components;
     }
     float control(const char *key, float fallback = 0) {
-        return selected >= 2 && selected <= 20 && selected != 18
+        return selected >= 1 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+                       selected != 21 && !neon::pc::isStudy(selected)
                    ? author.sceneControl(selected, key, fallback)
                    : fallback;
     }
+    void studyInterventions(ShapeSettings &mixer, ShapeSettings &terminal, int mode) const {
+        const auto &c = params.studyControls;
+        if (params.studyPhaseOverride || c[1] != 1) {
+            if (mode == 0 || mode == 5) {
+                int slot = mode == 5 ? 6 : 5;
+                if (params.studyPhaseOverride)
+                    terminal.floats[slot] = c[0];
+                terminal.floats[slot] =
+                    std::clamp((terminal.floats[slot] - .5f) * c[1] + .5f, 0.f, 1.f);
+            } else {
+                int slot = (mode == 3 || mode == 4) ? 9 : 4;
+                if (params.studyPhaseOverride)
+                    mixer.floats[slot] = (c[0] * 2 - 1) * 6.2831855f;
+                mixer.floats[slot] *= c[1];
+            }
+        }
+        terminal.floats[4] *= c[3];
+        terminal.floats[7] *= c[2];
+        if (c[4] != 1)
+            for (int slot : {0, 1, 5, 6})
+                mixer.floats[slot] = (mixer.floats[slot] + 1) * c[4] - 1;
+    }
+    uint64_t cycleState = ~uint64_t(0);
     void evaluateEdits() {
+        if (selected >= 7 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+            selected != 21 && !neon::pc::isStudy(selected)) {
+            uint64_t revision = uint64_t(selected);
+            for (const auto &e : author.controls(selected))
+                if ((e.key.rfind("cycle.", 0) == 0 || e.key == "rings.speed")) {
+                    uint32_t bits;
+                    std::memcpy(&bits, &e.value, 4);
+                    revision = (revision ^ bits ^ uint64_t(e.enabled)) * 1099511628211ull;
+                }
+            if (revision != cycleState) {
+                author.applyCycles(selected, scene.preset);
+                if (scene.preset.ticks)
+                    scene.preset.sample();
+                cycleState = revision;
+            }
+        }
         auto bank = author.responses.find(selected);
         useResponseComponents = (selected == 18 || selected == 21) &&
                                 bank != author.responses.end() && !bank->second.sequences.empty();
@@ -935,7 +1487,8 @@ struct Runtime::Impl {
         settings.clear();
         for (auto &n : scene.preset.nodes)
             settings.push_back(n.effective);
-        if (selected >= 7 && selected <= 20 && selected != 18)
+        if (selected >= 7 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+            selected != 21 && !neon::pc::isStudy(selected))
             settings = author.authoredScene(selected);
         else if (selected >= 5 && selected <= 6)
             author.applyScene(selected, settings[selected == 5 ? 18 : 17], settings[10],
@@ -949,7 +1502,18 @@ struct Runtime::Impl {
                                     : 14;
             author.apply(selected, settings[a], settings[a + 1], settings[b], settings[b + 1]);
         }
-        if (editorAuthoring && selected >= 7 && selected <= 20 && selected != 18) {
+        if (selected == 5 && control("tunnel.ripple.enabled", 1) < .5f)
+            settings[18].integers[4] = 33;
+        if (selected == 0 || (selected >= 2 && selected <= 6)) {
+            int source = selected == 0   ? 9
+                         : selected == 2 ? 13
+                         : selected == 3 ? 10
+                         : selected == 4 ? 7
+                                         : 10;
+            studyInterventions(settings[source], settings[source + 1], selected);
+        }
+        if (editorAuthoring && selected >= 7 && selected <= neon::pc::lastJukeboxPreset &&
+            selected != 18 && selected != 21 && !neon::pc::isStudy(selected)) {
             params.titleSize = control("title.size", 1.35f);
             params.titlePeriod = control("title.period", 18);
             params.titleHue = control("title.hue");
@@ -996,6 +1560,12 @@ struct Runtime::Impl {
     }
     uint64_t componentTextureKey(const Component &c) {
         uint64_t h = 1469598103934665603ull;
+        std::array<int, 3> imageInputs = {c.source, c.sourceB ? c.sourceB : c.source,
+                                          c.sourceC ? c.sourceC : c.source};
+        for (int input = 0; input < 3; ++input)
+            if (componentSamplerMask(c.shader) & (1 << input))
+                if (auto asset = author.images.find(imageInputs[input]))
+                    h = (h ^ asset->fingerprint()) * 1099511628211ull;
         auto mix = [&](float f) {
             uint32_t bits;
             std::memcpy(&bits, &f, 4);
@@ -1011,10 +1581,36 @@ struct Runtime::Impl {
         if (!c.enabled)
             return h;
         if (c.kind == ComponentKind::Layer) {
+            const auto prefix = "layer." + std::to_string(c.id) + "/";
+            auto bank = author.responses.find(selected);
+            if (bank != author.responses.end())
+                for (const auto &sequence : bank->second.sequences)
+                    if (sequence.mode == ResponseMode::Input)
+                        for (const auto &target : sequence.targets)
+                            if (target.key.rfind(prefix, 0) == 0) {
+                                for (unsigned char value : target.key)
+                                    h = (h ^ value) * 1099511628211ull;
+                                for (float value :
+                                     {float(sequence.enabled), sequence.inputLow,
+                                      sequence.inputHigh,
+                                      bank->second.input(sequence.source,
+                                                         std::numeric_limits<float>::quiet_NaN()),
+                                      target.low, target.high, target.frequency, target.phase,
+                                      float(target.wave), float(target.blend)})
+                                    mix(value);
+                            }
             h ^= layerFingerprint(c);
             mix(float(c.layerOutput));
             mix(float(c.layerComponent));
             mix(c.values[Speed]);
+            for (auto binding : {std::pair<int, int>{LayerInputA, c.sourceB ? c.sourceB : c.source},
+                                 {LayerInputB, c.sourceC ? c.sourceC : c.source}})
+                if (c.values[binding.first] >= 0) {
+                    mix(c.values[binding.first]);
+                    mix(float(binding.second));
+                    if (binding.second >= 10000)
+                        h ^= componentTargets.at(binding.second - 10000).key;
+                }
         }
         if (c.kind == ComponentKind::Texture) {
             mix(float(c.shader));
@@ -1065,21 +1661,21 @@ struct Runtime::Impl {
         return h;
     }
     const CubeFace &componentShape(const Component &c, double seconds) {
-        auto renderSettings = shapeComponentSettings(c, seconds);
+        auto settings = shapeComponentSettings(c, seconds);
         uint64_t key = 1469598103934665603ull;
         auto mix = [&](const void *data, size_t size) {
             auto p = (const unsigned char *)data;
             for (size_t n = 0; n < size; n++)
                 key = (key ^ p[n]) * 1099511628211ull;
         };
-        mix(renderSettings.integers.data(), 64);
-        mix(renderSettings.floats.data(), 64);
+        mix(settings.integers.data(), 64);
+        mix(settings.floats.data(), 64);
         mix(&c.values[ShapeGateDrive], sizeof(float));
         mix(&c.values[ShapePaletteMode], sizeof(float));
         auto &cache = componentTargets[c.id];
         if (cache.shapeKey != key) {
             auto mesh = generatedShapeMesh(
-                renderSettings, c.values[ShapePaletteMode] >= .5f ? spectrumPalette : shapePalette,
+                settings, c.values[ShapePaletteMode] >= .5f ? spectrumPalette : shapePalette,
                 c.values[ShapeGateDrive]);
             CubeFace vertices;
             vertices.reserve(mesh.size());
@@ -1096,6 +1692,105 @@ struct Runtime::Impl {
             ++stats.totalShapeBuilds;
         }
         return cache.shapeVertices;
+    }
+    void forwardLayerInputs(ComponentTarget &cache, int component) {
+        auto parent = author.responses.find(selected);
+        const auto prefix = "layer." + std::to_string(component) + "/";
+        std::set<std::string> keys;
+        if (parent != author.responses.end())
+            for (const auto &sequence : parent->second.sequences)
+                if (sequence.mode == ResponseMode::Input)
+                    for (const auto &target : sequence.targets)
+                        if (target.key.rfind(prefix, 0) == 0)
+                            keys.insert(target.key);
+        uint64_t revision = 1469598103934665603ull;
+        for (const auto &key : keys)
+            for (unsigned char value : key)
+                revision = (revision ^ value) * 1099511628211ull;
+        auto &child = *cache.layer;
+        child.parameters().copyElision = params.copyElision;
+        auto &bank = child.responses();
+        if (cache.forwardedKey != revision) {
+            std::set<std::string> previous;
+            for (const auto &parameter : cache.forwarded)
+                previous.insert("host/" + parameter.key);
+            bank.sequences.erase(std::remove_if(bank.sequences.begin(), bank.sequences.end(),
+                                                [&](const auto &sequence) {
+                                                    return previous.count(sequence.name) != 0;
+                                                }),
+                                 bank.sequences.end());
+            cache.forwarded.clear();
+            if (!keys.empty())
+                for (auto parameter : child.responseParameters()) {
+                    auto full = prefix + parameter.key;
+                    if (!keys.count(full))
+                        continue;
+                    ResponseSequence sequence;
+                    sequence.name = "host/" + full;
+                    sequence.source = sequence.name;
+                    if (std::any_of(
+                            bank.sequences.begin(), bank.sequences.end(),
+                            [&](const auto &existing) { return existing.name == sequence.name; }))
+                        throw std::runtime_error("Live layer route name is already used");
+                    sequence.mode = ResponseMode::Input;
+                    sequence.enabled = false;
+                    sequence.inputLow = parameter.low;
+                    sequence.inputHigh = parameter.high;
+                    sequence.targets = {{parameter.key, ResponseWave::Constant,
+                                         ResponseBlend::Replace, 1, 0, parameter.low,
+                                         parameter.high}};
+                    bank.sequences.push_back(sequence);
+                    parameter.key = full;
+                    cache.forwarded.push_back(parameter);
+                }
+            cache.forwardedKey = revision;
+            bank.rebuild();
+        }
+        bool changed = false;
+        for (const auto &parameter : cache.forwarded) {
+            bool enabled = false;
+            if (parent != author.responses.end())
+                for (const auto &sequence : parent->second.sequences)
+                    if (sequence.enabled && sequence.mode == ResponseMode::Input &&
+                        std::isfinite(parent->second.input(
+                            sequence.source, std::numeric_limits<float>::quiet_NaN())))
+                        for (const auto &target : sequence.targets)
+                            if (target.key == parameter.key)
+                                enabled = true;
+            const auto source = "host/" + parameter.key;
+            for (auto &sequence : bank.sequences)
+                if (sequence.name == source && sequence.enabled != enabled) {
+                    sequence.enabled = enabled;
+                    changed = true;
+                }
+            if (enabled)
+                bank.setInput(source, parent->second.apply(parameter.key, parameter.baseline,
+                                                           time(), parameter.low, parameter.high));
+            else
+                bank.clearInput(source);
+        }
+        if (changed)
+            bank.rebuild();
+    }
+    bool componentVectorSource() {
+        if (params.sourceOnly || control("vector.enabled") > .5f)
+            return true;
+        for (const auto &c : activeComponents().items)
+            for (int input : {c.source, c.sourceB, c.sourceC})
+                if (input == 200)
+                    return true;
+        return false;
+    }
+    bool allocatedComponentDirect = false, allocatedComponentVectors = true;
+    bool directComponentOutput() const {
+        if (!params.copyElision || (selected != 18 && selected != 21) ||
+            params.framing.mode == Framing::LegacyStretch)
+            return false;
+        for (const auto &c : activeComponents().items)
+            for (int input : {c.source, c.sourceB, c.sourceC})
+                if (input >= 31 && input < 47)
+                    return false;
+        return true;
     }
     void componentSource(const Component &c) {
         MaterialScope material(materialComponent, &c, sourcePass, true);
@@ -1125,19 +1820,38 @@ struct Runtime::Impl {
         }
         if (c.kind == ComponentKind::Layer) {
             if (!cache.layer || cache.layerDocument != c.layerScene) {
-                auto pending = std::make_unique<Runtime>(data, reader);
-                std::istringstream input(c.layerScene);
-                pending->readScene(input);
+                auto pending = documentRuntime(data, reader, c.layerScene);
                 pending->parameters().layerPreview = c.layerOutput;
                 pending->parameters().componentPreviewId = std::max(0, c.layerComponent);
                 pending->parameters().renderScale = 1;
                 cache.layer = std::move(pending);
+                cache.forwardedKey = ~uint64_t(0);
+                cache.forwarded.clear();
                 cache.layerDocument = c.layerScene;
                 cache.layerHash = std::hash<std::string>{}(c.layerScene);
                 cache.layerTime = 0;
             }
             auto &child = *cache.layer;
+            child.impl_->programCache = programCache;
+            forwardLayerInputs(cache, c.id);
+            child.setGameplayTexture(gameplayTexture, gameplayWidth, gameplayHeight);
             child.parameters().framing = params.framing;
+            child.parameters().layerPreview = c.layerOutput;
+            child.parameters().componentPreviewId = std::max(0, c.layerComponent);
+            child.clearExternalLayers();
+            for (auto binding : {std::pair<int, int>{LayerInputA, c.sourceB ? c.sourceB : c.source},
+                                 {LayerInputB, c.sourceC ? c.sourceC : c.source}})
+                if (c.values[binding.first] >= 0) {
+                    if (binding.second <= 0)
+                        throw std::runtime_error(
+                            "Select an external source for the replaced layer");
+                    bool expanded =
+                        binding.second >= 10000 &&
+                        activeComponents().at(binding.second - 10000).kind == ComponentKind::Layer;
+                    child.setExternalLayer(int(c.values[binding.first]), texture(binding.second),
+                                           expanded, expanded);
+                }
+
             double seconds = c.animated ? std::floor(time() * c.updateHz) / c.updateHz : 0;
             if (seconds < cache.layerTime) {
                 child.reset();
@@ -1150,7 +1864,10 @@ struct Runtime::Impl {
             glColorMask(1, 1, 1, 1);
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
-            child.frame((seconds - cache.layerTime) * c.values[Speed], output);
+            if (sampledFrame)
+                child.frameSampled((seconds - cache.layerTime) * c.values[Speed], output);
+            else
+                child.frame((seconds - cache.layerTime) * c.values[Speed], output);
             if (child.time() == 0)
                 child.frame(1. / 60, output);
             stats.drawCalls += child.statistics().drawCalls;
@@ -1217,7 +1934,19 @@ struct Runtime::Impl {
         if (c.enabled && c.kind == ComponentKind::Vector) {
             initializeBeam();
             canvas.clear();
-            if (c.profile == 4) {
+            if (c.profile == 5) {
+                const int columns = int(std::lround(c.values[GridColumns])),
+                          rows = int(std::lround(c.values[GridRows]));
+                // Half-cell placement and extended strokes keep repeated tile edges continuous.
+                for (int x = 0; x < columns; ++x) {
+                    float u = (x + .5f) * 640 / columns;
+                    canvas.line({u, -64}, {u, 544}, {1, 1, 1}, 1, 1);
+                }
+                for (int y = 0; y < rows; ++y) {
+                    float v = (y + .5f) * 480 / rows;
+                    canvas.line({-64, v}, {704, v}, {1, 1, 1}, 1, 1);
+                }
+            } else if (c.profile == 4) {
                 int columns = int(std::lround(c.values[GridColumns])),
                     rows = int(std::lround(c.values[GridRows]));
                 auto energy = [&](float v) {
@@ -1299,19 +2028,22 @@ struct Runtime::Impl {
                          [&](const auto &c) { return c.id == params.componentPreviewId; }))
             params.componentPreviewId = 0;
         if (params.componentPreviewId) {
-            auto &selectedIndex = components.at(params.componentPreviewId);
-            if (selectedIndex.producer()) {
+            auto &selected = components.at(params.componentPreviewId);
+            if (selected.producer() &&
+                !(selected.kind == ComponentKind::Layer && selected.profile == 1)) {
                 ShapeSettings n{}, terminal{};
                 n.integers[2] = 26;
                 n.integers[1] = n.integers[4] = 255;
-                drawMixer(n, terminal, 10000 + selectedIndex.id, false, 1, false);
-                copyStack(0);
+                drawMixer(n, terminal, 10000 + selected.id, false, 1, false);
+                if (!directComponentOutput())
+                    copyStack(0);
                 return;
             }
         }
         for (auto &c : activeComponents().items) {
             MaterialScope material(materialComponent, &c, sourcePass, false);
-            if (!c.enabled || !c.visible || c.kind == ComponentKind::Texture ||
+            if (!c.enabled || (!c.visible && params.componentPreviewId != c.id) ||
+                c.kind == ComponentKind::Texture ||
                 (params.componentPreviewId && params.componentPreviewId != c.id))
                 continue;
             glEnable(GL_BLEND);
@@ -1319,7 +2051,45 @@ struct Runtime::Impl {
             ShapeSettings terminal{};
             for (int i = 0; i < 8; i++)
                 terminal.floats[i < 4 ? i + 4 : i + 5] = c.values[C0 + i];
-            if (c.kind == ComponentKind::Shape || c.kind == ComponentKind::Primitive) {
+            if (c.kind == ComponentKind::Layer && c.profile == 1) {
+                // A single projective surface, pivoted about its centre. Texture coordinates
+                // span the produced image once; pose never introduces mirrored image copies.
+                const float ex = screen.extentX, ey = screen.extentY,
+                            aspect = params.framing.referenceAspect;
+                CubeFace mesh;
+                auto vertex = [&](float x, float y) {
+                    float u = .5f + x * ex * .5f, v = .5f + y * ey * .5f;
+                    return CubeVertex{0xffffff00u | unsigned(c.values[Opacity] * 255),
+                                      u,
+                                      v,
+                                      u,
+                                      v,
+                                      x * ex * aspect * c.values[Scale],
+                                      -y * ey * c.values[Scale],
+                                      0};
+                };
+                for (auto point :
+                     {std::pair<float, float>{-1, -1}, {1, -1}, {1, 1}, {-1, -1}, {1, 1}, {-1, 1}})
+                    mesh.push_back(vertex(point.first, point.second));
+                auto pose =
+                    multiplyMatrix(rotation(2, c.values[Roll]),
+                                   multiplyMatrix(rotation(1, c.values[Yaw] - yawValue()),
+                                                  rotation(0, c.values[Pitch] - pitchValue())));
+                auto projection = identityMatrix();
+                projection[0] = 1 / aspect;
+                projection[10] = .125f;
+                projection[11] = .25f;
+                projection[14] = .5f;
+                auto matrix = multiplyMatrix(pose, projection);
+                for (int i = 0; i < 4; ++i) {
+                    matrix[i * 4] += 2 * c.values[X] * ex * matrix[i * 4 + 3];
+                    matrix[i * 4 + 1] -= 2 * c.values[Y] * ey * matrix[i * 4 + 3];
+                }
+                drawSpatial(mesh, matrix, c.shader, terminal,
+                            {10000 + c.id, c.sourceB ? c.sourceB : 10000 + c.id,
+                             c.sourceC ? c.sourceC : 10000 + c.id},
+                            c.values[Gain]);
+            } else if (c.kind == ComponentKind::Shape || c.kind == ComponentKind::Primitive) {
                 double seconds = c.animated ? std::floor(time() * c.updateHz) / c.updateHz : 0;
                 const CubeFace *mesh = nullptr;
                 if (c.kind == ComponentKind::Primitive) {
@@ -1405,6 +2175,7 @@ struct Runtime::Impl {
             } else if (c.kind == ComponentKind::Flower) {
                 ShapeSettings n{};
                 n.integers[0] = int(std::lround(c.values[Segments]));
+                n.integers[1] = int(std::lround(c.values[Phase] * 16384)) & 16383;
                 n.integers[2] = int(c.values[Opacity] * 255);
                 n.integers[3] = int(std::lround(c.values[RepeatX]));
                 n.integers[7] = int(c.values[Colour] * 255);
@@ -1439,7 +2210,9 @@ struct Runtime::Impl {
                 auto n = componentTunnelSettings(c);
                 auto &tunnel = componentTunnels[c.id];
                 tunnel.tick(n, profiles, false);
-                auto frame = tunnel.frame(n, scene.neutralView);
+                auto frame =
+                    tunnel.frame(n, scene.neutralView, int(std::lround(c.values[TunnelSides])),
+                                 c.values[TunnelRoundness]);
                 ShapeSettings cameraNode{};
                 cameraNode.floats[4] = 400;
                 cameraNode.floats[5] = 10024;
@@ -1504,9 +2277,31 @@ struct Runtime::Impl {
                 draw(q.data(), q.size(), GL_TRIANGLE_STRIP);
             }
         }
-        copyStack(0);
+        if (!directComponentOutput())
+            copyStack(0);
+    }
+    std::map<int, std::array<float, 3>> spriteColours;
+    float spriteControl(size_t node, const char *key, float fallback = 0) {
+        return control(("sprite." + std::to_string(node) + "." + key).c_str(), fallback);
+    }
+    bool spriteSequence(size_t node) {
+        return spriteControl(node, "enabled") > .5f;
+    }
+    void configureSprites(size_t node, ParticlePlayback &particles) {
+        if (!spriteSequence(node))
+            return;
+        SpriteCycle cycle{
+            int(spriteControl(node, "baseFirst")), int(spriteControl(node, "baseCount", 1)),
+            int(spriteControl(node, "rareFirst")), int(spriteControl(node, "rareCount")),
+            int(spriteControl(node, "rareEvery", 10))};
+        int capacity = int(spriteControl(node, "columns", 1)) * int(spriteControl(node, "rows", 1));
+        if (capacity < 1 || capacity > 256 || cycle.baseFirst + cycle.baseCount > capacity ||
+            cycle.rareFirst + cycle.rareCount > capacity)
+            throw std::runtime_error("Sprite sequence exceeds atlas capacity");
+        particles.configureSprites(cycle);
     }
     void tickCpu() {
+        author.applyCycles(selected, scene.preset);
         scene.preset.tick();
         evaluateEdits();
         if ((selected == 18 || selected == 21))
@@ -1515,7 +2310,7 @@ struct Runtime::Impl {
                     auto n = componentTunnelSettings(c);
                     componentTunnels[c.id].tick(n, profiles, c.animated);
                 }
-        if (selected >= 100) {
+        if (neon::pc::isStudy(selected)) {
             studyClock.tick(140);
             studyMixerValues =
                 evaluate(scene.preset.nodes[9].channels, studyClock.clocks(), studyMixerValues);
@@ -1524,8 +2319,10 @@ struct Runtime::Impl {
         }
         for (auto &t : scene.tunnels)
             t.second.tick(settings[t.first], profiles);
-        for (auto &p : scene.particles)
+        for (auto &p : scene.particles) {
+            configureSprites(p.first, p.second);
             p.second.tick(settings[p.first], scene.palette);
+        }
     }
     double time() const {
         return scene.preset.ticks / 60.;
@@ -1536,9 +2333,13 @@ struct Runtime::Impl {
                 return true;
         return false;
     }
+    int previewNode() {
+        return params.nodePreview >= 0 ? params.nodePreview : int(control("scene.node", -1));
+    }
     uint64_t key() const {
         bool vectorSource = usesVectorTexture();
-        uint64_t hash = scene.preset.ticks ^ (vectorSource ? objectRevision : 0);
+        uint64_t hash =
+            scene.preset.ticks ^ (vectorSource ? objectRevision : 0) ^ author.images.fingerprint();
         auto bank = author.responses.find(selected);
         if (bank != author.responses.end())
             hash ^= bank->second.revision * 1099511628211ull;
@@ -1551,13 +2352,25 @@ struct Runtime::Impl {
              {yawValue(), pitchValue(), params.titleSize, params.titlePeriod, params.titleHue,
               params.titleFilter, params.titleOpacity, float(params.titleSprite)})
             mix(v);
+        if (selected >= 7 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+            selected != 21 && !neon::pc::isStudy(selected))
+            for (const auto &e : author.edits[neon::pc::editIndex(selected)])
+                if (e.key.rfind("colour.", 0) == 0 || e.key.rfind("sprite.", 0) == 0)
+                    mix(e.current);
+        mix(float(params.nodePreview));
+        if (selected <= 6 || neon::pc::isStudy(selected)) {
+            for (float v : params.studyControls)
+                mix(v);
+            mix(float(params.studyPhaseOverride));
+        }
         if (vectorSource)
             for (float v : {params.beam.width, params.beam.intensity, params.beam.halo,
                             params.beam.spread, params.beam.persistenceMs, params.beam.colour,
                             params.beam.whiteHot, float(params.vectorScene)})
                 mix(v);
-        if (selected >= 2 && selected <= 20 && selected != 18)
-            for (auto &e : author.edits[selected - 2]) {
+        if (selected >= 1 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+            selected != 21 && !neon::pc::isStudy(selected))
+            for (auto &e : author.edits[neon::pc::editIndex(selected)]) {
                 if (!vectorSource && e.key.rfind("vector.", 0) == 0)
                     continue;
                 mix(float(e.enabled));
@@ -1629,10 +2442,61 @@ struct Runtime::Impl {
             glDisable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | (depth ? GL_DEPTH_BUFFER_BIT : 0));
     }
+    // Authoring overrides affect draws into a recovered stack, not the stack's
+    // dependency order or its shader's own multi-texture combination.
+    void layerBlend(int mode) {
+        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+        if (mode == 3) {
+            glDisable(GL_BLEND);
+            return;
+        }
+        glEnable(GL_BLEND);
+        switch (mode) {
+        case 2:
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
+                                GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case 4:
+            glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case 5:
+            glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        default:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        }
+    }
     void drawMixer(ShapeSettings n, const ShapeSettings &terminal, int overrideSource = -1,
-                   bool legacyCoordinates = false, float materialGain = 1, bool additive = true) {
+                   bool legacyCoordinates = false, float materialGain = 1, bool additive = true,
+                   int blendOverride = 0) {
         int id = n.integers[2];
+        if (id == 67 && samplerNode >= 0 &&
+            control(("sampling." + std::to_string(samplerNode) + ".0.scrollspace").c_str()) > .5f) {
+            const int input = overrideSource >= 0 ? overrideSource : n.integers[5];
+            const bool expanded =
+                input == 200 || input == 201 ||
+                (input >= 10000 &&
+                 activeComponents().at(input - 10000).kind == ComponentKind::Layer) ||
+                (input < 10000 && originalTextureBinding(input).kind == TextureSourceKind::Stack);
+            // Reference-tile addressing already wraps in authored texture units.
+            // Only whole-surface and legacy sampling need the extent conversion.
+            const int domain =
+                int(control(("sampling." + std::to_string(samplerNode) + ".0.3").c_str()));
+            if (expanded &&
+                (materialComponent || params.framing.mode == Framing::LegacyStretch || domain == 2))
+                n.floats[7] *= screen.extentX;
+        }
         auto p = shader(id);
+        if (id == 68 && samplerNode >= 0) {
+            float clean =
+                control(("sampling." + std::to_string(samplerNode) + ".0.scrollspace").c_str());
+            glUniform1f(location(p, U_radialScroll), clean);
+            if (clean > .5f) {
+                double phase = std::fmod(double(n.floats[7]) + 1., 2.);
+                n.floats[7] = float((phase < 0 ? phase + 2 : phase) - 1);
+            }
+        }
         bind(p, id, terminal,
              {overrideSource >= 0 ? overrideSource : n.integers[5], n.integers[3], n.integers[6]});
         glUniform1i(location(p, U_spatial), 0);
@@ -1645,6 +2509,8 @@ struct Runtime::Impl {
         else
             glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
+        if (blendOverride)
+            layerBlend(blendOverride);
         auto q = quad();
         for (auto &v : q) {
             if (legacyCoordinates && params.framing.mode == Framing::LegacyStretch) {
@@ -1682,6 +2548,7 @@ struct Runtime::Impl {
         glUniform1f(location(p, U_outputSign), 1);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, scratch.texture);
+        glBindSampler(0, 0);
         glDisable(GL_BLEND);
         auto q =
             params.framing.mode == Framing::LegacyStretch ? quad(332.f / 330, 262.f / 260) : quad();
@@ -1689,14 +2556,15 @@ struct Runtime::Impl {
     }
     void drawSpatial(const CubeFace &mesh, const Matrix4 &matrix, int id,
                      const ShapeSettings &terminal, std::array<int, 3> inputs,
-                     float materialGain = 1, int targetExtent = 0) {
+                     float materialGain = 1, int targetExtent = 0, float spriteFiltration = -1) {
         auto p = shader(id);
         bind(p, id, terminal, inputs);
         glUniform1f(location(p, U_materialGain), materialGain);
         if (id == 26)
             glUniform1f(location(p, U_gain), materialGain);
         if (id == 1000)
-            glUniform4f(location(p, U_c25), params.titleFilter, 0, 0, 0);
+            glUniform4f(location(p, U_c25),
+                        spriteFiltration >= 0 ? spriteFiltration : params.titleFilter, 0, 0, 0);
         auto adjusted = matrix;
         if (!targetExtent) {
             for (int i = 0; i < 4; ++i) {
@@ -1727,7 +2595,18 @@ struct Runtime::Impl {
         auto &graph = scene.preset;
         beginScratch(selected == 1);
         if (selected == 1) {
-            auto n = graph.nodes[24].effective;
+            auto n = author.authoredCube();
+            const auto &c = params.studyControls;
+            n.floats[9] += (c[1] - 1) * .05f;
+            n.floats[2] *= c[2];
+            n.floats[3] *= c[2];
+            n.floats[5] *= c[2];
+            if (c[3] != 1)
+                n.integers[10] =
+                    std::clamp(int(std::lround((n.integers[10] + 2) * c[3])) - 2, 0, 28);
+            n.floats[4] /= c[4];
+            if (params.studyPhaseOverride)
+                n.floats[8] = (c[0] * 2 - 1) * 3.1415927f;
             auto camera = multiplyMatrix(
                 translationMatrix(-control("camera.x"), -control("camera.y"), -control("camera.z")),
                 multiplyMatrix(rotation(1, -yawValue() - control("camera.yaw")),
@@ -1813,7 +2692,14 @@ struct Runtime::Impl {
     void syntheticStudyFrame() {
         auto n = scene.preset.nodes[9].saved, terminal = scene.preset.nodes[10].saved;
         float phase = studyOutputValues[7] ? mapFloat(*studyOutputValues[7], 0, 1) : 0;
-        terminal.floats[5] = std::clamp(phase, 0.f, 1.f);
+        const auto &c = params.studyControls;
+        terminal.floats[5] =
+            params.studyPhaseOverride ? c[0] : std::clamp((phase - .5f) * c[1] + .5f, 0.f, 1.f);
+        terminal.floats[4] *= c[3];
+        terminal.floats[7] *= c[2];
+        if (c[4] != 1)
+            for (int slot : {0, 1, 5, 6})
+                n.floats[slot] = (n.floats[slot] + 1) * c[4] - 1;
         n.floats[4] = studyMixerValues[3] ? mapFloat(*studyMixerValues[3], -6.2831855f, 6.2831855f)
                                           : n.floats[4];
         n.integers[2] = selected == 103 ? 80 : 1079;
@@ -1864,7 +2750,12 @@ struct Runtime::Impl {
                 }
             clearPending = false;
         }
-        auto revision = key() ^ (uint64_t(params.layerPreview + 1) * 0x9e3779b97f4a7c15ull);
+        const int endpoint = previewNode();
+        const int endpointStack = endpoint >= 0 && size_t(endpoint) < scene.preset.nodes.size()
+                                      ? scene.preset.nodes[endpoint].stack
+                                      : -1;
+        auto revision = key() ^ (uint64_t(params.layerPreview + 1) * 0x9e3779b97f4a7c15ull) ^
+                        (uint64_t(endpoint + 2) * 0xbf58476d1ce4e5b9ull);
         if (renderedKey == revision)
             return;
         if ((selected == 18 || selected == 21)) {
@@ -1872,7 +2763,7 @@ struct Runtime::Impl {
             renderedKey = revision;
             return;
         }
-        if (selected >= 100) {
+        if (neon::pc::isStudy(selected)) {
             syntheticStudyFrame();
             renderedKey = revision;
             return;
@@ -1882,42 +2773,130 @@ struct Runtime::Impl {
             renderedKey = revision;
             return;
         }
+        auto inputOverrides =
+            selected >= 7 ? author.materialOverrides(selected) : std::vector<std::array<int, 3>>{};
         auto camera = multiplyMatrix(
             translationMatrix(-control("camera.x"), -control("camera.y"), -control("camera.z")),
             multiplyMatrix(rotation(1, -yawValue() - control("camera.yaw")),
                            multiplyMatrix(rotation(0, -pitchValue() - control("camera.pitch")),
                                           rotation(2, -control("camera.roll")))));
+        if (endpointStack >= 0) {
+            if (nodeOutput.width != scratch.width || nodeOutput.height != scratch.height) {
+                nodeOutput.release();
+                nodeOutput.create(scratch.width, scratch.height);
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, nodeOutput.fbo);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        // Snapshot a pass without stopping later passes: feedback must continue
+        // to receive the completed stack image on every frame.
+        auto captureNode = [&](size_t index) {
+            if (int(index) != endpoint)
+                return;
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, scratch.fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nodeOutput.fbo);
+            glBlitFramebuffer(0, 0, scratch.width, scratch.height, 0, 0, nodeOutput.width,
+                              nodeOutput.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer(GL_FRAMEBUFFER, scratch.fbo);
+        };
         for (int stack = 0; stack < 16; stack++)
             if (scene.reachable[stack]) {
+                if (externalLayers.count(stack) ||
+                    (selected == 5 && stack == 1 && !allocatedRipple))
+                    continue;
+                // A non-feedback mixer can produce its layer texture directly.
+                // Retained/self inputs and spatial draws keep the scratch-and-copy path.
+                bool directStack = params.copyElision && endpoint < 0 &&
+                                   params.framing.mode != Framing::LegacyStretch;
+                for (auto index : scene.preset.stacks[stack].nodes) {
+                    const auto &node = scene.preset.nodes[index];
+                    if (node.type == 0 || node.type == 7 || node.type == 12 || node.type == 14 ||
+                        scene.nonDrawingShapes.count(index))
+                        continue;
+                    if (node.type != 9) {
+                        directStack = false;
+                        break;
+                    }
+                    const auto inputs =
+                        resolvedSamplerInputs(scene.preset, index, &settings,
+                                              inputOverrides.empty() ? nullptr : &inputOverrides);
+                    const int shader = settings[index].integers[2];
+                    for (int sampler = 0; sampler < 3; ++sampler)
+                        if ((scene.masks.at(shader) & (1 << sampler)) &&
+                            inputs[sampler] == 31 + stack)
+                            directStack = false;
+                }
                 unbind();
-                glBindFramebuffer(GL_FRAMEBUFFER, scratch.fbo);
+                glBindFramebuffer(GL_FRAMEBUFFER, directStack ? stacks[stack].fbo : scratch.fbo);
                 glViewport(0, 0, scratch.width, scratch.height);
                 glClearColor(0, 0, 0, 0);
                 glClear(GL_COLOR_BUFFER_BIT);
                 auto &indices = scene.preset.stacks[stack].nodes;
                 auto terminal = settings[indices.back()];
                 if (control(("layer." + std::to_string(stack)).c_str(), 1) < .5f) {
-                    copyStack(stack);
+                    if (!directStack)
+                        copyStack(stack);
                     continue;
                 }
                 ShapeSettings cameraNode{};
                 cameraNode.floats[4] = 400;
                 cameraNode.floats[5] = 10024;
                 bool hasCamera = false;
+                int blendOverride = int(control(("blend." + std::to_string(stack)).c_str(), 0));
                 for (auto index : indices) {
+                    samplerNode = int(index);
                     auto &node = scene.preset.nodes[index];
                     auto n = settings[index];
+                    auto resolved =
+                        resolvedSamplerInputs(scene.preset, index, &settings,
+                                              inputOverrides.empty() ? nullptr : &inputOverrides);
                     if (node.type == 12) {
                         cameraNode = n;
                         hasCamera = true;
                         continue;
                     }
-                    if (node.type == 0 || node.type == 7 || node.type == 14)
+                    if (node.type == 0 || node.type == 7 || node.type == 14 ||
+                        scene.nonDrawingShapes.count(index))
                         continue;
+                    if (node.type == 11) {
+                        auto projection = originalPerspective(
+                            -(cameraNode.floats[3] + 1) * 256 / control("camera.zoom", 1),
+                            (cameraNode.floats[3] + 1) * 256 / control("camera.zoom", 1),
+                            -(cameraNode.floats[2] + 1) * 256 / control("camera.zoom", 1),
+                            (cameraNode.floats[2] + 1) * 256 / control("camera.zoom", 1),
+                            cameraNode.floats[4], cameraNode.floats[5]);
+                        auto view = originalCubeModelView(n, hasCamera ? scene.neutralView
+                                                                       : originalStackView());
+                        auto matrix = multiplyMatrix(multiplyMatrix(view, camera), projection);
+                        auto field = cubeField(n);
+                        uint32_t rgba =
+                            0xffff0000u | (uint32_t(n.integers[9]) << 8) | uint32_t(n.integers[6]);
+                        glEnable(GL_DEPTH_TEST);
+                        glDepthFunc(GL_LEQUAL);
+                        glDepthMask(GL_TRUE);
+                        clearDepth(1);
+                        glClear(GL_DEPTH_BUFFER_BIT);
+                        glDisable(GL_BLEND);
+                        if (blendOverride)
+                            layerBlend(blendOverride);
+                        for (int face = 0; face < 6; ++face)
+                            if (n.integers[face])
+                                drawSpatial(cubeFace(n, field, rgba, face), matrix, n.integers[7],
+                                            terminal,
+                                            {!inputOverrides.empty() && inputOverrides[index][0] > 0
+                                                 ? inputOverrides[index][0]
+                                                 : n.integers[face],
+                                             resolved[1], resolved[2]});
+                        glDisable(GL_DEPTH_TEST);
+                        captureNode(index);
+                        continue;
+                    }
                     if (node.type == 9 || node.type == 6) {
-                        if (node.type == 6)
-                            n.integers[5] = 31 + stack;
-                        drawMixer(n, terminal);
+                        n.integers[5] = resolved[0];
+                        n.integers[3] = resolved[1];
+                        n.integers[6] = resolved[2];
+                        drawMixer(n, terminal, -1, false, 1, true, blendOverride);
                     } else if (node.type == 15 || node.type == 1 || node.type == 19) {
                         TunnelFrame frame;
                         if (node.type == 19) {
@@ -1927,11 +2906,19 @@ struct Runtime::Impl {
                         } else if (node.type == 15) {
                             auto &tunnel = scene.tunnels.at(index);
                             tunnel.tick(n, profiles, false);
-                            frame = tunnel.frame(n, scene.neutralView);
+                            auto key = selected >= 5 && selected <= 6
+                                           ? std::string("tunnel.mesh.")
+                                           : "mesh." + std::to_string(index) + ".";
+                            frame =
+                                tunnel.frame(n, scene.neutralView,
+                                             int(std::lround(control((key + "sides").c_str(), 8))),
+                                             control((key + "roundness").c_str(), 1));
                         } else {
                             auto &particles = scene.particles.at(index);
-                            if (!particles.ready())
+                            if (!particles.ready()) {
+                                configureSprites(index, particles);
                                 particles.tick(n, scene.palette);
+                            }
                             frame.modelView = scene.neutralView;
                             frame.vertices =
                                 selected == 16 && index == 19
@@ -1939,7 +2926,15 @@ struct Runtime::Impl {
                                                             params.titleSize, params.titlePeriod,
                                                             params.titleHue, params.titleOpacity,
                                                             params.titleSprite)
-                                    : particleBillboards(n, particles.particles());
+                                    : particleBillboards(n, particles.particles(),
+                                                         spriteSequence(index)
+                                                             ? &particles.spriteFrames()
+                                                             : nullptr,
+                                                         int(spriteControl(index, "columns", 1)),
+                                                         int(spriteControl(index, "rows", 1)),
+                                                         spriteControl(index, "paletteTint", 1),
+                                                         &scene.particles.at(index).spriteStyles(),
+                                                         &spriteColours);
                         }
                         auto projection = originalPerspective(
                             -(cameraNode.floats[3] + 1) * 256 / control("camera.zoom", 1),
@@ -1952,22 +2947,27 @@ struct Runtime::Impl {
                         int id = node.type == 15 ? n.integers[15]
                                  : node.type == 19
                                      ? n.integers[6]
-                                     : (selected == 16 && index == 19 ? 1000 : n.integers[9]);
+                                     : ((selected == 16 && index == 19) || spriteSequence(index)
+                                            ? 1000
+                                            : n.integers[9]);
                         glEnable(GL_BLEND);
                         glBlendFunc(GL_ONE, GL_ONE);
-                        drawSpatial(
-                            frame.vertices, matrix, id, terminal,
-                            node.type == 15
-                                ? std::array<int, 3>{n.integers[3], n.integers[4], n.integers[12]}
-                            : node.type == 19
-                                ? std::array<int, 3>{n.integers[4], n.integers[5], n.integers[8]}
-                                : std::array<int, 3>{id == 1000 ? 147 : n.integers[6],
-                                                     n.integers[7], 0});
+                        if (blendOverride)
+                            layerBlend(blendOverride);
+                        drawSpatial(frame.vertices, matrix, id, terminal,
+                                    id == 1000 && !spriteSequence(index)
+                                        ? std::array<int, 3>{147, resolved[1], resolved[2]}
+                                        : resolved,
+                                    1, 0,
+                                    spriteSequence(index) ? spriteControl(index, "filter") : -1);
                     } else
                         throw std::runtime_error("Unported module in GLES effect");
+                    captureNode(index);
                 }
-                copyStack(stack);
+                if (!directStack)
+                    copyStack(stack);
             }
+        samplerNode = -1;
         renderedKey = revision;
     }
     void renderOverlays(const Destination &d) {
@@ -1985,8 +2985,9 @@ struct Runtime::Impl {
         State state;
         initializeBeam();
         if (!overlayProgram)
-            overlayProgram = program(read(data / "vectors/vector-beam.vert.glsl"),
-                                     read(data / "vectors/vector-beam.frag.glsl"));
+            overlayProgram =
+                program(read(data / "vectors/vector-beam.vert.glsl"),
+                        read(data / "vectors/vector-beam.frag.glsl"), programCache.get());
         glBindFramebuffer(GL_FRAMEBUFFER, d.framebuffer);
         auto r = d.viewport;
         glViewport(r.x, d.height - r.y - r.height, r.width, r.height);
@@ -2084,7 +3085,7 @@ struct Runtime::Impl {
         drawText(frame.bezel, overlayBezelMesh, overlayBezelCache, true);
         drawText(frame.overGame, overlayOverGameMesh, overlayOverGameCache, false);
     }
-    void render(const Destination &destination) {
+    void render(const Destination &destination, bool reuse = false) {
         if (!glad_glBindSampler || !clearDepth)
             throw std::runtime_error("Host must load GLES 3 sampler entry points before rendering");
         if (destination.width < 1 || destination.height < 1 || destination.viewport.width < 1 ||
@@ -2095,11 +3096,17 @@ struct Runtime::Impl {
             destination.viewport.height > destination.height - destination.viewport.y)
             throw std::runtime_error("Invalid effect destination");
         if (!std::isfinite(yawValue()) || !std::isfinite(pitchValue()) ||
-            !std::isfinite(exposureValue()) || !std::isfinite(params.renderScale) ||
+            !std::isfinite(exposureValue()) || !std::isfinite(params.hueShift) ||
+            params.hueShift < 0 || params.hueShift > 1 || !std::isfinite(params.renderScale) ||
             params.renderScale < .25f || params.renderScale > 1 || params.vectorScene < 0 ||
             params.vectorScene > 3 || params.layerPreview < -1 || params.layerPreview > 15)
             throw std::runtime_error("Invalid effect parameters");
-        State state;
+        const float studyLow[] = {0, 0, .05f, .25f, .2f}, studyHigh[] = {1, 2, 2.5f, 3, 2.5f};
+        for (int n = 0; n < 5; ++n)
+            if (!std::isfinite(params.studyControls[n]) || params.studyControls[n] < studyLow[n] ||
+                params.studyControls[n] > studyHigh[n])
+                throw std::runtime_error("Invalid study control");
+        State state(destination.preserveHostState);
         for (int unit = 0; unit < 3; unit++)
             glBindSampler(unit, 0);
         glDisable(GL_SCISSOR_TEST);
@@ -2111,72 +3118,114 @@ struct Runtime::Impl {
         stats.drawCalls = stats.triangles = 0;
         stats.uploadedBytes = 0;
         stats.textureBuilds = 0;
-        stats.shapeBuilds = 0;
-        auto layout = screenLayout(destination.viewport.width, destination.viewport.height,
-                                   destination.clockwiseTurns, params.framing);
-        if (layout.extentX != screen.extentX || layout.extentY != screen.extentY) {
-            renderedKey = ~uint64_t(0);
-            clearPending = true;
-        }
-        screen = layout;
-        initialize(std::max(1, int(std::lround(screen.width * params.renderScale))),
-                   std::max(1, int(std::lround(screen.height * params.renderScale))));
-        evaluateEdits();
-        if (params.sourceOnly || control("vector.enabled") > .5f)
-            vectors();
-        else {
-            glBindFramebuffer(GL_FRAMEBUFFER, source.fbo);
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-        sceneFrame();
-        stats.targets = baseTargets;
-        stats.targetBytes = baseBytes;
-        for (auto &t : componentTargets)
-            if (t.second.target.texture) {
-                ++stats.targets;
-                stats.targetBytes += size_t(t.second.target.width) * t.second.target.height * 4;
-                if (t.second.layer) {
-                    stats.targets += t.second.layer->statistics().targets;
-                    stats.targetBytes += t.second.layer->statistics().targetBytes;
+        stats.imageUploads = 0;
+        for (auto it = imageKeys.begin(); it != imageKeys.end();)
+            if (!author.images.find(it->first)) {
+                auto image = images.find(1000000 + it->first);
+                if (image != images.end()) {
+                    glDeleteTextures(1, &image->second);
+                    images.erase(image);
                 }
+                it = imageKeys.erase(it);
+            } else
+                ++it;
+        stats.shapeBuilds = 0;
+        if (!reuse) {
+            auto layout = screenLayout(destination.viewport.width, destination.viewport.height,
+                                       destination.clockwiseTurns, params.framing);
+            if (layout.extentX != screen.extentX || layout.extentY != screen.extentY) {
+                renderedKey = ~uint64_t(0);
+                clearPending = true;
             }
+            screen = layout;
+            initialize(std::max(1, int(std::lround(screen.width * params.renderScale))),
+                       std::max(1, int(std::lround(screen.height * params.renderScale))));
+            evaluateEdits();
+            if (params.sourceOnly || control("vector.enabled") > .5f)
+                vectors();
+            else if (source.fbo) {
+                vectorSourceKey = ~uint64_t(0);
+                glBindFramebuffer(GL_FRAMEBUFFER, source.fbo);
+                glClearColor(0, 0, 0, 0);
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
+            sceneFrame();
+            stats.targets = baseTargets;
+            stats.targetBytes = baseBytes;
+            if (nodeOutput.texture) {
+                ++stats.targets;
+                stats.targetBytes += size_t(nodeOutput.width) * nodeOutput.height * 4;
+            }
+            for (auto &t : componentTargets)
+                if (t.second.target.texture) {
+                    ++stats.targets;
+                    stats.targetBytes += size_t(t.second.target.width) * t.second.target.height * 4;
+                    if (t.second.layer) {
+                        stats.targets += t.second.layer->statistics().targets;
+                        stats.targetBytes += t.second.layer->statistics().targetBytes;
+                    }
+                }
+            outputReady = true;
+            readyWidth = destination.viewport.width;
+            readyHeight = destination.viewport.height;
+            readyTurns = destination.clockwiseTurns;
+            readyScale = params.renderScale;
+        }
         unbind();
         glBindFramebuffer(GL_FRAMEBUFFER, destination.framebuffer);
         auto r = destination.viewport;
         glViewport(r.x, destination.height - r.y - r.height, r.width, r.height);
+        if (destination.clearDestination) {
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(r.x, destination.height - r.y - r.height, r.width, r.height);
+            glColorMask(1, 1, 1, 1);
+            glClearColor(0, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glDisable(GL_SCISSOR_TEST);
+        }
         auto p = shader(selected == 104 && geometry.glow > 0 ? 1002 : 26);
         glUniform4f(location(p, U_c25), 2.f / sourceWidth, 2.f / sourceHeight, geometry.glow, 0);
         glUniform1f(location(p, U_gain),
-                    selected >= 100 ? 1 : std::clamp(exposureValue(), 0.f, 4.f));
+                    neon::pc::isStudy(selected) ? 1 : std::clamp(exposureValue(), 0.f, 4.f));
         glUniform2f(location(p, U_pixelShift), 1.f / r.width, -1.f / r.height);
         glUniform1i(location(p, U_spatial), 0);
         glUniform1f(location(p, U_outputSign), -1);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(
-            GL_TEXTURE_2D,
+        const GLuint backgroundTexture =
             (params.sourceOnly || int(control("scene.output", -1)) == 16) ? source.texture
-            : selected >= 100                                             ? studyOutput.texture
-            : selected < 2
-                ? scratch.texture
-                : stacks[params.layerPreview >= 0 ? params.layerPreview
-                         : params.previewStage
-                             ? scene.stages[params.previewStage]
-                             : int(control("scene.output", float(scene.preset.outputStack)))]
-                      .texture);
+            : directComponentOutput()                                     ? scratch.texture
+            : neon::pc::isStudy(selected)                                 ? studyOutput.texture
+            : selected < 2                                                ? scratch.texture
+            : previewNode() >= 0 && !params.previewStage && nodeOutput.texture
+                ? nodeOutput.texture
+                : texture(31 +
+                          (params.layerPreview >= 0 ? params.layerPreview
+                           : params.previewStage
+                               ? scene.stages[params.previewStage]
+                               : int(control("scene.output", float(scene.preset.outputStack)))));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, backgroundTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glDisable(GL_BLEND);
         glEnable(GL_SCISSOR_TEST);
         glColorMask(1, 1, 1, 0);
-        auto q = params.framing.mode != Framing::LegacyStretch || selected < 2 || selected >= 100
+        auto q = params.framing.mode != Framing::LegacyStretch || selected < 2 ||
+                         neon::pc::isStudy(selected)
                      ? quad()
                      : quad(320.f / 330, 240.f / 260);
-        if (selected >= 2 && selected <= 4) {
+        bool flatCamera =
+            (selected >= 2 && selected <= 4) ||
+            (selected >= 7 && selected <= neon::pc::lastJukeboxPreset && selected != 18 &&
+             selected != 21 && !neon::pc::isStudy(selected) && !scene.spatialCamera());
+        if (flatCamera && (control("camera.yaw") != 0 || control("camera.pitch") != 0 ||
+                           control("camera.roll") != 0 || control("camera.x") != 0 ||
+                           control("camera.y") != 0 || control("camera.zoom", 1) != 1)) {
             float yaw = control("camera.yaw"), pitch = control("camera.pitch"),
                   roll = control("camera.roll"), zoom = control("camera.zoom", 1);
+            const float aspect = float(sourceWidth) / sourceHeight;
             for (auto &v : q) {
-                float x = v.x - .5f, y = v.y - .5f, z = -x * std::sin(yaw);
+                float x = (v.x - .5f) * aspect, y = v.y - .5f, z = -x * std::sin(yaw);
                 x *= std::cos(yaw);
                 float py = y * std::cos(pitch) - z * std::sin(pitch);
                 z = y * std::sin(pitch) + z * std::cos(pitch);
@@ -2185,43 +3234,63 @@ struct Runtime::Impl {
                 y = x * std::sin(roll) + y * std::cos(roll);
                 x = px;
                 float perspective = 2 / (2 + z);
-                v.x = .5f + (x + control("camera.x")) * zoom * perspective;
+                v.x = .5f + (x / aspect + control("camera.x")) * zoom * perspective;
                 v.y = .5f + (y + control("camera.y")) * zoom * perspective;
+                // Restore homogeneous depth in the vertex shader after screen placement.
+                // Keeping this weight prevents affine UV interpolation across the diagonal.
+                v.clipWeight = 1 / perspective;
             }
+        }
+        if (selected >= 2 && !neon::pc::isStudy(selected) && !params.sourceOnly &&
+            int(control("scene.output", -1)) != 16 &&
+            !(previewNode() >= 0 && !params.previewStage && nodeOutput.texture)) {
+            int output = params.layerPreview >= 0 ? params.layerPreview
+                         : params.previewStage
+                             ? scene.stages[params.previewStage]
+                             : int(control("scene.output", float(scene.preset.outputStack)));
+            auto input = externalLayers.find(output);
+            if (input != externalLayers.end() && input->second.flipY)
+                for (auto &v : q) {
+                    v.v = 1 - v.v;
+                    v.v1 = 1 - v.v1;
+                }
         }
         for (auto &v : q)
             rotateScreenPoint(v.x, v.y, screen.turns);
-        if (selected < 2 || selected >= 100)
+        if (selected < 2 || neon::pc::isStudy(selected))
             glUniform2f(location(p, U_pixelShift), 0, 0);
-        GLint backgroundTexture = 0;
-        glGetIntegerv(GL_TEXTURE_BINDING_2D, &backgroundTexture);
         auto paint = [&](Rect c) {
             if (c.width <= 0 || c.height <= 0)
                 return;
             glScissor(c.x, destination.height - c.y - c.height, c.width, c.height);
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
+            if (!destination.clearDestination) {
+                glClearColor(0, 0, 0, 0);
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
             glUseProgram(p);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, backgroundTexture);
             glDisable(GL_BLEND);
             glUniform1f(location(p, U_gain),
-                        selected >= 100 ? 1 : std::clamp(exposureValue(), 0.f, 4.f));
-            glUniform2f(
-                location(p, U_pixelShift),
-                params.framing.mode != Framing::LegacyStretch || selected < 2 || selected >= 100
-                    ? 0
-                    : 1.f / r.width,
-                params.framing.mode != Framing::LegacyStretch || selected < 2 || selected >= 100
-                    ? 0
-                    : -1.f / r.height);
+                        neon::pc::isStudy(selected) ? 1 : std::clamp(exposureValue(), 0.f, 4.f));
+            glUniform2f(location(p, U_pixelShift),
+                        params.framing.mode != Framing::LegacyStretch || selected < 2 ||
+                                neon::pc::isStudy(selected)
+                            ? 0
+                            : 1.f / r.width,
+                        params.framing.mode != Framing::LegacyStretch || selected < 2 ||
+                                neon::pc::isStudy(selected)
+                            ? 0
+                            : -1.f / r.height);
             glUniform1i(location(p, U_spatial), 0);
             glUniform1f(location(p, U_outputSign), -1);
+            glUniform1f(location(p, U_hueShift), hueValue());
             if (control("vector.background", 1) > .5f || params.sourceOnly)
                 draw(q.data(), q.size(), GL_TRIANGLE_STRIP);
             if (params.layerPreview < 0 && !params.componentPreviewId && !params.sourceOnly &&
                 control("vector.enabled") > .5f && int(control("vector.placement")) != 1) {
                 auto overlay = shader(26);
+                glUniform1f(location(overlay, U_hueShift), hueValue());
                 glUniform1f(location(overlay, U_gain), 1);
                 glUniform1i(location(overlay, U_spatial), 0);
                 glUniform1f(location(overlay, U_outputSign), -1);
@@ -2251,10 +3320,27 @@ struct Runtime::Impl {
 };
 Runtime::Runtime(const std::filesystem::path &p, pc::AssetReader reader)
     : impl_(std::make_unique<Impl>(p, std::move(reader))) {}
-Runtime::~Runtime() = default;
+Runtime::Runtime(const std::filesystem::path &p, pc::AssetReader reader, PlaybackOnly)
+    : impl_(std::make_unique<Impl>(p, std::move(reader), true)) {}
+
 void Runtime::abandonGraphics() {
     impl_->abandon();
 }
+Runtime::~Runtime() = default;
+void Runtime::clearExternalLayers() {
+    impl_->externalLayers.clear();
+    impl_->renderedKey = ~uint64_t(0);
+}
+void Runtime::setExternalLayer(int layer, unsigned texture, bool expanded, bool flipY) {
+    if (layer < 0 || layer >= 16 || impl_->scene.preset.stacks[layer].nodes.empty())
+        throw std::runtime_error("External input names an unavailable native layer");
+    if (texture)
+        impl_->externalLayers[layer] = {texture, expanded, flipY};
+    else
+        impl_->externalLayers.erase(layer);
+    impl_->renderedKey = ~uint64_t(0);
+}
+
 void Runtime::advance(double elapsed) {
     if (!std::isfinite(elapsed) || elapsed < 0)
         throw std::runtime_error("Invalid effect time step");
@@ -2300,8 +3386,70 @@ void Runtime::frame(double elapsed, const Destination &destination) {
     i.stats.drawCalls = draws;
     i.stats.triangles = triangles;
     i.stats.uploadedBytes = uploaded;
+    if (i.programCache) {
+        i.stats.shaderCompilations = i.programCache->compilations;
+        i.stats.shaderCacheHits = i.programCache->hits;
+    }
+}
+void Runtime::frameSampled(double elapsed, const Destination &destination) {
+    if (!std::isfinite(elapsed) || elapsed < 0)
+        throw std::runtime_error("Invalid sampled effect time");
+    auto &i = *impl_;
+    i.accumulator += std::min(elapsed, .25);
+    while (i.accumulator + 1e-10 >= 1. / 60) {
+        i.tickCpu();
+        i.accumulator = std::max(0., i.accumulator - 1. / 60);
+    }
+    struct Sampling {
+        bool &flag;
+        bool previous;
+        explicit Sampling(bool &value) : flag(value), previous(value) {
+            flag = true;
+        }
+        ~Sampling() {
+            flag = previous;
+        }
+    } sampling(i.sampledFrame);
+    i.render(destination);
+}
+bool Runtime::presentCached(const Destination &destination) {
+    auto &i = *impl_;
+    if (!i.outputReady || i.readyWidth != destination.viewport.width ||
+        i.readyHeight != destination.viewport.height ||
+        i.readyTurns != destination.clockwiseTurns || i.readyScale != i.params.renderScale)
+        return false;
+    i.render(destination, true);
+    return true;
+}
+void Runtime::setSpriteColours(const std::map<int, std::array<float, 3>> &colours) {
+    if (colours.size() > 256)
+        throw std::runtime_error("Too many live sprite colours");
+    for (const auto &entry : colours) {
+        if (entry.first < 0 || entry.first > 255)
+            throw std::runtime_error("Invalid sprite colour source");
+        for (float value : entry.second)
+            if (!std::isfinite(value) || value < 0 || value > 4)
+                throw std::runtime_error("Invalid sprite colour");
+    }
+    if (impl_->spriteColours != colours) {
+        impl_->spriteColours = colours;
+        impl_->renderedKey = ~uint64_t(0);
+    }
+}
+bool Runtime::insertSprite(int node, int atlasFrame, unsigned count, float speed,
+                           int colourSource) {
+    auto &i = *impl_;
+    i.evaluateEdits();
+    auto found = i.scene.particles.find(size_t(node));
+    if (node < 0 || found == i.scene.particles.end() || !i.spriteSequence(size_t(node)))
+        return false;
+    int capacity = int(i.spriteControl(node, "columns", 1)) * int(i.spriteControl(node, "rows", 1));
+    if (atlasFrame < 0 || atlasFrame >= capacity)
+        return false;
+    return found->second.insertSprite(atlasFrame, count, speed, colourSource);
 }
 void Runtime::reset() {
+    impl_->outputReady = false;
     auto reads = impl_->readBanks.find(impl_->selected);
     if (reads != impl_->readBanks.end())
         reads->second.reset();
@@ -2310,6 +3458,7 @@ void Runtime::reset() {
     if (bank != impl_->author.responses.end())
         bank->second.reset();
     impl_->scene.reset();
+    impl_->author.groupClocks.clear();
     impl_->componentTunnels.clear();
     impl_->studyClock = {};
     impl_->studyMixerValues = {};
@@ -2360,6 +3509,10 @@ double Runtime::time() const {
     return impl_->time();
 }
 bool Runtime::loadGlesEntryPoints(void *(*resolve)(const char *)) {
+    getProgramBinary = reinterpret_cast<GetProgramBinaryFunction>(resolve("glGetProgramBinary"));
+    loadProgramBinary = reinterpret_cast<ProgramBinaryFunction>(resolve("glProgramBinary"));
+    programParameteri = reinterpret_cast<ProgramParameteriFunction>(resolve("glProgramParameteri"));
+
     glad_glGenSamplers = reinterpret_cast<PFNGLGENSAMPLERSPROC>(resolve("glGenSamplers"));
     glad_glSamplerParameteri =
         reinterpret_cast<PFNGLSAMPLERPARAMETERIPROC>(resolve("glSamplerParameteri"));
@@ -2376,19 +3529,26 @@ int Runtime::selectedPreset() const {
     return impl_->selected;
 }
 void Runtime::selectPreset(int id) {
+    if (impl_->playbackOnly)
+        throw std::runtime_error("Prepared scenes cannot select catalogue presets");
     if (std::none_of(presets().begin(), presets().end(), [&](const auto &p) { return p.id == id; }))
         throw std::runtime_error("Unknown GLES preset");
     static const char *names[] = {"r2-c8",  "r6-c15", "r6-c11", "r4-c3",  "r5-c13", "r1-c6",
                                   "r1-c4",  "r1-c8",  "r4-c10", "r2-c13", "r6-c1",  "r1-c10",
                                   "r5-c8",  "r1-c0",  "r3-c1",  "r5-c0",  "r1-c8",  "r2-c13",
                                   "r2-c13", "r1-c12", "r2-c14", "r2-c13"};
-    RecoveredScene pending(impl_->data, names[id >= 100 ? 0 : id], id >= 5 && id < 100,
-                           impl_->reader);
+    RecoveredScene pending(impl_->data,
+                           (id >= 22 && id <= neon::pc::lastJukeboxPreset && !neon::pc::isStudy(id)
+                                ? neon::pc::addedJukeboxPresets.at(neon::pc::addedIndex(id))
+                                : names[neon::pc::isStudy(id) ? 0 : id]),
+                           id >= 5 && !neon::pc::isStudy(id), impl_->reader);
+    if (impl_->author.graphs.count(id))
+        pending = impl_->author.extraScenes.at(pc::AuthoringModel::graphIndex(id));
     if (impl_->selected == 18 || impl_->selected == 21)
         impl_->componentDocuments[impl_->selected] = impl_->components;
     if (id == 18 || id == 21)
         impl_->components = impl_->componentDocuments.at(id);
-    if (id >= 100) {
+    if (neon::pc::isStudy(id)) {
         pending.reachable.fill(false);
         pending.stages.fill(pending.preset.outputStack);
     }
@@ -2418,6 +3578,7 @@ void Runtime::selectPreset(int id) {
     impl_->scene = std::move(pending);
     impl_->baseReachable = impl_->scene.reachable;
     impl_->selected = id;
+    impl_->author.groupClocks.clear();
     auto reads = impl_->readBanks.find(id);
     if (reads != impl_->readBanks.end())
         reads->second.reset();
@@ -2425,12 +3586,15 @@ void Runtime::selectPreset(int id) {
     auto bank = impl_->author.responses.find(id);
     if (bank != impl_->author.responses.end())
         bank->second.reset();
-    impl_->author.bindPlayback(id <= 20 && id != 18 ? id : -1, &impl_->scene.preset);
+    impl_->author.bindPlayback(
+        id <= neon::pc::lastJukeboxPreset && id != 18 && id != 21 && !neon::pc::isStudy(id) ? id
+                                                                                            : -1,
+        &impl_->scene.preset);
     ++impl_->sceneGeneration;
     impl_->studyClock = {};
     impl_->studyMixerValues = {};
     impl_->studyOutputValues = {};
-    if (id >= 100) {
+    if (neon::pc::isStudy(id)) {
         std::array<ShapeSettings, 3> originals;
         for (int i = 0; i < 3; i++) {
             originals[i] = impl_->scene.preset.nodes[i + 1].saved;
@@ -2449,7 +3613,7 @@ void Runtime::selectPreset(int id) {
         impl_->geometry.enabled = id == 104;
     }
     impl_->params = Parameters{};
-    if (id >= 100)
+    if (neon::pc::isStudy(id))
         impl_->params.exposure = .65f;
     impl_->params.beam.colour = 1;
     impl_->accumulator = 0;
@@ -2476,19 +3640,31 @@ bool Runtime::validateShaderLibrary(std::ostream &log) {
 } // namespace neon::effects
 
 namespace neon::effects {
+Runtime *Runtime::layerRuntime(int component) {
+    auto found = impl_->componentTargets.find(component);
+    return found == impl_->componentTargets.end() ? nullptr : found->second.layer.get();
+}
 pc::AuthoringModel &Runtime::authoring() {
     impl_->editorAuthoring = true;
     return impl_->author;
 }
-void Runtime::writeScene(std::ostream &out, double rate) const {
+void Runtime::writeScene(std::ostream &out, double rate,
+                         const std::filesystem::path &assetFolder) const {
+    if (impl_->playbackOnly)
+        throw std::runtime_error("Prepared scenes cannot be exported as editable scenes");
     if (!std::isfinite(rate) || rate < 0 || rate > 4)
         throw std::runtime_error("Invalid playback rate");
     screenLayout(4, 3, 0, impl_->params.framing);
     out.precision(9);
-    out << "NEONGLES 8\n"
+    out << "NEONGLES 15\n"
         << impl_->selected << ' ' << impl_->params.exposure << ' ' << rate << ' '
-        << impl_->params.renderScale << '\n'
+        << impl_->params.renderScale << ' ' << impl_->params.hueShift << '\n'
+        << impl_->params.studyControls[0] << ' ' << impl_->params.studyControls[1] << ' '
+        << impl_->params.studyControls[2] << ' ' << impl_->params.studyControls[3] << ' '
+        << impl_->params.studyControls[4] << ' ' << impl_->params.studyPhaseOverride << '\n'
         << int(impl_->params.framing.mode) << ' ' << impl_->params.framing.referenceAspect << '\n';
+    impl_->author.images.write(out, assetFolder);
+    impl_->author.writeGraphs(out);
     impl_->author.writeEdits(out);
     pc::writeGeometry(out, impl_->geometry);
     impl_->components.write(out);
@@ -2498,15 +3674,100 @@ void Runtime::writeScene(std::ostream &out, double rate) const {
     if (!out)
         throw std::runtime_error("Could not write GLES scene");
 }
+const ImageAssets &Runtime::imageAssets() const {
+    return impl_->author.images;
+}
+void Runtime::setImageAssets(ImageAssets images) {
+    images.prepare();
+    size_t pixels = 0;
+    for (const auto &image : images.items)
+        pixels += size_t(image.width) * image.height;
+    for (const auto &c : impl_->components.items) {
+        for (int input : {c.source, c.sourceB, c.sourceC})
+            if (importedImageSelector(input) && !images.find(input))
+                throw std::runtime_error("An image is still connected to a component");
+        if (c.kind == ComponentKind::Layer) {
+            Runtime child(impl_->data, impl_->reader);
+            std::istringstream scene(c.layerScene);
+            child.readScene(scene);
+            pixels += child.impl_->importedPixelTotal;
+        }
+    }
+    for (const auto &bank : impl_->author.edits)
+        for (const auto &field : bank)
+            if (importedImageSelector(int(field.value)) &&
+                std::any_of(field.choices.begin(), field.choices.end(),
+                            [](const auto &option) { return option.value == 200; }) &&
+                !images.find(int(field.value)))
+                throw std::runtime_error("An image is still referenced by a node");
+    if (pixels > 4 * 1024 * 1024)
+        throw std::runtime_error(
+            "Imported images and nested layers exceed 16 MiB of base RGBA pixels");
+    impl_->author.setImages(std::move(images));
+    impl_->importedPixelTotal = pixels;
+}
+void Runtime::saveSceneFile(const std::filesystem::path &file, double rate) const {
+    std::ostringstream document;
+    writeScene(document, rate,
+               std::filesystem::absolute(file).parent_path() /
+                   (file.stem().u8string() + ".assets"));
+    auto temporary = file;
+    temporary += ".tmp";
+    std::ofstream out(temporary, std::ios::binary);
+    out << document.str();
+    out.close();
+    if (!out)
+        throw std::runtime_error("Cannot save scene");
+    // Replace only after every referenced image and the new scene have been written.
+#ifdef _WIN32
+    if (!MoveFileExW(temporary.c_str(), file.c_str(),
+                     MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+        throw std::runtime_error("Cannot replace saved scene");
+#else
+    std::filesystem::rename(temporary, file);
+#endif
+}
+double Runtime::loadSceneFile(const std::filesystem::path &file) {
+    if (std::filesystem::file_size(file) > 128 * 1024 * 1024)
+        throw std::runtime_error("Scene file is too large");
+    auto previous = ImageAssets::fileBase();
+    struct Scope {
+        std::filesystem::path previous;
+        ~Scope() {
+            ImageAssets::setFileBase(previous);
+        }
+    } scope{previous};
+    ImageAssets::setFileBase(std::filesystem::absolute(file).parent_path());
+    std::ifstream input(file, std::ios::binary);
+    if (!input)
+        throw std::runtime_error("Cannot open scene");
+    return readScene(input);
+}
 double Runtime::readScene(std::istream &in) {
+    if (impl_->playbackOnly)
+        throw std::runtime_error("Prepared scenes are playback-only; edit the .neongles source");
     std::string magic;
     int version, id;
     float gain, tempo, scale;
     if (!(in >> magic >> version >> id >> gain >> tempo >> scale) || magic != "NEONGLES" ||
-        (version < 1 || version > 8) || !std::isfinite(gain) || gain < 0 || gain > 2 ||
+        (version < 1 || version > 15) || !std::isfinite(gain) || gain < 0 || gain > 2 ||
         !std::isfinite(tempo) || tempo < 0 || tempo > 4 || !std::isfinite(scale) || scale < .25f ||
         scale > 1)
         throw std::runtime_error("Invalid GLES scene");
+    float hue = 0;
+    if (version >= 10 && (!(in >> hue) || !std::isfinite(hue) || hue < 0 || hue > 1))
+        throw std::runtime_error("Invalid global hue shift");
+    std::array<float, 5> study{.35f, 1, 1, 1, 1};
+    int overridePhase = 0;
+    if (version >= 11) {
+        const float low[] = {0, 0, .05f, .25f, .2f}, high[] = {1, 2, 2.5f, 3, 2.5f};
+        for (int n = 0; n < 5; ++n)
+            if (!(in >> study[n]) || !std::isfinite(study[n]) || study[n] < low[n] ||
+                study[n] > high[n])
+                throw std::runtime_error("Invalid study control");
+        if (!(in >> overridePhase) || overridePhase < 0 || overridePhase > 1)
+            throw std::runtime_error("Invalid study phase override");
+    }
     ScreenFraming framing{Framing::LegacyStretch, 4.f / 3};
     if (version >= 5) {
         int mode;
@@ -2515,16 +3776,6 @@ double Runtime::readScene(std::istream &in) {
         framing.mode = Framing(mode);
         screenLayout(4, 3, 0, framing);
     }
-    auto pending = std::make_unique<pc::AuthoringModel>(impl_->data, impl_->reader);
-    pending->readEdits(in, id);
-    auto geometry = pc::readGeometry(in);
-    auto components = version >= 2 ? ComponentScene::read(in) : ComponentScene{};
-    auto responses = version >= 3 ? readResponseBanks(in) : std::map<int, ResponseBank>{};
-    auto reads = version >= 4 ? readReadBanks(in) : std::map<int, ReadBindings>{};
-    auto objects = vectors::readObjects(in);
-    in >> std::ws;
-    if (!in.eof())
-        throw std::runtime_error("Unexpected scene data");
     struct ParseScope {
         int &depth;
         bool root;
@@ -2541,7 +3792,46 @@ double Runtime::readScene(std::istream &in) {
         }
     };
     static thread_local int depth = 0, remaining = 4;
+    static thread_local size_t remainingPixels = 4 * 1024 * 1024;
+    if (depth == 0)
+        remainingPixels = 4 * 1024 * 1024;
     ParseScope scope(depth, remaining);
+    size_t pixelBudgetStart = remainingPixels;
+    auto pending = std::make_unique<pc::AuthoringModel>(impl_->data, impl_->reader);
+    if (version <= 10 && id >= 22 && id <= 25) {
+        static const char *legacy[] = {"minotaur-rescue", "minotron-bezel", "superoxwars-bezel",
+                                       "fiveaday-bezel"};
+        pc::RecoveredScene source(impl_->data, legacy[id - 22], true, impl_->reader);
+        pc::GraphRecipe recipe;
+        recipe.output = source.preset.outputStack;
+        for (int layer = 0; layer < 16; ++layer)
+            if (!source.preset.stacks[layer].nodes.empty())
+                recipe.layers.push_back({legacy[id - 22], layer, layer});
+        pending->installGraph(id, recipe);
+    }
+    if (version >= 13)
+        pending->setImages(ImageAssets::read(in, ImageAssets::fileBase()));
+    for (const auto &image : pending->images.items) {
+        size_t pixels = size_t(image.width) * image.height;
+        if (pixels > remainingPixels)
+            throw std::runtime_error("Nested imported images exceed the 16 MiB base pixel budget");
+        remainingPixels -= pixels;
+    }
+    if (version >= 15)
+        pending->readGraphs(in);
+    pending->readEdits(in);
+    auto geometry = pc::readGeometry(in);
+    auto components = version >= 2 ? ComponentScene::read(in) : ComponentScene{};
+    for (const auto &c : components.items)
+        for (int source : {c.source, c.sourceB, c.sourceC})
+            if (importedImageSelector(source) && !pending->images.find(source))
+                throw std::runtime_error("Scene references a missing imported image");
+    auto responses = version >= 3 ? readResponseBanks(in) : std::map<int, ResponseBank>{};
+    auto reads = version >= 4 ? readReadBanks(in) : std::map<int, ReadBindings>{};
+    auto objects = vectors::readObjects(in);
+    in >> std::ws;
+    if (!in.eof())
+        throw std::runtime_error("Unexpected scene data");
     for (auto &c : components.items)
         if (!c.vectorDocument.empty()) {
             std::istringstream vectors(c.vectorDocument);
@@ -2555,9 +3845,11 @@ double Runtime::readScene(std::istream &in) {
             std::istringstream payload(c.layerScene);
             child.readScene(payload);
         }
-    selectPreset(id); // validates and constructs before replacing active state
-    impl_->author.edits = std::move(pending->edits);
-    impl_->author.sceneNames = std::move(pending->sceneNames);
+    if (std::none_of(presets().begin(), presets().end(), [&](const auto &p) { return p.id == id; }))
+        throw std::runtime_error("Unknown scene preset");
+    impl_->author = std::move(*pending);
+    selectPreset(id);
+    impl_->importedPixelTotal = pixelBudgetStart - remainingPixels;
     impl_->author.responses = std::move(responses);
     impl_->readBanks = std::move(reads);
     impl_->readReport = {};
@@ -2570,6 +3862,9 @@ double Runtime::readScene(std::istream &in) {
     impl_->geometry = std::move(geometry);
     setVectorObjects(std::move(objects));
     impl_->params.exposure = gain;
+    impl_->params.hueShift = hue;
+    impl_->params.studyControls = study;
+    impl_->params.studyPhaseOverride = overridePhase != 0;
     impl_->params.renderScale = scale;
     impl_->params.framing = framing;
     return tempo;
@@ -2585,6 +3880,18 @@ ResponseBank &Runtime::responses() {
 }
 bool Runtime::triggerEvent(const std::string &event, float strength) {
     return responses().trigger(event, time(), strength);
+}
+void Runtime::setGameplayTexture(unsigned texture, int width, int height) {
+    if (!texture || width <= 0 || height <= 0) {
+        texture = 0;
+        width = height = 0;
+    }
+    auto &i = *impl_;
+    if (i.gameplayTexture != texture || i.gameplayWidth != width || i.gameplayHeight != height)
+        i.renderedKey = ~uint64_t(0);
+    i.gameplayTexture = texture;
+    i.gameplayWidth = width;
+    i.gameplayHeight = height;
 }
 void Runtime::setInput(const std::string &name, float value) {
     responses().setInput(name, value);
@@ -2612,8 +3919,11 @@ void Runtime::resetReads() {
 }
 std::vector<ResponseParameter> Runtime::responseParameters() {
     auto &i = *impl_;
+    if (i.playbackOnly)
+        return i.preparedParameters;
     std::vector<ResponseParameter> result = {
         {"runtime.exposure", "Overall exposure", 0, 2, i.params.exposure},
+        {"runtime.hue", "Global hue shift", 0, 1, i.params.hueShift},
         {"runtime.yaw", "Camera yaw", -3.141593f, 3.141593f, i.params.yaw},
         {"runtime.pitch", "Camera pitch", -3.141593f, 3.141593f, i.params.pitch}};
     if (i.selected == 18 || i.selected == 21) {
@@ -2622,11 +3932,466 @@ std::vector<ResponseParameter> Runtime::responseParameters() {
                 result.push_back(
                     {"component." + std::to_string(c.id) + "." + std::to_string(int(f.field)),
                      c.name + " / " + f.label, f.minimum, f.maximum, c.values[f.field]});
-    } else if (i.selected >= 2 && i.selected <= 20) {
+    } else if (i.selected >= 1 && i.selected <= neon::pc::lastJukeboxPreset) {
         for (const auto &e : i.author.controls(i.selected))
-            if (e.applicable && e.choices.empty())
+            if (e.applicable && (e.choices.empty() || e.key.rfind("node.", 0) == 0) &&
+                e.key.rfind("cycle.", 0) != 0)
                 result.push_back({e.key, e.label, e.minimum, e.maximum, e.current});
     }
+    if (i.selected == 18 || i.selected == 21)
+        for (const auto &component : i.components.items)
+            if (component.kind == ComponentKind::Layer) {
+                auto &source = i.componentTargets[component.id];
+                if (!source.layer || source.layerDocument != component.layerScene) {
+                    source.layer = documentRuntime(i.data, i.reader, component.layerScene);
+                    source.layerDocument = component.layerScene;
+                    source.layerHash = std::hash<std::string>{}(component.layerScene);
+                }
+                for (auto parameter : source.layer->responseParameters()) {
+                    parameter.key = "layer." + std::to_string(component.id) + "/" + parameter.key;
+                    parameter.label = component.name + " / " + parameter.label;
+                    result.push_back(std::move(parameter));
+                }
+            }
+    for (const auto &route : i.scene.preset.routes) {
+        auto key =
+            "clock." + std::to_string(route.node) + "." + std::to_string(route.channel) + ".speed";
+        if (std::none_of(result.begin(), result.end(), [&](const auto &p) { return p.key == key; }))
+            result.push_back({key, "Controller clock speed", 0, 8, 1});
+    }
     return result;
+}
+} // namespace neon::effects
+
+namespace neon::effects {
+void Runtime::writeBaked(std::ostream &output, double rate,
+                         const std::vector<std::string> *exports) {
+    auto &i = *impl_;
+    if (i.playbackOnly || i.selected < 5 || pc::isStudy(i.selected) || i.scene.preset.ticks)
+        throw std::runtime_error(
+            "Bake a freshly loaded scene, not an editor study or running playback");
+    auto parameters = responseParameters();
+    if (exports)
+        parameters.erase(std::remove_if(parameters.begin(), parameters.end(),
+                                        [&](const auto &p) {
+                                            return std::find(exports->begin(), exports->end(),
+                                                             p.key) == exports->end();
+                                        }),
+                         parameters.end());
+    output.write("NEONBK01", 8);
+    baked::IO io(output);
+    uint32_t version = 3;
+    io.value(version);
+    io.value(i.selected);
+    io.value(rate);
+    auto params = i.params;
+    for (float *v : {&params.yaw, &params.pitch, &params.exposure, &params.hueShift,
+                     &params.renderScale, &params.titleSize, &params.titlePeriod, &params.titleHue,
+                     &params.titleFilter, &params.titleOpacity})
+        io.value(*v);
+    for (float *v :
+         {&params.beam.width, &params.beam.intensity, &params.beam.halo, &params.beam.spread,
+          &params.beam.persistenceMs, &params.beam.colour, &params.beam.whiteHot})
+        io.value(*v);
+    io.array(params.studyControls);
+    io.value(params.studyPhaseOverride);
+    io.value(params.titleSprite);
+    io.value(params.vectorScene);
+    io.value(params.sourceOnly);
+    int framing = int(params.framing.mode);
+    io.value(framing);
+    io.value(params.framing.referenceAspect);
+    auto scene = i.scene;
+    const bool components = i.selected == 18 || i.selected == 21;
+    if (components) {
+        scene.preset = {};
+        scene.nonDrawingShapes.clear();
+    }
+    baked::playback(io, scene, components);
+    auto profiles = i.profiles;
+    bool needsProfiles = !i.scene.tunnels.empty();
+    for (const auto &c : i.components.items)
+        needsProfiles |= components && c.kind == ComponentKind::Tunnel;
+    io.value(needsProfiles);
+    if (needsProfiles) {
+        io.array(profiles.positions);
+        io.array(profiles.normals);
+    }
+    auto shape = i.shapePalette, spectrum = i.spectrumPalette;
+    io.array(shape);
+    io.array(spectrum);
+    auto controls = i.author.edits[pc::editIndex(i.selected)];
+    baked::controls(io, controls);
+    bool hasGraph = i.author.graphs.count(i.selected) != 0;
+    io.value(hasGraph);
+    if (hasGraph) {
+        auto graph = i.author.graphs.at(i.selected);
+        baked::graph(io, graph);
+    }
+    auto blob = [&](auto writer) {
+        std::ostringstream text;
+        writer(text);
+        auto value = text.str();
+        io.text(value);
+    };
+    blob([&](auto &out) { i.author.images.write(out); });
+    auto componentsData = playbackComponents(i.components);
+    if (!components)
+        componentsData.items.clear();
+    for (auto &c : componentsData.items)
+        if (c.kind == ComponentKind::Layer) {
+            auto child = documentRuntime(i.data, i.reader, c.layerScene);
+            std::vector<std::string> childExports;
+            if (exports) {
+                auto prefix = "layer." + std::to_string(c.id) + "/";
+                for (const auto &key : *exports)
+                    if (key.rfind(prefix, 0) == 0)
+                        childExports.push_back(key.substr(prefix.size()));
+            }
+            std::ostringstream prepared;
+            child->writeBaked(prepared, 1, exports ? &childExports : nullptr);
+            c.layerScene = prepared.str();
+        }
+    blob([&](auto &out) { componentsData.write(out); });
+    std::map<int, ResponseBank> responses;
+    if (auto found = i.author.responses.find(i.selected); found != i.author.responses.end())
+        responses.emplace(*found);
+    blob([&](auto &out) { writeResponseBanks(out, responses); });
+    std::map<int, ReadBindings> reads;
+    if (auto found = i.readBanks.find(i.selected); found != i.readBanks.end())
+        reads.emplace(*found);
+    blob([&](auto &out) { writeReadBanks(out, reads); });
+    blob([&](auto &out) { vectors::writeObjects(out, i.objects); });
+    io.count(parameters.size(), 32768, [&](size_t) {
+        for (auto &p : parameters) {
+            io.text(p.key, 1024);
+            io.text(p.label, 8192);
+            io.value(p.low);
+            io.value(p.high);
+            io.value(p.baseline);
+        }
+    });
+    if (!output)
+        throw std::runtime_error("Could not write baked Neon scene");
+}
+std::unique_ptr<Runtime> Runtime::loadBaked(std::istream &input, const std::filesystem::path &data,
+                                            pc::AssetReader reader, double *playbackRate) {
+    static thread_local unsigned depth = 0, remaining = 0;
+    static thread_local size_t remainingBytes = 0, remainingPixels = 0;
+    if (!depth) {
+        remaining = 5;
+        remainingBytes = 64 * 1024 * 1024;
+        remainingPixels = 4 * 1024 * 1024;
+    }
+    if (depth >= 4 || !remaining--)
+        throw std::runtime_error("Baked scene nesting budget exceeded");
+    struct Scope {
+        unsigned &depth;
+        explicit Scope(unsigned &d) : depth(d) {
+            ++depth;
+        }
+        ~Scope() {
+            --depth;
+        }
+    } scope(depth);
+    char magic[8];
+    input.read(magic, 8);
+    if (!input || std::string(magic, 8) != "NEONBK01")
+        throw std::runtime_error("Not a baked Neon scene");
+    auto result = std::unique_ptr<Runtime>(new Runtime(data, std::move(reader), PlaybackOnly{}));
+    auto &i = *result->impl_;
+    baked::IO io(input, &remainingBytes);
+    uint32_t version = 0;
+    io.value(version);
+    io.need(version == 1 || version == 2 || version == 3);
+    io.value(i.selected);
+    io.need(i.selected >= 5 && i.selected <= pc::lastJukeboxPreset && !pc::isStudy(i.selected));
+    double rate = 1;
+    io.value(rate);
+    io.need(rate >= 0 && rate <= 4);
+    if (playbackRate)
+        *playbackRate = rate;
+    auto &params = i.params;
+    for (float *v : {&params.yaw, &params.pitch, &params.exposure, &params.hueShift,
+                     &params.renderScale, &params.titleSize, &params.titlePeriod, &params.titleHue,
+                     &params.titleFilter, &params.titleOpacity})
+        io.value(*v);
+    for (float *v :
+         {&params.beam.width, &params.beam.intensity, &params.beam.halo, &params.beam.spread,
+          &params.beam.persistenceMs, &params.beam.colour, &params.beam.whiteHot})
+        io.value(*v);
+    io.array(params.studyControls);
+    io.value(params.studyPhaseOverride);
+    io.value(params.titleSprite);
+    io.value(params.vectorScene);
+    io.value(params.sourceOnly);
+    int framing = 0;
+    io.value(framing);
+    params.framing.mode = Framing(framing);
+    io.value(params.framing.referenceAspect);
+    screenLayout(4, 3, 0, params.framing);
+    const bool components = i.selected == 18 || i.selected == 21;
+    baked::playback(io, i.scene, components, version);
+    i.baseReachable = i.scene.reachable;
+    bool needsProfiles = false;
+    io.value(needsProfiles);
+    if (needsProfiles) {
+        io.array(i.profiles.positions);
+        io.array(i.profiles.normals);
+    }
+    i.author.profiles = i.profiles;
+    io.array(i.shapePalette);
+    io.array(i.spectrumPalette);
+    baked::controls(io, i.author.edits[pc::editIndex(i.selected)]);
+    bool hasGraph = false;
+    io.value(hasGraph);
+    if (hasGraph)
+        baked::graph(io, i.author.graphs[i.selected]);
+    auto blob = [&] {
+        std::string value;
+        io.text(value);
+        return value;
+    };
+    {
+        std::istringstream text(blob());
+        i.author.images = ImageAssets::read(text, {});
+    }
+    for (const auto &image : i.author.images.items) {
+        size_t pixels = size_t(image.width) * image.height;
+        io.need(pixels <= remainingPixels);
+        remainingPixels -= pixels;
+    }
+    {
+        std::istringstream text(blob());
+        i.components = ComponentScene::read(text);
+    }
+    {
+        std::istringstream text(blob());
+        i.author.responses = readResponseBanks(text);
+    }
+    {
+        std::istringstream text(blob());
+        i.readBanks = readReadBanks(text);
+    }
+    {
+        std::istringstream text(blob());
+        i.objects = vectors::readObjects(text);
+        ++i.objectRevision;
+    }
+    io.count(0, 32768, [&](size_t count) {
+        i.preparedParameters.resize(count);
+        for (auto &p : i.preparedParameters) {
+            io.text(p.key, 1024);
+            io.text(p.label, 8192);
+            io.value(p.low);
+            io.value(p.high);
+            io.value(p.baseline);
+            io.need(p.low <= p.high);
+        }
+    });
+    io.need(input.peek() == std::char_traits<char>::eof());
+    if (!components && i.selected >= 7)
+        i.author.extraScenes.at(pc::AuthoringModel::graphIndex(i.selected)) = i.scene;
+    i.author.bindPlayback(i.selected, &i.scene.preset);
+    i.editorAuthoring = true;
+    i.clearPending = true;
+    i.componentDocuments.emplace(i.selected, i.components);
+    for (const auto &c : i.components.items)
+        if (c.kind == ComponentKind::Layer) {
+            auto &cache = i.componentTargets[c.id];
+            std::istringstream child(c.layerScene);
+            cache.layer = loadBaked(child, i.data, i.reader);
+            cache.layerDocument = c.layerScene;
+            cache.layerHash = std::hash<std::string>{}(c.layerScene);
+        }
+    return result;
+}
+} // namespace neon::effects
+
+namespace neon::effects {
+std::vector<std::string> Runtime::bakedResources(const std::vector<int> &additionalShaders,
+                                                 const std::vector<int> &additionalTextures) {
+    auto &i = *impl_;
+    i.evaluateEdits();
+    std::set<std::string> files;
+    auto file = [&](const std::string &name) {
+        if (!pc::assetExists(i.data / name, i.reader))
+            throw std::runtime_error("Missing baked dependency: " + name);
+        files.insert(name);
+    };
+    auto shader = [&](int id) {
+        if (id >= 0 && id < 96)
+            file("gles/shaders/" + std::to_string(id) + ".frag");
+    };
+    auto texture = [&](int selector) {
+        if (selector == 200 || selector == 201 || selector == 202 || selector >= 1000)
+            return;
+        auto b = pc::originalTextureBinding(selector);
+        if (b.kind == pc::TextureSourceKind::Root)
+            file("reference/roots/" + std::to_string(b.index) + ".argb");
+        else if (b.kind == pc::TextureSourceKind::Alternate) {
+            auto name = b.index == 100 ? std::string("title-flight.png")
+                                       : (b.index < 10 ? "0" : "") + std::to_string(b.index) +
+                                             (b.index >= 31 && b.index <= 41 ? ".jpg" : ".png");
+            auto path = "reference/literals/" + name;
+            if (!pc::assetExists(i.data / path, i.reader))
+                path = "reference/literals/" + std::to_string(b.index) + ".jpg";
+            file(path);
+        }
+    };
+    for (int selector : additionalTextures)
+        texture(selector);
+    shader(26);
+    bool vectors = false;
+    if (i.selected != 18 && i.selected != 21) {
+        for (const auto &c : i.author.controls(i.selected))
+            if (c.key == "vector.enabled" && c.current > .5f)
+                vectors = true;
+        auto overrides = i.selected >= 7 ? i.author.materialOverrides(i.selected)
+                                         : std::vector<std::array<int, 3>>(i.settings.size());
+        for (size_t index = 0; index < i.scene.preset.nodes.size(); ++index) {
+            const auto &node = i.scene.preset.nodes[index];
+            if (!i.scene.reachable[node.stack])
+                continue;
+            const auto &settings = i.settings.at(index);
+            int slot = node.type == 9 || node.type == 6 ? 2
+                       : node.type == 11                ? 7
+                       : node.type == 15                ? 15
+                       : node.type == 19                ? 6
+                       : node.type == 1                 ? 9
+                                                        : -1;
+            if (slot < 0)
+                continue;
+            std::set<int> shaders(additionalShaders.begin(), additionalShaders.end());
+            shaders.insert(settings.integers[slot]);
+            auto held = [&](int field) {
+                auto key = "node." + std::to_string(index) + ".i." + std::to_string(field);
+                for (const auto &c : i.author.controls(i.selected))
+                    if (c.key == key && c.enabled)
+                        return true;
+                return false;
+            };
+            for (const auto &route : i.scene.preset.savedRoutes)
+                if (route.node == index && !route.floating && route.slot == slot && !held(slot))
+                    for (int value = int(route.minimum); value <= int(route.maximum) && value < 96;
+                         ++value)
+                        if (value >= 0)
+                            shaders.insert(value);
+            unsigned mask = 0;
+            for (int id : shaders)
+                if (id >= 0 && id < 96) {
+                    shader(id);
+                    mask |= i.scene.masks[id];
+                }
+            auto inputs = pc::resolvedSamplerInputs(i.scene.preset, index, &i.settings, &overrides);
+            if (i.selected == 16 && index == 19 && node.type == 1) {
+                texture(147);
+                inputs[0] = 147;
+            }
+            if (node.type == 11) {
+                for (int face = 0; face < 6; ++face)
+                    if (settings.integers[face] > 0)
+                        texture(settings.integers[face]);
+            }
+            for (int k = 0; k < 3; ++k)
+                if (mask & (1u << k)) {
+                    texture(inputs[k]);
+                    vectors |= inputs[k] == 200;
+                }
+            const std::array<int, 3> slots = node.type == 9    ? std::array<int, 3>{5, 3, 6}
+                                             : node.type == 6  ? std::array<int, 3>{-1, 3, -1}
+                                             : node.type == 15 ? std::array<int, 3>{3, 4, 12}
+                                             : node.type == 19 ? std::array<int, 3>{4, 5, 8}
+                                             : node.type == 11 ? std::array<int, 3>{0, 12, 13}
+                                                               : std::array<int, 3>{6, 7, -1};
+            for (int k = 0; k < 3; ++k)
+                if ((mask & (1u << k)) && slots[k] >= 0 && !held(slots[k]) &&
+                    overrides[index][k] <= 0)
+                    for (const auto &route : i.scene.preset.savedRoutes)
+                        if (route.node == index && !route.floating && route.slot == slots[k])
+                            for (int value = int(route.minimum);
+                                 value <= int(route.maximum) && value < 1000; ++value)
+                                if (value > 0)
+                                    texture(value);
+        }
+    } else {
+        for (const auto &c : playbackComponents(i.components).items) {
+            shader(c.shader);
+            if (c.kind == ComponentKind::Vector)
+                vectors = true;
+            if (c.kind == ComponentKind::Layer) {
+                auto child = documentRuntime(i.data, i.reader, c.layerScene);
+                for (auto &path : child->bakedResources(additionalShaders, additionalTextures))
+                    files.insert(path);
+                if (c.sourceB > 0)
+                    texture(c.sourceB);
+                if (c.sourceC > 0)
+                    texture(c.sourceC);
+            } else
+                for (int selector :
+                     {c.source, c.sourceB ? c.sourceB : c.source, c.sourceC ? c.sourceC : c.source})
+                    texture(selector);
+        }
+    }
+    if (vectors) {
+        file("vectors/vector-beam.vert.glsl");
+        file("vectors/vector-beam.frag.glsl");
+    }
+    return {files.begin(), files.end()};
+}
+} // namespace neon::effects
+
+namespace neon::effects {
+void Runtime::setShaderCacheDirectory(const std::filesystem::path &path) {
+    auto &i = *impl_;
+    if (path.empty())
+        i.programCache.reset();
+    else if (!i.programCache || i.programCache->directory != path) {
+        i.programCache = std::make_shared<ProgramCache>();
+        i.programCache->directory = path;
+    }
+    for (auto &[id, source] : i.componentTargets)
+        if (source.layer)
+            source.layer->impl_->programCache = i.programCache;
+}
+} // namespace neon::effects
+
+namespace neon::effects {
+bool Runtime::prepareShaderChoices(const std::string &target, const std::vector<float> &choices) {
+    State saved;
+    auto &i = *impl_;
+    if (target.rfind("layer.", 0) == 0) {
+        const auto slash = target.find('/');
+        if (slash == std::string::npos)
+            return false;
+        int id = std::stoi(target.substr(6, slash - 6));
+        auto source = i.componentTargets.find(id);
+        return source != i.componentTargets.end() && source->second.layer &&
+               source->second.layer->prepareShaderChoices(target.substr(slash + 1), choices);
+    }
+    if (target.rfind("node.", 0) != 0)
+        return false;
+    const auto field = target.find(".i.", 5);
+    if (field == std::string::npos)
+        return false;
+    size_t index = std::stoul(target.substr(5, field - 5));
+    int slot = std::stoi(target.substr(field + 3));
+    if (index >= i.scene.preset.nodes.size())
+        return false;
+    const auto &node = i.scene.preset.nodes[index];
+    int shaderSlot = node.type == 9 || node.type == 6 ? 2
+                     : node.type == 11                ? 7
+                     : node.type == 15                ? 15
+                     : node.type == 19                ? 6
+                     : node.type == 1                 ? 9
+                                                      : -1;
+    if (slot != shaderSlot)
+        return false;
+    for (float choice : choices) {
+        if (!std::isfinite(choice) || choice < 0 || choice > 95 || choice != std::floor(choice))
+            throw std::runtime_error("Invalid prepared shader selector");
+        i.shader(int(choice));
+    }
+    return true;
 }
 } // namespace neon::effects

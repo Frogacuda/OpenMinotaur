@@ -15,8 +15,9 @@ struct PresetNode {
     int stack, type;
     unsigned inputMode;
     ShapeSettings saved, effective;
-    Channels channels;
-    Values values;
+    Channels channels, savedChannels;
+    Values values, priorValues;
+    std::array<double, 32> phaseOffsets{};
 };
 struct PresetStack {
     std::vector<size_t> nodes;
@@ -27,14 +28,16 @@ struct PresetStack {
 // Renderers consume effective nodes in their original stack/node order.
 class PresetPlayback {
   public:
+    bool integrateSpeed = true; // Disabled when the authoring model owns phase integration.
     static PresetPlayback load(const std::filesystem::path &, const std::filesystem::path &routes,
                                const AssetReader &reader = {});
     void tick();
+    void sample();
     void reset();
     bool retainedInJukebox(const ParameterRoute &) const;
     std::vector<PresetNode> nodes;
     std::array<PresetStack, 16> stacks;
-    std::vector<ParameterRoute> routes;
+    std::vector<ParameterRoute> routes, savedRoutes;
     std::vector<size_t> unresolvedRoutes;
     unsigned ticks = 0;
     int outputStack = 0; // Saved header +0x90; final presentation uses selector 31+this.

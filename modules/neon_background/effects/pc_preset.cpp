@@ -54,6 +54,7 @@ PresetPlayback PresetPlayback::load(const std::filesystem::path &path,
         }
         node.effective = node.saved;
         node.channels = loadChannels(record, extent);
+        node.savedChannels = node.channels;
         if (node.type == 0) {
             if (!p.stacks[stack].nodes.empty())
                 throw std::runtime_error("Unexpected CONTROL placement");
@@ -79,6 +80,7 @@ PresetPlayback PresetPlayback::load(const std::filesystem::path &path,
     }
     if (!routeFile.eof())
         throw std::runtime_error("Malformed parameter route");
+    p.savedRoutes = p.routes;
     return p;
 }
 void PresetPlayback::reset() {
@@ -89,6 +91,8 @@ void PresetPlayback::reset() {
     for (auto &n : nodes) {
         n.effective = n.saved;
         n.values = {};
+        n.priorValues = {};
+        n.phaseOffsets = {};
     }
 }
 bool PresetPlayback::retainedInJukebox(const ParameterRoute &r) const {
@@ -104,9 +108,28 @@ void PresetPlayback::tick() {
     for (auto &s : stacks)
         if (!s.nodes.empty())
             s.clock.tick(s.tempo);
+    for (auto &n : nodes) {
+        if (integrateSpeed)
+            for (size_t i = 0; i < n.channels.size(); ++i) {
+                auto &channel = n.channels[i];
+                if (channel.clock >= 4)
+                    continue;
+                const auto &clock = stacks[n.stack].clock.clocks()[channel.clock];
+                n.phaseOffsets[i] += clock.delta * double(channel.speed - 1);
+                n.phaseOffsets[i] -= std::floor(n.phaseOffsets[i]);
+                channel.phaseShift =
+                    float(n.phaseOffsets[i] -
+                          (clock.position + clock.delta * channel.rate) * (channel.speed - 1));
+            }
+        n.priorValues = n.values;
+    }
+    sample();
+    ++ticks;
+}
+void PresetPlayback::sample() {
     for (auto &n : nodes)
         n.values =
-            evaluate(n.channels, stacks[n.stack].clock.clocks(), n.values, n.inputMode, true);
+            evaluate(n.channels, stacks[n.stack].clock.clocks(), n.priorValues, n.inputMode, true);
     unresolvedRoutes.clear();
     for (size_t i = 0; i < routes.size(); i++) {
         auto &r = routes[i];
@@ -124,6 +147,5 @@ void PresetPlayback::tick() {
             n.effective.integers[r.slot] =
                 mapInteger(*value, int32_t(r.minimum), int32_t(r.maximum));
     }
-    ++ticks;
 }
 } // namespace neon::pc

@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/1.frag","gles/shaders/13.frag","gles/shaders/14.frag","gles/shaders/17.frag","gles/shaders/26.frag","gles/shaders/31.frag","gles/shaders/4.frag","gles/shaders/59.frag","gles/shaders/67.frag","gles/shaders/80.frag","reference/literals/279.png","reference/literals/287.png","reference/roots/10.argb","reference/roots/16.argb","reference/roots/6.argb","reference/roots/7.argb","vectors/vector-beam.frag.glsl","vectors/vector-beam.vert.glsl"],
+"exports":[{"name":"grid.pitch","target":"component.4.5","unit":"radians","minimum":-1.39999998,"maximum":1.39999998,"baseline":0},{"name":"grid.yaw","target":"component.4.4","unit":"radians","minimum":-1.39999998,"maximum":1.39999998,"baseline":0}]
+}

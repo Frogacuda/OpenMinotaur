@@ -1,0 +1,11 @@
+NEONRIG 2
+# Level-complete cue: rise, plateau, fade; the clock ramp resets after 2.25 s.
+envelope "levels.completed" "node.7.i.1" 0.5 1.5 0.25 0 200
+easesweep "levels.completed" "clock.10.6.speed" 2.25 1 8
+# First matching condition wins; invincibility takes precedence over multi-shot.
+select "node.4.i.2" 59 2 "player.invincible" 1 46 "player.shots" 3 61
+advance "level" "colour.1.hue" 0.5 0 25 -180 180 smooth
+value "colour.1.brightness" "audio.level" 0 1 0.7 1.9 clamp 0.7 1.9
+# Bomb brightness takes the maximum over the audio-driven baseline.
+pulsemax "bombs.used" "colour.1.brightness" 0.1 0.4 0.7 3
+turn "extraLives.gained" "colour.1.hue" 1 0 360 -180 180 linear

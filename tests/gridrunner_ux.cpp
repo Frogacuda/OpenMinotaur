@@ -1,4 +1,7 @@
 // Exercise the production shell's input, state transitions and renderer.
+#include "../cores/gridrunner/gridrunner_core.cpp"
+#include "display.h"
+#include <SDL3/SDL.h>
 #include <array>
 #include <cstdarg>
 #include <filesystem>
@@ -7,9 +10,6 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
-#include "../cores/gridrunner/gridrunner_core.cpp"
-#include "display.h"
-#include <SDL3/SDL.h>
 
 namespace mino {
 namespace {
@@ -36,18 +36,14 @@ struct GridrunnerUxChecks {
             bytes.assign(std::istreambuf_iterator<char>(file), {});
             return true;
         }
-        std::string saveDir() const override {
-            return saves.generic_string() + "/";
-        }
+        std::string saveDir() const override { return saves.generic_string() + "/"; }
         void log(const char *, ...) override {}
         std::string adaptShader(const std::string &text, int stage) const override {
             return display->adaptShader(text, stage);
         }
         void lockAudio() override {}
         void unlockAudio() override {}
-        void requestQuit() override {
-            quit = true;
-        }
+        void requestQuit() override { quit = true; }
         bool presentStartupFrame() override {
             display->present();
             return true;
@@ -218,6 +214,33 @@ struct GridrunnerUxChecks {
             core.classicGame_.start();
         else
             core.startNative(false);
+        if (classic) {
+            core.classicGame_.tick(0, 0, 0);
+            const auto state = core.presentationState();
+            expect(state.gameplay && state.values.size() == 2, "Classic read-only position fields");
+            expect(std::get<double>(state.values.at("player.x")) == 11 &&
+                       std::get<double>(state.values.at("player.y")) == 18,
+                   "Classic display ship position");
+        }
+        if (!classic) {
+            auto before = core.presentationState();
+            expect(before.gameplay, "Gridrunner presentation active");
+            auto &ac = core.native_->ac;
+            ac.powers[6] = 40;
+            ac.powers[1] = 40;
+            ac.powers[4] = 40;
+            auto snapshot = core.presentationState();
+            expect(std::get<bool>(snapshot.values.at("power.slow")) &&
+                       std::get<bool>(snapshot.values.at("power.multishot")) &&
+                       std::get<bool>(snapshot.values.at("power.allAround")),
+                   "Existing power timers are readable");
+            auto *ship = core.native_->currentShip();
+            expect(ship != nullptr, "Gridrunner presentation ship");
+            expect(std::get<double>(snapshot.values.at("player.x")) == ship->position.x,
+                   "Read-only ship coordinate");
+            expect(std::get<int64_t>(snapshot.values.at("lives")) == ac.lives, "Read-only lives");
+            ac.powers[6] = ac.powers[1] = ac.powers[4] = 0;
+        }
         core.scores_.lastName = "ABCDEFGHIJ";
         if (!classic)
             core.native_->score(500);

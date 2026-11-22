@@ -14,6 +14,7 @@
 #include "neon/sample_audio.h"
 #include "core_api.h"
 #include "minotron_game_host.h"
+#include "minotron_presentation.h"
 #include "minotron_menu_input.h"
 #include "mode_preference.h"
 #include "engine/game.h"
@@ -70,6 +71,9 @@ class MinotronCore final : public Core {
         renderState_.shaderCycles = history;
     }
     const CoreInfo &info() const override;
+    PresentationState presentationState() const override {
+        return presentation_.sample(gameHost_.game());
+    }
 
     bool init(Host &host, const SurfaceInfo &s) override {
         if (!startup_.begin(host, s))
@@ -484,7 +488,9 @@ class MinotronCore final : public Core {
         // YakEffect
         dev_.SetAlphaBlend(1, 1);
         const int modeBefore = g->gameMode;
+        presentation_.beforeTick(*g);
         g->run();
+        presentation_.afterTick(*g);
         if (g->gameMode != modeBefore)
             modePreference_.selected();
         if (g->state == 8 && !g->demo && modePreference_.played(g->gameMode))
@@ -532,6 +538,7 @@ class MinotronCore final : public Core {
     NeonDevice dev_;
     NeonDrawContext ctx_;
     minotron::module::GameHost gameHost_;
+    minotron::module::PresentationObserver presentation_;
     NeonEffect *effect_ = nullptr;
     WaveState waves_;
     SampleMixer mixer_;

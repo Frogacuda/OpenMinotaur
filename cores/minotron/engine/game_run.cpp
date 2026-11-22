@@ -15,9 +15,9 @@
 #include "game.h"
 #include "game_entities.h"
 #include "game_tables.h"
+#include "grid_menus.h"
 #include "neon_audio.h"
 #include "neon_modules.h"
-#include "grid_menus.h"
 
 namespace NEON_GAME {
 namespace Neon_Internals {
@@ -45,6 +45,7 @@ void fadeLook(theGame *g, float t, double scaleBase) {
 void runList(entity *&list) {
     neon::entities::runAndCull(list, [](entity *e) { delete e; });
 }
+
 } // namespace
 
 // Touch hit-testing and controller focus supply the same menu activation ID.

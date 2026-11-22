@@ -25,7 +25,7 @@ std::optional<float> wave(unsigned id, float phase, std::optional<unsigned> inpu
     // Table initialization: 00411810, float increment at 004c4dac.
     // Lookup index conversion truncates as in the original ftol helper.
     constexpr double step = double(0.00038349518f);
-    auto sine = [step](int index) { return float(std::sin(double(index & 16383) * step)); };
+    auto sine = [=](int index) { return float(std::sin(double(index & 16383) * step)); };
     const int index = int(phase * 16384.f);
     switch (id) {
     case 0:
@@ -83,6 +83,7 @@ void Sequencer::tick(float tempo) {
         clocks_[i].delta = upstream - old;
         if (clocks_[i].delta < 0)
             clocks_[i].delta += 1.f;
+        clocks_[i].position += clocks_[i].delta;
         upstream = (float(steps_[i]) + upstream) / float(lengths[i]);
         pulse = nextPulse;
     }
@@ -113,7 +114,11 @@ Values evaluate(const Channels &channels, const std::array<Clock, 4> &clocks,
         }
         const auto &clock = clocks[c.clock];
         float integral;
-        const float phase = std::modf(clock.phase + clock.delta * c.rate, &integral);
+        float phase = std::modf(clock.phase + clock.delta * c.rate, &integral);
+        if (c.speed != 1 || c.phaseShift != 0) {
+            double position = (clock.position + clock.delta * c.rate) * c.speed + c.phaseShift;
+            phase = float(position - std::floor(position));
+        }
         auto value = wave(c.waveform, phase, inputMode, jukebox);
         if (!value) {
             result[i].reset();

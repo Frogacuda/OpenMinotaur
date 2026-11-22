@@ -1,0 +1,11 @@
+NEONRIG 1
+# One turn of UV rotation per turn of the first player's visible heading.
+value "node.17.f.4" "player.orientation" 0 6.283185307179586 0 6.283185307179586 wrap 0 6.283185307179586
+# The two secondary-UV dimensions share controller channel 3.
+value "clock.14.3.speed" "player.fireBoost" 0 1 0.25 1 clamp 0.25 1
+# Hue uses turns. Level steps persist; rescue turns return to the moving baseline.
+advance "level" "runtime.hue" 1 0.166666672 0.138888888888889 0 1 linear
+turn "minotaurs.rescued" "runtime.hue" 1 0.166666672 1 0 1 linear
+turn "center.contacts" "node.14.f.4" 1 0 6.283185307179586 -6.283185307179586 6.283185307179586 smooth
+turn "player1.hits" "node.14.f.4" 1 0 6.283185307179586 -6.283185307179586 6.283185307179586 smooth
+turn "player2.hits" "node.4.f.4" 1 0 -6.283185307179586 -6.283185307179586 6.283185307179586 smooth

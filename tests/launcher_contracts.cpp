@@ -3,21 +3,21 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
 #include "../third_party/stb/stb_image_write.h"
-#include "launcher.h"
+#include "achievement_catalog.h"
+#include "bundled_assets.h"
 #include "display.h"
-#include "game_catalog.h"
-#include "gridrunner_choices.h"
 #include "dock_style_previews.h"
+#include "game_catalog.h"
 #include "gear_icon_preview.h"
+#include "gridrunner_choices.h"
+#include "launcher.h"
 #include "launcher_transition.h"
 #include "startup_screen.h"
-#include "bundled_assets.h"
-#include "achievement_catalog.h"
 #include <SDL3/SDL.h>
-#include <glad/gl.h>
 #include <cstdarg>
 #include <cstdio>
 #include <filesystem>
+#include <glad/gl.h>
 #include <iostream>
 #include <stdexcept>
 
@@ -611,11 +611,9 @@ struct LauncherChecks {
                 return *std::find_if(rows.begin(), rows.end(),
                                      [](const auto &row) { return row.key == "screen_mode"; });
             };
-            settings.set("global", "screen_mode", "crt");
+            settings.set("global", "screen_mode", "crt2");
             auto row = filterRow();
-            REQUIRE(row.value == "CRT 1" &&
-                    row.tip.find("May impact performance on low-end devices.") !=
-                        std::string::npos);
+            REQUIRE(row.value == "CRT 1" && row.tip == "Lightweight retro tube TV with S-Video.");
             auto rows = l.optionRows();
             int index = 0;
             while (rows[size_t(index)].key != "screen_mode")
@@ -623,8 +621,10 @@ struct LauncherChecks {
             l.focus() = iox::options::firstRow + index;
             capture("crt1-options");
             l.key(0, 0, true, false);
-            REQUIRE(settings.get("global", "screen_mode", "") == "crt2" &&
-                    filterRow().value == "CRT 2");
+            REQUIRE(settings.get("global", "screen_mode", "") == "crt" &&
+                    filterRow().value == "CRT 2" &&
+                    filterRow().tip.find("May impact performance on low-end devices.") !=
+                        std::string::npos);
             l.takeRequest();
             capture("crt2-options");
             l.key(0, 0, true, false);
@@ -632,6 +632,51 @@ struct LauncherChecks {
             l.takeRequest();
             settings.set("global", "screen_mode", saved);
             l.focus() = focus;
+        }
+        {
+            Settings defaults;
+            l.configureOptions(defaults, true, true, 1, {});
+            auto rows = l.optionRows();
+            auto backdrop = std::find_if(rows.begin(), rows.end(),
+                                         [](const auto &r) { return r.key == "backdrop"; });
+            REQUIRE(backdrop != rows.end() && backdrop->value == "LiveSynth");
+            l.focus() = iox::options::firstRow + int(backdrop - rows.begin());
+            capture("livesynth-default-options");
+            l.key(0, 0, true, false);
+            REQUIRE(defaults.get("global", "backdrop", "") == "colour");
+            l.takeRequest();
+            l.configureOptions(settings, true, true, 1, {"1280 x 720", "1920 x 1080"});
+        }
+        {
+            auto savedBackdrop = settings.get("global", "backdrop", "colour");
+            settings.set("global", "backdrop", "neon");
+            auto rows = l.optionRows();
+            auto backdrop = std::find_if(rows.begin(), rows.end(),
+                                         [](const auto &r) { return r.key == "backdrop"; });
+            REQUIRE(backdrop != rows.end() && backdrop->value == "LiveSynth" &&
+                    backdrop->tip ==
+                        "Reactive light synthesizer bezels inspired by the Neon Engine.");
+            auto quality = std::find_if(rows.begin(), rows.end(),
+                                        [](const auto &r) { return r.key == "neon_quality"; });
+            REQUIRE(quality != rows.end() && quality->label == "LiveSynth Quality" &&
+                    quality->enabled && quality != rows.begin() &&
+                    (quality - 1)->key == "backdrop");
+            l.focus() = iox::options::firstRow + int(quality - rows.begin());
+            const bool before = settings.neonHighQuality("global");
+            l.key(0, 0, true, false);
+            l.takeRequest();
+            REQUIRE(settings.neonHighQuality("global") != before);
+            capture("neon-quality");
+            settings.set("global", "backdrop", "plasma");
+            rows = l.optionRows();
+            quality = std::find_if(rows.begin(), rows.end(),
+                                   [](const auto &r) { return r.key == "neon_quality"; });
+            REQUIRE(!quality->enabled);
+            const bool disabled = settings.neonHighQuality("global");
+            l.key(0, 0, true, false);
+            REQUIRE(settings.neonHighQuality("global") == disabled);
+            settings.set("global", "backdrop", savedBackdrop);
+            l.focus() = iox::options::firstRow;
         }
         l.key(0, -1, false, false);
         l.key(1, 0, false, false);
@@ -712,6 +757,13 @@ struct LauncherChecks {
         l.back();
         REQUIRE(l.takeRequest().action == Launcher::Action::CancelTilt);
         auto controls = l.optionRows();
+        for (const auto &row : controls) {
+            if (row.key == "remap")
+                REQUIRE(row.label == "Remap Controls");
+            if (row.key == "rotate_controls")
+                REQUIRE(row.label == "Rotate Controls" &&
+                        row.tip.find("game is rotated") != std::string::npos);
+        }
         int remap = -1;
         for (size_t i = 0; i < controls.size(); ++i)
             if (controls[i].key == "remap")
@@ -940,20 +992,21 @@ int main(int argc, char **argv) {
         SDL_DestroyWindow(window);
         SDL_Quit();
         if (appIcon)
-            std::cout
-                << "About artwork exported for Android with launcher glass and rounded silhouette\n";
+            std::cout << "About artwork exported for Android with launcher glass and rounded "
+                         "silhouette\n";
         else if (iconPreview)
-            std::cout
-                << "Gear icon preview captured with 20% stronger glass; production icons unchanged\n";
+            std::cout << "Gear icon preview captured with 20% stronger glass; production icons "
+                         "unchanged\n";
         else if (dockPreviews)
-            std::cout
-                << "Two dock alternatives captured in both orientations; production default unchanged\n";
+            std::cout << "Two dock alternatives captured in both orientations; production default "
+                         "unchanged\n";
         else if (notesChecks)
-            std::cout
-                << "Notes: 79 entries, unlock display, touch/analog scroll, game cycling/index and both orientations passed\n";
+            std::cout << "Notes: 79 entries, unlock display, touch/analog scroll, game "
+                         "cycling/index and both orientations passed\n";
         else
-            std::cout
-                << "iOX: one-second entrance in both orientations, wallpaper/black-strip first frame, input gating, scale/easing/timing and existing screen/navigation contracts passed\n";
+            std::cout << "iOX: one-second entrance in both orientations, wallpaper/black-strip "
+                         "first frame, input gating, scale/easing/timing and existing "
+                         "screen/navigation contracts passed\n";
     } catch (const std::exception &error) {
         std::cerr << error.what() << "\n";
         return 1;

@@ -1,9 +1,12 @@
 #pragma once
+#include "image_assets.h"
+#include "pc_texture_catalog.h"
 #include <array>
 #include <iosfwd>
 #include <string>
 #include <vector>
 namespace neon::effects {
+inline constexpr const auto &componentLiteralSlots = neon::pc::literalTextureSlots;
 enum class ComponentKind { Texture, Plane, Tunnel, Vector, Flower, Shape, Layer, Primitive };
 enum ComponentField {
     X,
@@ -122,6 +125,19 @@ enum ComponentField {
     GridFade,
     GridFadePower,
     PrimitiveNearClip,
+    TunnelSides,
+    TunnelRoundness,
+    Input0Filter,
+    Input0WrapU,
+    Input0WrapV,
+    Input1Filter,
+    Input1WrapU,
+    Input1WrapV,
+    Input2Filter,
+    Input2WrapU,
+    Input2WrapV,
+    LayerInputA,
+    LayerInputB,
     FieldCount
 };
 struct ComponentFieldSpec {

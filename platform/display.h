@@ -3,12 +3,13 @@
 // inverse mapping used to turn window touches into surface coordinates.
 #pragma once
 #include "core_api.h"
-#include "settings.h"
 #include "display_layout.h"
+#include "settings.h"
 #ifndef MINO_NO_PRESENTATION_FILTERS
 #include "royale_pipeline.h"
 #endif
 
+#include <functional>
 #include <string>
 
 namespace mino {
@@ -30,6 +31,9 @@ class Display {
     const std::string &error() const {
         return error_;
     }
+    unsigned gameplayTexture() const {
+        return colorTex_;
+    }
     const Rect &viewport() const {
         return view_;
     }
@@ -38,6 +42,16 @@ class Display {
     void beginFrame();
     // Draw the surface into the window's default framebuffer.
     void present(unsigned framebuffer = 0);
+    bool liveBackgroundRequested() const {
+        return backdropMode_ == Backdrop::Neon && (view_.w < winW_ || view_.h < winH_);
+    }
+    bool neonSelected() const {
+        return backdropMode_ == Backdrop::Neon;
+    }
+    using BackgroundPass = std::function<bool(unsigned, int, int, int, int, int, int, int)>;
+    void backgroundPass(BackgroundPass pass) {
+        backgroundPass_ = std::move(pass);
+    }
 
     // Window pixel position -> surface pixel position (unclamped; may lie outside).
     void windowToSurface(float wx, float wy, float *sx, float *sy) const;
@@ -57,12 +71,15 @@ class Display {
     void destroySurface();
     unsigned compile(const char *vs, const char *fs);
 
+    BackgroundPass backgroundPass_;
     bool es_ = false;
     bool directCRT_ = false;
     SurfaceInfo surface_;
     unsigned colorTex_ = 0, depthRb_ = 0;
     unsigned presentProg_ = 0, quadVbo_ = 0, vao_ = 0;
     int uTex_ = -1, uTexSize_ = -1, uOutSize_ = -1, uSharp_ = -1, uClockwise_ = -1;
+    int uTime_ = -1, uPass_ = -1, uMode_ = -1, uScanlines_ = -1;
+    int uPortraitScreen_ = -1, uRasterSize_ = -1;
     DisplayLayout layout_;
 #ifndef MINO_NO_PRESENTATION_FILTERS
     TubeLayout tube_;

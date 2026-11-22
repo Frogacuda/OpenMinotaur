@@ -1,0 +1,21 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "screen.elevation" number "game-screens"
+input "player.x" number "game-widths"
+input "billyGoats.kissed" integer "count"
+input "kids" integer "count"
+input "zone" integer "count"
+input "mushroom.active" boolean "boolean"
+
+parameter "background.heightOffset" "node.25.f.3" "texture-widths"
+parameter "camera.yaw" "camera.yaw" "radians"
+parameter "scene.hue" "runtime.hue" "turns"
+parameter "background.colourShader" "node.22.i.2" "shader-id"
+
+value "background.heightOffset" "screen.elevation" 0 1 -0.506909966 -0.006909966 wrap -1 1
+value "camera.yaw" "player.x" -0.5 0.5 0.8 -0.8 clamp -0.8 0.8
+pulse "billyGoats.kissed" "scene.hue" 1 1 0 0.2777777777777778
+sweep "kids" "scene.hue" 1 0 1
+advance "zone" "scene.hue" 0.5 0 0.1388888888888889 0 1 smooth
+select "background.colourShader" 12 1 "mushroom.active" 1 46
+cycle "mushroom.active" "scene.hue" 2 1 0

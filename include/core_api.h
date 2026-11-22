@@ -5,15 +5,18 @@
 // shared-engine service instances, rendering into an offscreen surface the platform
 // provides. Cores never talk to SDL directly.
 #pragma once
+#include <array>
 #include "neon/device_motion.h"
-#include "neon/render_host.h"
 #include "neon/input.h"
+#include "neon/render_host.h"
 
 #include <cstdint>
-#include <string>
-#include <vector>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace mino {
 
@@ -119,6 +122,8 @@ class Host : public neon::RenderHost {
     }
     // During synchronous initialization, present a startup image already drawn
     // by the core before loading the remaining assets. No timer/thread implied.
+    // Shared loading presentation lifecycle; optional, never a simulation event.
+    virtual void startupPresentationFinished() {}
     virtual bool presentStartupFrame() {
         return false;
     }
@@ -180,9 +185,28 @@ struct NativeFormat {
     }
 };
 
+// Read-only presentation sample. Unavailable cores return gameplay=false.
+// Coordinates use the game's native screen axes, before host rotation.
+struct PresentationState {
+    bool gameplay = false, paused = false;
+    uint64_t session = 0;
+    using Value = std::variant<int64_t, uint64_t, double, bool, std::string>;
+    std::map<std::string, Value> values; // Owned samples; names and units belong to each adapter.
+    struct CollectionItem {
+        uint64_t id = 0;
+        int64_t value = 0;
+        int colourSource = -1;
+    };
+    std::map<std::string, std::vector<CollectionItem>> collections;
+    std::map<int, std::array<float, 3>> colours;
+};
+
 class Core {
   public:
     virtual ~Core() = default;
+    virtual PresentationState presentationState() const {
+        return {};
+    }
     virtual const CoreInfo &info() const = 0;
     virtual NativeFormat nativeFormat() const {
         const auto &i = info();

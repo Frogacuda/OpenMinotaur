@@ -1,0 +1,22 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "power.slow" boolean "boolean"
+input "player.x" number "game-widths"
+input "player.y" number "game-heights"
+input "power.multishot" boolean "boolean"
+input "power.allAround" boolean "boolean"
+input "lives" integer "count"
+
+parameter "background.scrollSpeed" "layer.3/clock.8.6.speed" "multiplier"
+parameter "grid.yaw" "component.4.4" "radians"
+parameter "grid.pitch" "component.4.5" "radians"
+parameter "background.colourShader" "layer.3/node.18.i.2" "shader-id"
+parameter "background.brightness" "layer.3/colour.18.brightness" "gain"
+parameter "scene.hue" "runtime.hue" "turns"
+
+select "background.scrollSpeed" 1 1 "power.slow" 1 0.5
+value "grid.yaw" "player.x" -0.4 0.43 -0.2 0.2 clamp -0.2 0.2
+value "grid.pitch" "player.y" -0.228 0.428 0.3 0 clamp 0 0.3
+select "background.colourShader" 14 1 "power.multishot" 1 13
+stateenvelope "power.allAround" "background.brightness" 0.5 0.5 1 2
+turn "lives" "scene.hue" 1 0 1 0 1 linear

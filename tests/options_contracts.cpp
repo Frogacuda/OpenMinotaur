@@ -3,12 +3,21 @@
 #endif
 #include "control_mapping.h"
 #include "display_layout.h"
+#include "neon_performance.h"
+#include "submission_pacing.h"
 #include <cassert>
 #include <iostream>
 using namespace mino;
 int main(int argc, char **argv) {
     Settings settings;
     assert(settings.display("gridrunner").aspect == AspectMode::IPad);
+    assert(settings.display("gridrunner").backdrop == Backdrop::Neon);
+    settings.set("global", "backdrop", "colour");
+    assert(settings.display("gridrunner").backdrop == Backdrop::Colour);
+    settings.set("global", "backdrop", "neon");
+    settings.set("gridrunner", "backdrop", "plasma");
+    assert(settings.display("gridrunner").backdrop == Backdrop::Plasma);
+    assert(settings.display("goatup").backdrop == Backdrop::Neon);
     for (const auto *game : {"minotron", "minorescue", "gridrunner", "gridrunner-classic"}) {
         settings.set("global", "screen_mode", "crt");
         settings.set("global", "aspect", "fill");
@@ -25,6 +34,11 @@ int main(int argc, char **argv) {
            settings.display("goatup").screenMode == ScreenMode::CRT2);
     settings.set("gridrunner", "screen_mode", "smooth");
     assert(settings.display("gridrunner").screenMode == ScreenMode::Smooth);
+    settings.set("global", "backdrop", "plasma");
+    assert(settings.display("minotron").backdrop == Backdrop::Plasma);
+    settings.set("minotron", "backdrop", "neon");
+    assert(settings.display("minotron").backdrop == Backdrop::Neon &&
+           settings.display("minos").backdrop == Backdrop::Plasma);
     Settings phone;
     phone.useNativeOrientationDefault(true);
     assert(phone.display("global").orientation == Orientation::BestFit);
@@ -33,6 +47,50 @@ int main(int argc, char **argv) {
     assert(phone.display("minos").orientation == Orientation::Landscape);
     phone.set("minos", "orientation", "bestfit");
     assert(phone.display("minos").orientation == Orientation::BestFit);
+    Settings quality;
+    quality.set("global", "neon_quality", "lq");
+    assert(!quality.neonHighQuality("minotron"));
+    quality.set("minotron", "neon_quality", "hq");
+    assert(quality.neonHighQuality("minotron"));
+    NeonCadence cadence;
+    for (int n = 0; n < 40; ++n)
+        cadence.observe(20, 33.3);
+    assert(cadence.divisor() == 1); // Never switch in the middle of the loading assessment.
+    cadence.finish();
+    assert(cadence.divisor() == 2);
+    for (int n = 0; n < 600; ++n)
+        cadence.observe(3, 16.7);
+    assert(cadence.divisor() == 2);
+    cadence.reset();
+    for (int n = 0; n < 40; ++n)
+        cadence.observe(3, 16.7);
+    cadence.finish();
+    for (int n = 0; n < 600; ++n)
+        cadence.observe(40, 66.7);
+    assert(cadence.divisor() == 1); // A completed 60 Hz choice is equally immutable.
+    cadence.reset();
+    cadence.observe(100, 100);
+    cadence.finish();
+    assert(cadence.divisor() == 1);
+    SubmissionPacer submission;
+    constexpr uint64_t period = 16666667;
+    assert(submission.remaining(100, period) == 0);
+    submission.started(100);
+    assert(submission.remaining(100 + period / 2, period) == period - period / 2);
+    assert(submission.remaining(100 + period * 8, period) == 0);
+    submission.started(100 + period * 8);
+    assert(submission.remaining(100 + period * 8 + 1, period) == period - 1);
+    submission.reset();
+    assert(submission.remaining(101, period) == 0);
+    NeonPacer pacer;
+    for (int n = 0; n < 600; ++n) {
+        assert(pacer.due(2) == bool(n % 2));
+    }
+    assert(pacer.due(1));
+    assert(!pacer.due(2));
+    assert(pacer.due(2));
+    pacer.reset();
+    assert(!pacer.due(2));
     PhysicalPad raw;
     raw.connected = true;
     ControlMapping defaults;
@@ -149,6 +207,7 @@ int main(int argc, char **argv) {
     input.released = PAD_RIGHT;
     auto rotated = layout.nativePad(input);
     assert(rotated.ly == -1 && rotated.released == PAD_UP);
-    std::cout
-        << "Options contracts: defaults/overrides, 20-source remap (16-source saves retained), release gating, triggers, cancel/disconnect, serialization and rotated release edges passed\n";
+    std::cout << "Options contracts: defaults/overrides, 20-source remap (16-source saves "
+                 "retained), release gating, triggers, cancel/disconnect, serialization and "
+                 "rotated release edges passed\n";
 }

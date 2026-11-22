@@ -150,8 +150,8 @@
     },
     {
       "file": "platform/presentation_archive/bytes.zip",
-      "bytes": 583253,
-      "sha256": "3926014a5d48f230928fbbf7a6c536da1eeb58f0728778123bbbf6bd2b66b367",
+      "bytes": 2902658,
+      "sha256": "79d9e9c6948b200ee529663f3820d3c86b9acbd29a0712b69aa8ca943007d56e",
       "consumer": "platform/presentation_archive.cpp",
       "symbol": "bytes"
     },

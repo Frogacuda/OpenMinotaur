@@ -1563,12 +1563,14 @@ void theGame::vectorSeek(entity *e, entity *target, int edge) {
         diff = -diff;
     float h = diff <= 0.0f ? e->seekHeading - e->seekTurnRate : e->seekHeading + e->seekTurnRate;
     e->seekHeading = h;
-    if (3.1415927f < h) {
-        h -= 6.2831855f;
+    // Wrap in double precision, then store the heading as float. Rounding the
+    // circle constant to float first shifts enemy steering at the seam.
+    if (3.141592654 < double(h)) {
+        h = float(double(h) - 6.2831853072);
         e->seekHeading = h;
     }
-    if (h < -3.1415927f)
-        e->seekHeading = h + 6.2831855f;
+    if (double(h) < -3.141592654)
+        e->seekHeading = float(double(h) + 6.2831853072);
     e->vel = vec2d(0, double(-e->seekSpeed));
     e->vel.rotateBy(double(e->seekHeading) - 1.570796327);
     moveClipped(e, edge);

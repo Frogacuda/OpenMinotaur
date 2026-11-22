@@ -1,0 +1,5 @@
+{
+"format":"NEONBK01",
+"resources":["gles/shaders/1.frag","gles/shaders/12.frag","gles/shaders/15.frag","gles/shaders/18.frag","gles/shaders/26.frag","gles/shaders/46.frag","gles/shaders/6.frag","reference/literals/31.jpg","reference/literals/32.jpg","reference/literals/34.jpg","reference/roots/6.argb"],
+"exports":[{"name":"background.colourShader","target":"node.22.i.2","unit":"shader-id","minimum":0,"maximum":255,"baseline":12},{"name":"background.heightOffset","target":"node.25.f.3","unit":"texture-widths","minimum":-8,"maximum":8,"baseline":-0.506909966},{"name":"camera.yaw","target":"camera.yaw","unit":"radians","minimum":-0.800000012,"maximum":0.800000012,"baseline":0},{"name":"scene.hue","target":"runtime.hue","unit":"turns","minimum":0,"maximum":1,"baseline":0}]
+}

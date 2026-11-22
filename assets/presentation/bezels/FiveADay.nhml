@@ -1,0 +1,16 @@
+NHML 1
+# Named scene exports isolate game-facing bindings from node addresses.
+input "player.rotation" number "radians"
+input "levels.completed" integer "count"
+input "minotaurs.rescued" integer "count"
+input "fruit.trail" integer "count"
+
+parameter "feedback.rotation" "node.8.f.9" "radians"
+parameter "composition.effect" "node.12.i.4" "byte"
+parameter "feedback.hue" "colour.8.hue" "degrees"
+parameter "feedback.brightness" "colour.8.brightness" "gain"
+
+value "feedback.rotation" "player.rotation" -3.141592653589793 3.141592653589793 -3.141592653589793 3.141592653589793 clamp -6.2831855 6.2831855
+oscillate "levels.completed" "composition.effect" 1.5 174 0 255 smooth
+turn "minotaurs.rescued" "feedback.hue" 1 120 360 -180 180 linear
+value "feedback.brightness" "fruit.trail" 0 20 1 2 clamp 1 2

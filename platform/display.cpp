@@ -1,7 +1,7 @@
 #include "display.h"
 
-#include <glad/gl.h>
 #include <SDL3/SDL.h>
+#include <glad/gl.h>
 
 #include <algorithm>
 #include <cmath>
@@ -215,6 +215,12 @@ bool Display::init(bool glES) {
     uOutSize_ = glGetUniformLocation(presentProg_, "uOutSize");
     uSharp_ = glGetUniformLocation(presentProg_, "uSharp");
     uClockwise_ = glGetUniformLocation(presentProg_, "uClockwise");
+    uTime_ = glGetUniformLocation(presentProg_, "uTime");
+    uPass_ = glGetUniformLocation(presentProg_, "uPass");
+    uMode_ = glGetUniformLocation(presentProg_, "uMode");
+    uScanlines_ = glGetUniformLocation(presentProg_, "uScanlines");
+    uPortraitScreen_ = glGetUniformLocation(presentProg_, "uPortraitScreen");
+    uRasterSize_ = glGetUniformLocation(presentProg_, "uRasterSize");
 
     // Core profile requires a bound VAO; one shared VAO is enough because the
     // engine re-specifies its attribute pointers every draw, as on ES 2.
@@ -246,6 +252,8 @@ void Display::shutdown() {
     if (vao_)
         glDeleteVertexArrays(1, &vao_);
     presentProg_ = quadVbo_ = vao_ = 0;
+    uTex_ = uTexSize_ = uOutSize_ = uSharp_ = uClockwise_ = -1;
+    uTime_ = uPass_ = uMode_ = uScanlines_ = uPortraitScreen_ = uRasterSize_ = -1;
 }
 void Display::abandonGraphics() {
     // Names from a lost context must never be deleted in its replacement.
@@ -253,6 +261,8 @@ void Display::abandonGraphics() {
     surface_.width = surface_.height = 0;
     colorTex_ = depthRb_ = presentProg_ = quadVbo_ = vao_ = bezelTex_ = 0;
     bezelKey_.clear();
+    uTex_ = uTexSize_ = uOutSize_ = uSharp_ = uClockwise_ = -1;
+    uTime_ = uPass_ = uMode_ = uScanlines_ = uPortraitScreen_ = uRasterSize_ = -1;
 #ifndef MINO_NO_PRESENTATION_FILTERS
     royale_.abandonGraphics();
 #endif
@@ -362,7 +372,10 @@ void Display::beginFrame() {
 }
 
 void Display::present(unsigned framebuffer) {
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    const bool hasBezelArea = view_.w < winW_ || view_.h < winH_;
+    const bool deferredClear = hasBezelArea && backdropMode_ == Backdrop::Neon && backgroundPass_;
+    if (!deferredClear)
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glBindVertexArray(vao_);
     // Core/startup draws use colour and extra texture attributes. Presentation
     // uses only position/UV; don't retain enabled arrays from a released VBO.
@@ -375,32 +388,76 @@ void Display::present(unsigned framebuffer) {
     glDisable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glClearColor(float((backdrop_ >> 16) & 0xff) / 255.0f, float((backdrop_ >> 8) & 0xff) / 255.0f,
-                 float(backdrop_ & 0xff) / 255.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    const auto clearColour = backdropMode_ == Backdrop::Neon ? 0u : backdrop_;
+    glClearColor(float((clearColour >> 16) & 0xff) / 255.0f,
+                 float((clearColour >> 8) & 0xff) / 255.0f, float(clearColour & 0xff) / 255.0f,
+                 1.0f);
+    // Neon prepares offscreen targets before touching the window buffer. Its
+    // final composition clears/covers the bezel strips; the game draw covers
+    // the remaining rectangle. Acquiring/clearing the window first can block
+    // submission of that independent work on mobile window-buffer fences.
+    if (!deferredClear)
+        glClear(GL_COLOR_BUFFER_BIT);
 
+    const bool live = hasBezelArea && backdropMode_ == Backdrop::Neon && backgroundPass_ &&
+                      backgroundPass_(framebuffer, winW_, winH_, view_.x, view_.y, view_.w, view_.h,
+                                      layout_.turns);
+    if (deferredClear && !live) {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, winW_, winH_);
+        glDisable(GL_SCISSOR_TEST);
+        glColorMask(1, 1, 1, 1);
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+    if (live || deferredClear) {
+        // The live pass owns its state until this handoff. Establish the known
+        // composition state instead of asking the driver to restore a snapshot.
+        glBindVertexArray(vao_);
+        for (unsigned attribute = 2; attribute < 5; ++attribute)
+            glDisableVertexAttribArray(attribute);
+        glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_RASTERIZER_DISCARD);
+        glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+        glDisable(GL_SAMPLE_COVERAGE);
+        glDisable(GL_BLEND);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DITHER);
+        glColorMask(1, 1, 1, 1);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LEQUAL);
+        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+        glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+        for (unsigned unit = 0; unit < 3; ++unit) {
+            if (glad_glBindSampler)
+                glBindSampler(unit, 0);
+            glActiveTexture(GL_TEXTURE0 + unit);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glActiveTexture(GL_TEXTURE0);
+    }
 #ifndef MINO_NO_PRESENTATION_FILTERS
-    if (backdropMode_ == Backdrop::Neon || (backdropMode_ == Backdrop::Image && bezelTex_)) {
+    const bool procedural = backdropMode_ == Backdrop::Plasma;
+    if (hasBezelArea && !live && (procedural || (backdropMode_ == Backdrop::Image && bezelTex_))) {
         glBindVertexArray(vao_);
         glUseProgram(presentProg_);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, backdropMode_ == Backdrop::Neon ? colorTex_ : bezelTex_);
-        if (backdropMode_ == Backdrop::Neon)
+        glBindTexture(GL_TEXTURE_2D, procedural ? colorTex_ : bezelTex_);
+        if (procedural)
             glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                        backdropMode_ == Backdrop::Neon ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+                        procedural ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glUniform1i(uTex_, 0);
-        glUniform1f(uClockwise_,
-                    float(backdropMode_ == Backdrop::Neon ? layout_.turns : backdropTurns_));
+        glUniform1f(uClockwise_, float(procedural ? layout_.turns : backdropTurns_));
         glUniform2f(uTexSize_, float(bezelW_), float(bezelH_));
         glUniform2f(uOutSize_, float(backdropTurns_ ? winH_ : winW_),
                     float(backdropTurns_ ? winW_ : winH_));
-        glUniform1f(glGetUniformLocation(presentProg_, "uTime"), float(SDL_GetTicks() / 1000.0));
-        glUniform1f(glGetUniformLocation(presentProg_, "uPass"), backdropMode_ == Backdrop::Neon
-                                                                     ? 1.f
-                                                                 : bezelTiled_ ? 2.f
-                                                                               : 3.f);
+        glUniform1f(uTime_, float(SDL_GetTicks() / 1000.0));
+        glUniform1f(uPass_, procedural ? 1.f : bezelTiled_ ? 2.f : 3.f);
         glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
@@ -442,16 +499,12 @@ void Display::present(unsigned framebuffer) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
     glUniform1i(uTex_, 0);
-    glUniform1f(glGetUniformLocation(presentProg_, "uPass"), 0.f);
-    glUniform1f(glGetUniformLocation(presentProg_, "uMode"),
-                screenMode_ == ScreenMode::Sharp ? 2.f : 0.f);
-    glUniform1i(glGetUniformLocation(presentProg_, "uScanlines"),
-                screenMode_ == ScreenMode::Scanlines);
-    glUniform1f(glGetUniformLocation(presentProg_, "uPortraitScreen"),
-                view_.h > view_.w ? 1.f : 0.f);
+    glUniform1f(uPass_, 0.f);
+    glUniform1f(uMode_, screenMode_ == ScreenMode::Sharp ? 2.f : 0.f);
+    glUniform1i(uScanlines_, screenMode_ == ScreenMode::Scanlines);
+    glUniform1f(uPortraitScreen_, view_.h > view_.w ? 1.f : 0.f);
 #ifndef MINO_NO_PRESENTATION_FILTERS
-    glUniform2f(glGetUniformLocation(presentProg_, "uRasterSize"), float(tube_.sourceHeight),
-                float(tube_.height));
+    glUniform2f(uRasterSize_, float(tube_.sourceHeight), float(tube_.height));
 #endif
     glUniform2f(uTexSize_, float(textureW), float(textureH));
     glUniform2f(uOutSize_, float(layout_.turns ? view_.h : view_.w),

@@ -19,3 +19,12 @@ target_include_directories(mino_core_minorescue PUBLIC ${PROJECT_SOURCE_DIR}/eng
 
 # Match source floating-point operation boundaries in shared template consumers.
 target_link_libraries(mino_core_minorescue PRIVATE neon_source_numeric)
+
+if(BUILD_TESTING)
+    add_executable(mino_minorescue_gameplay_checks EXCLUDE_FROM_ALL tests/gameplay.cpp)
+    target_compile_definitions(mino_minorescue_gameplay_checks PRIVATE NEON_GAME=minorescue)
+    target_include_directories(mino_minorescue_gameplay_checks PRIVATE engine)
+    target_link_libraries(mino_minorescue_gameplay_checks PRIVATE mino_core_minorescue neon_source_numeric)
+    add_test(NAME minorescue_gameplay_original COMMAND mino_minorescue_gameplay_checks
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+endif()

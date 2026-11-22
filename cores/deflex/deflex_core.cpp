@@ -2,6 +2,7 @@
 #include "startup_screen.h"
 #include "backend.h"
 #include "frontend.h"
+#include "presentation_observer.h"
 #include "neon/sample_audio.h"
 #include "neon/controller_session.h"
 #include <fstream>
@@ -25,6 +26,24 @@ class DeflexCore final : public Core {
     double accumulator_ = 0;
     std::atomic<bool> suspended_{false};
     bool rendered_ = false;
+    uint64_t turnSequence_ = 0;
+    double remainingShell_ = 1;
+    std::vector<PresentationState::CollectionItem> turns_;
+    bool presentationActive() const {
+        using Page = deflex::Frontend::Page;
+        return frontend_ && (frontend_->page == Page::Game || frontend_->page == Page::Result ||
+                             frontend_->paused());
+    }
+    void observeTurn(neon::vec2d before) {
+        auto &world = frontend_->world();
+        const int turn =
+            deflex_presentation::reflectionTurn(before, world.ball().flight, world.level);
+        if (!turn)
+            return;
+        if (turns_.size() == 128)
+            turns_.erase(turns_.begin());
+        turns_.push_back({++turnSequence_, turn});
+    }
     void requestedExit() {
         if (frontend_ && frontend_->quit)
             host_->requestQuit();
@@ -33,6 +52,17 @@ class DeflexCore final : public Core {
   public:
     const CoreInfo &info() const override {
         return Info;
+    }
+    PresentationState presentationState() const override {
+        if (!presentationActive())
+            return {};
+        PresentationState state{true,
+                                suspended_ || frontend_->paused(),
+                                1,
+                                {{"level.number", int64_t(frontend_->selected()) + 1},
+                                 {"ball.shell", remainingShell_}}};
+        state.collections["ball.turns"] = turns_;
+        return state;
     }
     bool init(Host &host, const SurfaceInfo &surface) override {
         if (!startup_.begin(host, surface))
@@ -144,7 +174,23 @@ class DeflexCore final : public Core {
         accumulator_ += std::clamp(dt, 0., .1);
         while (accumulator_ >= 1. / 60) {
             accumulator_ -= 1. / 60;
+            auto *beforeWorld = &frontend_->world();
+            const bool observe =
+                frontend_->page == deflex::Frontend::Page::Game && !frontend_->paused();
+            const auto beforeVelocity =
+                observe ? beforeWorld->ball().flight.velocity : neon::vec2d{};
             frontend_->tick();
+            if (observe && beforeWorld == &frontend_->world())
+                observeTurn(beforeVelocity);
+            if (!presentationActive()) {
+                turns_.clear();
+                remainingShell_ = 1;
+            } else if (frontend_->world().context.balls) {
+                // Result summaries replace the play world with ball-free scenery.
+                // Keep the last shell value until the next actual ball is available.
+                remainingShell_ =
+                    std::clamp((128 - frontend_->world().ball().mesh.depleted) / 128., 0., 1.);
+            }
             reportAchievements();
             for (const auto &sound : frontend_->sounds)
                 mixer_.play(sound.sample, sound.volume << 12, 0);

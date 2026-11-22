@@ -1,0 +1,623 @@
+{
+  "format": 1,
+  "compiler_signature": "15050e968483d6fbc96257841ac485978a0f08e6854ebae2747dc49529685324",
+  "scenes": [
+    {
+      "source": "bezels/Deflex.neongles",
+      "source_sha256": "a0300d22f087325c6076446d13a128fb6ad881ee7b0cd0eb48cfdde0d9872aec",
+      "file": "bezels/Deflex.neonb",
+      "sha256": "2f13342c39e2e8907a1e53b559841e1a35b62fac57db7fb4ba2aae75bd3ab63e",
+      "resources": {
+        "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
+        "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/15.frag": "dbfa193f4ec3f7388f6a280b93076513840c3143994e0d8445de2ec2bf482747",
+        "gles/shaders/16.frag": "0650de9fec830560c5e2fdeb897ebae34fb46c9569e11e2c6ac0857241c7913c",
+        "gles/shaders/19.frag": "43eaf6d2f15766770aa9ada2ef5e3b20356fe12bc4ebf1d475daf426d5496f58",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/28.frag": "5992d73334ca99d8cf791175f2e5e567dce2194a3519895589a8ea2e89c8c2af",
+        "gles/shaders/81.frag": "18753ed19e1bc69f8619dda3b1052c8d79e16084a1748848a6b0cf91bf82797b",
+        "reference/literals/11.png": "5d61a53f069436dbceb0179da51869315ae46bf706e20134e726b8e675985a56",
+        "reference/literals/34.jpg": "61fdcb75deea4041bf51125d197ac6670ae458067c0a5abc759f9135fb5808c1",
+        "reference/roots/12.argb": "c3597d9a1450c12b9de6194327ba916e5e1889e2a8c3fccd7b09c74f79a0d17f",
+        "reference/roots/2.argb": "cbbaab00e1715bde867df628f5198c1ec97d06a0d730e830d2806d23949c539c"
+      },
+      "exports": [
+        {
+          "name": "level.shader",
+          "target": "node.20.i.2",
+          "unit": "shader-id",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 16
+        },
+        {
+          "name": "reflection.rotation",
+          "target": "node.11.f.4",
+          "unit": "radians",
+          "minimum": -6.28318548,
+          "maximum": 6.28318548,
+          "baseline": 0
+        },
+        {
+          "name": "timer.field",
+          "target": "node.18.f.4",
+          "unit": "shader-constant",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0.305299997
+        }
+      ],
+      "harness": "bezels/Deflex.nhml",
+      "harness_sha256": "dc92a591c71c38ac58350addd82d6f3463754949f173f34242959c4e82c181c8"
+    },
+    {
+      "source": "bezels/FiveADay.neongles",
+      "source_sha256": "63d57a5abac3d8965a913daae0355b65009e08310d32e5b9ec700fe641f11b7e",
+      "file": "bezels/FiveADay.neonb",
+      "sha256": "4cc5f37a83e6c20fdbc7ec35c277212250e80d8acfbaf633ff34c1cce33d4951",
+      "resources": {
+        "gles/shaders/23.frag": "8e1aa937e457e216ea751f4d9c4c0894f897435b1df11a013791bb21a9dc249c",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/61.frag": "2c8f72bf753dccf3d34256a8c5cf311765a1dc740ceda21518adb7cb79c9d16d",
+        "gles/shaders/68.frag": "250bffd4d3f3c32fffee59fd4001d57049df5d6ef803952684011fedabaa891a",
+        "gles/shaders/70.frag": "759224f8ee0bb8f89d17f24a48a1e52217c2006e53a6f61f9264a668095ca76a",
+        "reference/literals/12.png": "67a2c1014394c4eb4bf28b403098916fa37221310c4e220b51c22e762e2705db",
+        "reference/literals/23.jpg": "961535b28681009918f78a84c7284a76e89d916b0142c602da56f3d9a6e1e48d",
+        "reference/roots/12.argb": "c3597d9a1450c12b9de6194327ba916e5e1889e2a8c3fccd7b09c74f79a0d17f"
+      },
+      "exports": [
+        {
+          "name": "composition.effect",
+          "target": "node.12.i.4",
+          "unit": "byte",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 174
+        },
+        {
+          "name": "feedback.brightness",
+          "target": "colour.8.brightness",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "feedback.hue",
+          "target": "colour.8.hue",
+          "unit": "degrees",
+          "minimum": -180,
+          "maximum": 180,
+          "baseline": 120
+        },
+        {
+          "name": "feedback.rotation",
+          "target": "node.8.f.9",
+          "unit": "radians",
+          "minimum": -6.28318548,
+          "maximum": 6.28318548,
+          "baseline": -0.884672642
+        }
+      ],
+      "harness": "bezels/FiveADay.nhml",
+      "harness_sha256": "da328c3e6dbbe2a5d8d70ee232f6cdf7c33249e9e3f4c00862b8c69088ef92ea"
+    },
+    {
+      "source": "bezels/GoatUp.neongles",
+      "source_sha256": "74637397280f19bde40a128bff56793b7464b45c0365b4adf9a3674d1935cb40",
+      "file": "bezels/GoatUp.neonb",
+      "sha256": "e0fc47169a443084a3a1340b419cb36b93dcd3e3fecd46907e8a877359d71651",
+      "resources": {
+        "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
+        "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
+        "gles/shaders/15.frag": "dbfa193f4ec3f7388f6a280b93076513840c3143994e0d8445de2ec2bf482747",
+        "gles/shaders/18.frag": "2743d35f0edee0ff058c4878d411fe7b5cb041aaec63b19493b98a5cb70cf659",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/46.frag": "8d1ce033c400f778875a487169499d6c6ea3bcbffe2fb31eef59ebbf2b6dfc83",
+        "gles/shaders/6.frag": "f76c762ea29a0f687210d33dc08f6d2b672837ce9a5b0b303606ff5175a223f3",
+        "reference/literals/31.jpg": "795886c4ba0589d631cf0ddba473f8b313a773eeab7ff83cb43c128f22c50edf",
+        "reference/literals/32.jpg": "2847d8fe498bbc38531b74be4bc630b699b01131bb3107f883f1e0b10c545267",
+        "reference/literals/34.jpg": "61fdcb75deea4041bf51125d197ac6670ae458067c0a5abc759f9135fb5808c1",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c"
+      },
+      "exports": [
+        {
+          "name": "background.colourShader",
+          "target": "node.22.i.2",
+          "unit": "shader-id",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 12
+        },
+        {
+          "name": "background.heightOffset",
+          "target": "node.25.f.3",
+          "unit": "texture-widths",
+          "minimum": -8,
+          "maximum": 8,
+          "baseline": -0.506909966
+        },
+        {
+          "name": "camera.yaw",
+          "target": "camera.yaw",
+          "unit": "radians",
+          "minimum": -0.800000012,
+          "maximum": 0.800000012,
+          "baseline": 0
+        },
+        {
+          "name": "scene.hue",
+          "target": "runtime.hue",
+          "unit": "turns",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/GoatUp.nhml",
+      "harness_sha256": "e27dd08c38f7ffc5a438e84d52da1801981f1cc8448c0420857381bbd927c457"
+    },
+    {
+      "source": "bezels/GoatUp2.neongles",
+      "source_sha256": "e6fdf4142f510c2abeb1fef4e7c201566fab46f71ae9bd95d05b2f7e829e3ae9",
+      "file": "bezels/GoatUp2.neonb",
+      "sha256": "ea3acc3eb8ad5bc6506caf7e49c37dde0b6f2d7d91927119b75e117ab4b6c781",
+      "resources": {
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/20.frag": "6db08370e9e1f24f5f29f605dd12b4dadb8629f1b3e91b706fe76213dc14925a",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/4.frag": "c7899f76088a880398c1891cc3a36d6b843cb5204aad45f3d53b0d35d50e1067",
+        "gles/shaders/5.frag": "0a5d59e1b516c37d3c440c2e4c9b6fb3421136f26b9f2dd1daf7dcb532ead6bd",
+        "gles/shaders/50.frag": "6e765659f51b79eaa5a71c6ba746e659d8174eea7567b4a50fb47d7bc529c4e7",
+        "gles/shaders/59.frag": "6a7b3f93215c77792e39c66dddb6f777eeb241b08892fda3d3bd77532a0f4b1e",
+        "gles/shaders/71.frag": "406c54e8866c673f2af04357d799a0ab79c5d54833f4c22cddbe16cf0aef08c6",
+        "reference/roots/14.argb": "e00b70418d5cc012b9bc08ee76f6f8a54bd964ffdf971b6ee5576f68a8011a88",
+        "reference/roots/2.argb": "cbbaab00e1715bde867df628f5198c1ec97d06a0d730e830d2806d23949c539c",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c"
+      },
+      "exports": [
+        {
+          "name": "hunger.field",
+          "target": "node.11.f.5",
+          "unit": "normalized",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 1
+        },
+        {
+          "name": "hunger.saturation",
+          "target": "colour.10.saturation",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 2,
+          "baseline": 1
+        },
+        {
+          "name": "invincible.field",
+          "target": "node.32.f.4",
+          "unit": "normalized",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0.13649115
+        },
+        {
+          "name": "invincible.green",
+          "target": "colour.31.green",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "invincible.hue",
+          "target": "runtime.hue",
+          "unit": "turns",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/GoatUp2.nhml",
+      "harness_sha256": "d38755960f38001b4974d48ea7a3b1f5fe37c80fa75238f34fb1fd27acff7069"
+    },
+    {
+      "source": "bezels/Gridrunner.neongles",
+      "source_sha256": "08b085db9fa94d0c81871425f67dfe45168533f836936aa02347ac990b6e97e1",
+      "file": "bezels/Gridrunner.neonb",
+      "sha256": "572c9e8e43af0617799f22b58f6c4a19a0866c3ab861ca7717a0a6687882f4ce",
+      "resources": {
+        "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
+        "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/17.frag": "02763317164ee293be5e55b494e8c3ad842649dc885f1fff714810c02b2f2ded",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/31.frag": "3359708a34ca7f874f13e58d48a35316e9b4536f8ccc3c3889f1bd92fb1c6ab7",
+        "gles/shaders/4.frag": "c7899f76088a880398c1891cc3a36d6b843cb5204aad45f3d53b0d35d50e1067",
+        "gles/shaders/59.frag": "6a7b3f93215c77792e39c66dddb6f777eeb241b08892fda3d3bd77532a0f4b1e",
+        "gles/shaders/67.frag": "a5341933171f8057b8afeac7d7c8297a570f6d3884d0a90128dc9d6a1e281c6d",
+        "gles/shaders/80.frag": "881fe8019da7680d98fb88e2397758554b88665ea90e83df78bdd46675a1e6dd",
+        "reference/literals/279.png": "06034e59ee94a2cebc3148584dd9f58c8b50896efb393bb463607bed0f1c002c",
+        "reference/literals/287.png": "1ed93bd4c779ff43e345bb7152d3728aeec0d8c4616b6e34b5bd6db0abfe9321",
+        "reference/roots/10.argb": "f8455fbb6d6bb1e2e277714afa162b384970035ac09f9a5c8b681058a86792bf",
+        "reference/roots/16.argb": "78bc3a8fc249fc539a7d55ad2457c2162568040592ba586a39ab864f04537864",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c",
+        "reference/roots/7.argb": "a485f643931458fa75bb0231f440aa97e83a9fa3f2cf1d5d52e43871f15d1d3a",
+        "vectors/vector-beam.frag.glsl": "fddc61e1871fc445198fada4464cc01bfd12adb40e5c6bb2d9dcd3b4a88234f3",
+        "vectors/vector-beam.vert.glsl": "0301905566e6d8e003274681e955128648f34e26f2c2adda2a38f055505efa87"
+      },
+      "exports": [
+        {
+          "name": "background.brightness",
+          "target": "layer.3/colour.18.brightness",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "background.colourShader",
+          "target": "layer.3/node.18.i.2",
+          "unit": "shader-id",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 14
+        },
+        {
+          "name": "background.scrollSpeed",
+          "target": "layer.3/clock.8.6.speed",
+          "unit": "multiplier",
+          "minimum": 0,
+          "maximum": 8,
+          "baseline": 1
+        },
+        {
+          "name": "grid.pitch",
+          "target": "component.4.5",
+          "unit": "radians",
+          "minimum": -1.39999998,
+          "maximum": 1.39999998,
+          "baseline": 0
+        },
+        {
+          "name": "grid.yaw",
+          "target": "component.4.4",
+          "unit": "radians",
+          "minimum": -1.39999998,
+          "maximum": 1.39999998,
+          "baseline": 0
+        },
+        {
+          "name": "scene.hue",
+          "target": "runtime.hue",
+          "unit": "turns",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/Gridrunner.nhml",
+      "harness_sha256": "f5a422fcf2f4b52e0b37bd415c5e5be7ae668bb546b4f8742bf080b6066bcb06"
+    },
+    {
+      "source": "bezels/GridrunnerClassic.neongles",
+      "source_sha256": "c2b3f3527182c8af7b1bd8e806a5fb709e9d8323c6de3e9bf734e35b6e4ff2b7",
+      "file": "bezels/GridrunnerClassic.neonb",
+      "sha256": "79b911654609fa9e73f0308db4797333a6a6c9e66f0b3063dda67c5f4be311e7",
+      "resources": {
+        "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
+        "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/17.frag": "02763317164ee293be5e55b494e8c3ad842649dc885f1fff714810c02b2f2ded",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/31.frag": "3359708a34ca7f874f13e58d48a35316e9b4536f8ccc3c3889f1bd92fb1c6ab7",
+        "gles/shaders/4.frag": "c7899f76088a880398c1891cc3a36d6b843cb5204aad45f3d53b0d35d50e1067",
+        "gles/shaders/59.frag": "6a7b3f93215c77792e39c66dddb6f777eeb241b08892fda3d3bd77532a0f4b1e",
+        "gles/shaders/67.frag": "a5341933171f8057b8afeac7d7c8297a570f6d3884d0a90128dc9d6a1e281c6d",
+        "gles/shaders/80.frag": "881fe8019da7680d98fb88e2397758554b88665ea90e83df78bdd46675a1e6dd",
+        "reference/literals/279.png": "06034e59ee94a2cebc3148584dd9f58c8b50896efb393bb463607bed0f1c002c",
+        "reference/literals/287.png": "1ed93bd4c779ff43e345bb7152d3728aeec0d8c4616b6e34b5bd6db0abfe9321",
+        "reference/roots/10.argb": "f8455fbb6d6bb1e2e277714afa162b384970035ac09f9a5c8b681058a86792bf",
+        "reference/roots/16.argb": "78bc3a8fc249fc539a7d55ad2457c2162568040592ba586a39ab864f04537864",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c",
+        "reference/roots/7.argb": "a485f643931458fa75bb0231f440aa97e83a9fa3f2cf1d5d52e43871f15d1d3a",
+        "vectors/vector-beam.frag.glsl": "fddc61e1871fc445198fada4464cc01bfd12adb40e5c6bb2d9dcd3b4a88234f3",
+        "vectors/vector-beam.vert.glsl": "0301905566e6d8e003274681e955128648f34e26f2c2adda2a38f055505efa87"
+      },
+      "exports": [
+        {
+          "name": "grid.pitch",
+          "target": "component.4.5",
+          "unit": "radians",
+          "minimum": -1.39999998,
+          "maximum": 1.39999998,
+          "baseline": 0
+        },
+        {
+          "name": "grid.yaw",
+          "target": "component.4.4",
+          "unit": "radians",
+          "minimum": -1.39999998,
+          "maximum": 1.39999998,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/GridrunnerClassic.nhml",
+      "harness_sha256": "db40a62f631e4dc80a388e8800d3222ddb1e292eb92f961eb082fb9bc1fa475b"
+    },
+    {
+      "source": "bezels/Minos.neongles",
+      "source_sha256": "f2bb26e701d23778e4b0062c114a4c48f40ef1d4098c6112439bfbd6a9470bb9",
+      "file": "bezels/Minos.neonb",
+      "sha256": "c7303c69c288800a0816f6db4f3373d5331e9d0e29979622e0ee1f1953f180bd",
+      "resources": {
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/82.frag": "fa66fba95b62aba5bd171d2bf32aa279ba40c57069bf65c8c098ebf2bb782569",
+        "gles/shaders/94.frag": "c10607e8e46fa9e6ca180b720c8173e8f093ec25450d7186d6db29c7c832dcaa",
+        "reference/roots/11.argb": "dd1414ca341006c61352046d7cb7f7ee5f78d1c825eab1fcac83b382bf1d5547",
+        "reference/roots/15.argb": "d8e974eaca55da8a80b7bb837ec5d304520db17d5217870c968bb53e5b8b4660",
+        "reference/roots/22.argb": "025239bc0c990b9e086579e2c43c411f5474f5eeeff2247657ffc4552db7c1f1",
+        "reference/roots/25.argb": "8a452683c7c4543554b5f9a7085c13f270c7277f262e4fcabaa802c5142bb4f9",
+        "reference/roots/27.argb": "743a5f4b68f1ddf2876deb33d7c9b7fe68ae163aa7ac55a40a688ec5aaf8e3d4",
+        "reference/roots/5.argb": "ffa8b676e575201e0805562cd950f11a29ff2ffa34476a696c672f18d69e4dee",
+        "reference/roots/8.argb": "c50f17868464866c58d675383c51d4d9b9ad25da7bb4c3185da5fde89caea24e"
+      },
+      "exports": [
+        {
+          "name": "material.rescueScroll",
+          "target": "node.8.f.3",
+          "unit": "texture-widths",
+          "minimum": -8,
+          "maximum": 8,
+          "baseline": 0.0009765625
+        },
+        {
+          "name": "pipe.axis",
+          "target": "node.25.f.5",
+          "unit": "quarter-turns",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 0
+        },
+        {
+          "name": "pipe.centre",
+          "target": "node.25.f.6",
+          "unit": "reference-coordinate",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0.5
+        },
+        {
+          "name": "scene.hue",
+          "target": "runtime.hue",
+          "unit": "turns",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0
+        },
+        {
+          "name": "wall.scroll",
+          "target": "node.18.f.7",
+          "unit": "texture-widths",
+          "minimum": -8,
+          "maximum": 8,
+          "baseline": 0
+        },
+        {
+          "name": "wall.texture",
+          "target": "node.18.i.5",
+          "unit": "texture-selector",
+          "minimum": 0,
+          "maximum": 350,
+          "baseline": 23
+        }
+      ],
+      "harness": "bezels/Minos.nhml",
+      "harness_sha256": "bb4e8ab7d1eac73c5f8e8bbcf865081662679298306c6f6af267a165abc448c5"
+    },
+    {
+      "source": "bezels/MinotaurRescue.neongles",
+      "source_sha256": "be63af972e5e1db04ee5f4b12e6be2b9e6e3235697947281eda162c98272ae3a",
+      "file": "bezels/MinotaurRescue.neonb",
+      "sha256": "9f0473de5f016fb635dcc0cbb39919d3d051d5958085dabdbceea39d2098863e",
+      "resources": {
+        "gles/shaders/20.frag": "6db08370e9e1f24f5f29f605dd12b4dadb8629f1b3e91b706fe76213dc14925a",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/70.frag": "759224f8ee0bb8f89d17f24a48a1e52217c2006e53a6f61f9264a668095ca76a",
+        "gles/shaders/81.frag": "18753ed19e1bc69f8619dda3b1052c8d79e16084a1748848a6b0cf91bf82797b",
+        "reference/roots/5.argb": "ffa8b676e575201e0805562cd950f11a29ff2ffa34476a696c672f18d69e4dee"
+      },
+      "exports": [
+        {
+          "name": "background.dimensionSpeed",
+          "target": "clock.14.3.speed",
+          "unit": "multiplier",
+          "minimum": 0,
+          "maximum": 8,
+          "baseline": 1
+        },
+        {
+          "name": "background.rotation",
+          "target": "node.14.f.4",
+          "unit": "radians",
+          "minimum": -6.28318548,
+          "maximum": 6.28318548,
+          "baseline": 0
+        },
+        {
+          "name": "foreground.rotation",
+          "target": "node.17.f.4",
+          "unit": "radians",
+          "minimum": -6.28318548,
+          "maximum": 6.28318548,
+          "baseline": 6.28318548
+        },
+        {
+          "name": "scene.hue",
+          "target": "runtime.hue",
+          "unit": "turns",
+          "minimum": 0,
+          "maximum": 1,
+          "baseline": 0
+        },
+        {
+          "name": "secondary.rotation",
+          "target": "node.4.f.4",
+          "unit": "radians",
+          "minimum": -6.28318548,
+          "maximum": 6.28318548,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/MinotaurRescue.nhml",
+      "harness_sha256": "5a2cde07ec6ab5ed47bd693577ebf44fb33cee040b37341c3957dc40f3d181a3"
+    },
+    {
+      "source": "bezels/Minotron.neongles",
+      "source_sha256": "ef57720ea9be606609e40bfc9c3a8a80d60f16ab7a5466aa939601ff2fe7613d",
+      "file": "bezels/Minotron.neonb",
+      "sha256": "bcc7e8aa65b06b1b448faaa17e30109d3a89148ad187116ddd70803a39abea4c",
+      "resources": {
+        "gles/shaders/14.frag": "0ae1092d1d5ab6846d6cbd4481d6fc372e312b20a2bc1bdcc9d93986d9e25b0a",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/3.frag": "e1d98ef11d140c891bb24a405cbfe678385b99d1592a08d8f40900d5b976a862",
+        "gles/shaders/46.frag": "8d1ce033c400f778875a487169499d6c6ea3bcbffe2fb31eef59ebbf2b6dfc83",
+        "gles/shaders/49.frag": "0c532723628a28c89ebed61d870515863b88da425f2a40683ab30e70bf0919e5",
+        "gles/shaders/59.frag": "6a7b3f93215c77792e39c66dddb6f777eeb241b08892fda3d3bd77532a0f4b1e",
+        "gles/shaders/61.frag": "2c8f72bf753dccf3d34256a8c5cf311765a1dc740ceda21518adb7cb79c9d16d",
+        "gles/shaders/67.frag": "a5341933171f8057b8afeac7d7c8297a570f6d3884d0a90128dc9d6a1e281c6d",
+        "gles/shaders/81.frag": "18753ed19e1bc69f8619dda3b1052c8d79e16084a1748848a6b0cf91bf82797b",
+        "reference/literals/31.jpg": "795886c4ba0589d631cf0ddba473f8b313a773eeab7ff83cb43c128f22c50edf",
+        "reference/literals/32.jpg": "2847d8fe498bbc38531b74be4bc630b699b01131bb3107f883f1e0b10c545267",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c",
+        "reference/roots/9.argb": "9caab43b3e92938510860bb817df05c08698a5eff9df28d1be51bff9cab2c11a"
+      },
+      "exports": [
+        {
+          "name": "rings.opacity",
+          "target": "node.7.i.1",
+          "unit": "byte",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 0
+        },
+        {
+          "name": "rings.speed",
+          "target": "clock.10.6.speed",
+          "unit": "multiplier",
+          "minimum": 0,
+          "maximum": 8,
+          "baseline": 1
+        },
+        {
+          "name": "source.brightness",
+          "target": "colour.1.brightness",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "source.colourShader",
+          "target": "node.4.i.2",
+          "unit": "shader-id",
+          "minimum": 0,
+          "maximum": 255,
+          "baseline": 59
+        },
+        {
+          "name": "source.hue",
+          "target": "colour.1.hue",
+          "unit": "degrees",
+          "minimum": -180,
+          "maximum": 180,
+          "baseline": 0
+        }
+      ],
+      "harness": "bezels/Minotron.nhml",
+      "harness_sha256": "2a85f54f4345d7cbcfb212ee8faa64733ccf6c113bf9794103400987962b1e65"
+    },
+    {
+      "source": "bezels/SuperOxWars.neongles",
+      "source_sha256": "18b10a77a8365c552c5830cfaa5b3a5bf6b9a55a4fb1de941d4d14335443d723",
+      "file": "bezels/SuperOxWars.neonb",
+      "sha256": "41d0e8ce1a91dddc87da0047ec7cb1339d6db043b1d1cccb7d5138690734c547",
+      "resources": {
+        "gles/shaders/11.frag": "719875f854eb80de7c2ad7c6045df484c77d2518b7b9ad0965e17a2ef66a9cf7",
+        "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/67.frag": "a5341933171f8057b8afeac7d7c8297a570f6d3884d0a90128dc9d6a1e281c6d",
+        "gles/shaders/73.frag": "51ba1a23a0f989a1129179c734eb0772653b283bfddf44ffadb09688e8a340bd",
+        "reference/literals/19.png": "10444900476c5d11a7cfbbc09b2ef03fe29fd01139a532c6b3e74aba702474f0",
+        "reference/roots/0.argb": "54fbb9469e98bf9a7cc8df1e7b60248700380a39a3baac146b5022fe24b837a8",
+        "reference/roots/9.argb": "9caab43b3e92938510860bb817df05c08698a5eff9df28d1be51bff9cab2c11a"
+      },
+      "exports": [
+        {
+          "name": "field.tilt",
+          "target": "node.20.f.2",
+          "unit": "texture-widths",
+          "minimum": -8,
+          "maximum": 8,
+          "baseline": 0.0009765625
+        },
+        {
+          "name": "polarity.blue",
+          "target": "colour.10.blue",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "polarity.red",
+          "target": "colour.7.red",
+          "unit": "gain",
+          "minimum": 0,
+          "maximum": 4,
+          "baseline": 1
+        },
+        {
+          "name": "rings.scrollSpeed",
+          "target": "clock.20.6.speed",
+          "unit": "multiplier",
+          "minimum": 0,
+          "maximum": 8,
+          "baseline": 1
+        }
+      ],
+      "harness": "bezels/SuperOxWars.nhml",
+      "harness_sha256": "5dc3e07abbd6bbcbfc17f34fa83366f8f0060d55b9fbca70c680f522ac6cc219"
+    },
+    {
+      "source": "Vaporwave.neongles",
+      "source_sha256": "c4e62a7e11df548c0599b32d30849f36de43ec37f8c497fe50136a4a14f03a3d",
+      "file": "Vaporwave.neonb",
+      "sha256": "d18db6b64eb038078d47c739bc8c1234d8a93c49fef4218a590c149aa70301db",
+      "resources": {
+        "gles/shaders/0.frag": "4399790f8e78874f5cf55e2c8a438cc02cf0eadd9cf6fa8fc55348525188990e",
+        "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
+        "gles/shaders/11.frag": "719875f854eb80de7c2ad7c6045df484c77d2518b7b9ad0965e17a2ef66a9cf7",
+        "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
+        "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",
+        "gles/shaders/16.frag": "0650de9fec830560c5e2fdeb897ebae34fb46c9569e11e2c6ac0857241c7913c",
+        "gles/shaders/26.frag": "977c466933ee8260db03b81a8bc73ee66d6655ce48710aa33a99a2b86535cf67",
+        "gles/shaders/4.frag": "c7899f76088a880398c1891cc3a36d6b843cb5204aad45f3d53b0d35d50e1067",
+        "gles/shaders/5.frag": "0a5d59e1b516c37d3c440c2e4c9b6fb3421136f26b9f2dd1daf7dcb532ead6bd",
+        "gles/shaders/73.frag": "51ba1a23a0f989a1129179c734eb0772653b283bfddf44ffadb09688e8a340bd",
+        "gles/shaders/83.frag": "583d2daeef13fd4b554d064e06dad0f2f581b9e318e018d20da09a82c6bd6b22",
+        "reference/literals/05.png": "c98b81f1697c039542c3c9e051a6da1c817fd82bccb14718d6512173b408b28b",
+        "reference/literals/11.png": "5d61a53f069436dbceb0179da51869315ae46bf706e20134e726b8e675985a56",
+        "reference/literals/12.png": "67a2c1014394c4eb4bf28b403098916fa37221310c4e220b51c22e762e2705db",
+        "reference/literals/title-flight.png": "e86261beb3694236283a118cd062f1c301569bcb03c801676a4f5c09e8d50192",
+        "reference/roots/10.argb": "f8455fbb6d6bb1e2e277714afa162b384970035ac09f9a5c8b681058a86792bf",
+        "reference/roots/2.argb": "cbbaab00e1715bde867df628f5198c1ec97d06a0d730e830d2806d23949c539c",
+        "reference/roots/6.argb": "e925ddd229fc4956b9278e318f1686ee725f339181aea24c60a1c1cd9a0b751c",
+        "vectors/vector-beam.frag.glsl": "fddc61e1871fc445198fada4464cc01bfd12adb40e5c6bb2d9dcd3b4a88234f3",
+        "vectors/vector-beam.vert.glsl": "0301905566e6d8e003274681e955128648f34e26f2c2adda2a38f055505efa87"
+      },
+      "exports": []
+    }
+  ]
+}

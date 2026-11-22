@@ -12,3 +12,9 @@ add_library(mino_core_deflex STATIC EXCLUDE_FROM_ALL backend.cpp deflex_core.cpp
 target_compile_definitions(mino_core_deflex PRIVATE NEON_GAME=deflex)
 target_include_directories(mino_core_deflex PRIVATE ${DF_BINDING} ${DF_RESOURCES} ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(mino_core_deflex PUBLIC mino_deflex_rules neon_renderer)
+
+if(BUILD_TESTING)
+    add_executable(mino_deflex_presentation_checks EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/tests/deflex_presentation.cpp)
+    target_link_libraries(mino_deflex_presentation_checks PRIVATE mino_deflex_rules)
+    add_test(NAME check.mino_deflex_presentation_checks COMMAND mino_deflex_presentation_checks)
+endif()
