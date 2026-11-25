@@ -21,6 +21,7 @@ inline constexpr float kFontEm = 48;
 inline constexpr float kFontSpread = 8;
 inline constexpr int kFontAtlasWidth = 1024, kFontAtlasHeight = 1024;
 Image gameIcon(const char *id);
+Image minorolaBezel();
 Image fontAtlas();
 Image notesFontAtlas();
 const FontFace &notesFontFace();

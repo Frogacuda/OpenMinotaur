@@ -8,6 +8,7 @@
 #include <glad/gl.h>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -16,6 +17,16 @@ namespace {
 void require(bool ok, const char *message) {
     if (!ok)
         throw std::runtime_error(message);
+}
+
+auto loadBakedBezel(const std::string &stem) {
+    std::vector<uint8_t> bytes;
+    require(mino::readPresentationAsset("bezels/" + stem + ".neonb", bytes),
+            "Missing compiled bezel");
+    std::istringstream input(std::string(bytes.begin(), bytes.end()));
+    return neon::effects::Runtime::loadBaked(input, {}, [](const auto &name, auto &data) {
+        return mino::readPresentationAsset("neon/" + name.generic_string(), data);
+    });
 }
 } // namespace
 int main(int argc, char **argv) {
@@ -104,6 +115,183 @@ int main(int argc, char **argv) {
             }
             std::cout
                 << "PASS: GoatUp2 compiled scene, eight-item insertion runs, hunger, invincibility, all rotations and HQ/LQ playback.\n";
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--minotron-optimization-check") {
+            using neon::effects::Destination;
+            using neon::effects::Rect;
+            constexpr int width = 960, height = 720;
+            for (float scale : {.5f, 1.f}) {
+                for (const auto &target : {Destination{0,
+                                                       width,
+                                                       height,
+                                                       {0, 0, width, height},
+                                                       {120, 0, 720, height},
+                                                       0,
+                                                       false,
+                                                       true},
+                                           Destination{0,
+                                                       width,
+                                                       height,
+                                                       {0, 0, 480, height},
+                                                       {0, 180, 480, 360},
+                                                       0,
+                                                       false,
+                                                       true},
+                                           Destination{0,
+                                                       width,
+                                                       height,
+                                                       {0, 0, width, height},
+                                                       {120, 0, 720, height},
+                                                       1,
+                                                       false,
+                                                       true}}) {
+                    auto reference = loadBakedBezel("Minotron");
+                    auto optimized = loadBakedBezel("Minotron");
+                    auto batched = target;
+                    batched.batchBezel = true;
+                    optimized->parameters().skipTransparentMixerPasses = true;
+                    std::vector<uint8_t> before(size_t(width) * height * 4), after(before.size());
+                    const auto clear = [] {
+                        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                        glDisable(GL_SCISSOR_TEST);
+                        glColorMask(1, 1, 1, 1);
+                        glClearColor(.125f, .25f, .5f, 1);
+                        glClear(GL_COLOR_BUFFER_BIT);
+                    };
+                    const auto compare = [&] {
+                        unsigned peak = 0;
+                        for (size_t i = 0; i < before.size(); ++i)
+                            peak = std::max(peak, unsigned(std::abs(int(before[i]) - after[i])));
+                        require(peak <= 1, "Minotron optimization changed the scene");
+                        require(glGetError() == GL_NO_ERROR, "Minotron optimization GLES error");
+                        return peak;
+                    };
+                    size_t idleBefore = 0, idleAfter = 0, activeBefore = 0, activeAfter = 0;
+                    unsigned peak = 0;
+                    for (int tick = 0; tick < 24; ++tick) {
+                        const float opacity =
+                            tick < 6 || tick >= 18 ? 0.f : float((18 - tick) * 14);
+                        const auto render = [&](auto &runtime, const auto &destination,
+                                                auto &pixels) {
+                            runtime.parameters().renderScale = scale;
+                            runtime.parameters().hueShift = float(tick) / 24;
+                            auto &controls = runtime.authoring().controls(23);
+                            const auto set = [&](const char *key, float value) {
+                                auto edit = std::find_if(
+                                    controls.begin(), controls.end(),
+                                    [&](const auto &control) { return control.key == key; });
+                                require(edit != controls.end(), "Missing Minotron scene control");
+                                edit->enabled = true;
+                                edit->value = value;
+                            };
+                            set("node.7.i.1", opacity);
+                            set("node.4.i.2", tick < 8 ? 59.f : tick < 16 ? 61.f : 46.f);
+                            set("colour.1.brightness", .7f + float(tick % 8) / 5);
+                            clear();
+                            runtime.frameSampled(1. / 60., destination);
+                            glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                         pixels.data());
+                        };
+                        render(*reference, target, before);
+                        render(*optimized, batched, after);
+                        peak = std::max(peak, compare());
+                        const auto slow = reference->statistics().drawCalls;
+                        const auto fast = optimized->statistics().drawCalls;
+                        if (opacity == 0) {
+                            idleBefore = slow;
+                            idleAfter = fast;
+                            require(fast + 5 == slow,
+                                    "Minotron must skip four idle mixer draws and batch the bezel");
+                        } else {
+                            activeBefore = slow;
+                            activeAfter = fast;
+                            require(fast + 1 == slow,
+                                    "Minotron must preserve all visible ring passes");
+                        }
+                    }
+                    clear();
+                    require(reference->presentCached(target),
+                            "Minotron baseline cache unavailable");
+                    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, before.data());
+                    clear();
+                    require(optimized->presentCached(batched),
+                            "Minotron optimized cache unavailable");
+                    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, after.data());
+                    peak = std::max(peak, compare());
+                    require(reference->statistics().drawCalls == 2 &&
+                                optimized->statistics().drawCalls == 1,
+                            "Minotron must present cached strips in one draw");
+                    std::cout << "Minotron width=" << target.viewport.width
+                              << " turns=" << target.clockwiseTurns << " scale=" << scale
+                              << " idle " << idleBefore << " -> " << idleAfter << ", rings "
+                              << activeBefore << " -> " << activeAfter
+                              << ", cached 2 -> 1, peak channel difference " << peak << '\n';
+                }
+            }
+            SDL_GL_DestroyContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--minos-batch-check") {
+            using neon::effects::Destination;
+            constexpr int width = 960, height = 720;
+            for (float scale : {.5f, 1.f}) {
+                auto batched = loadBakedBezel("Minos");
+                auto reference = loadBakedBezel("Minos");
+                batched->parameters().renderScale = reference->parameters().renderScale = scale;
+                for (int turns : {0, 1, 2, 3}) {
+                    for (auto hole : {neon::effects::Rect{210, 0, 540, height},
+                                      neon::effects::Rect{0, 110, 540, 500}}) {
+                        const int viewWidth = hole.y == 0 ? width : 540;
+                        Destination dest{0,    width, height, {0, 0, viewWidth, height},
+                                         hole, turns, false,  true};
+                        std::vector<uint8_t> after(size_t(width) * height * 4),
+                            before(after.size());
+                        const auto compare = [&](int tick, bool cached) {
+                            const auto render = [&](auto &runtime, bool batch, auto &pixels) {
+                                dest.batchBezel = batch;
+                                if (cached)
+                                    require(runtime.presentCached(dest),
+                                            "Minos cached bezel unavailable");
+                                else {
+                                    runtime.parameters().hueShift = float(tick) / 16;
+                                    runtime.frameSampled(1. / 60., dest);
+                                }
+                                glReadPixels(0, 0, viewWidth, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                             pixels.data());
+                            };
+                            render(*reference, false, before);
+                            render(*batched, true, after);
+                            unsigned peak = 0;
+                            for (size_t index = 0; index < size_t(viewWidth) * height * 4; ++index)
+                                peak = std::max(
+                                    peak, unsigned(std::abs(int(before[index]) - after[index])));
+                            if (peak != 0)
+                                std::cout << "Minos framebuffer difference: " << peak << '\n';
+                            require(peak <= 1, "Minos bezel batching changed the image");
+                            require(reference->statistics().drawCalls ==
+                                        batched->statistics().drawCalls + 1,
+                                    "Minos bezel batching did not remove a draw");
+                            require(glGetError() == GL_NO_ERROR, "Minos bezel batching GLES error");
+                        };
+                        for (int tick = 0; tick < 12; ++tick)
+                            compare(tick, false);
+                        std::cout << "Minos " << viewWidth << "x" << height << " scale=" << scale
+                                  << " turns=" << turns << " draws "
+                                  << reference->statistics().drawCalls << " -> "
+                                  << batched->statistics().drawCalls << '\n';
+                        compare(0, true);
+                        require(reference->statistics().drawCalls == 2 &&
+                                    batched->statistics().drawCalls == 1,
+                                "Minos cached bezel should use one draw");
+                    }
+                }
+            }
+            SDL_GL_DestroyContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
             return 0;
         }
         if (argc == 2 && std::string(argv[1]) == "--minos-check") {
@@ -274,7 +462,8 @@ int main(int argc, char **argv) {
             for (int n = 0; n < 12; ++n) {
                 bezel.update("minotron", state, 1. / 60, true);
                 require(bezel.draw(0, 960, 720, 240, 200, 480, 320, 0), "Cached cadence draw");
-                require(bezel.refreshedFrame() == (n % 2 == 1), "Cached draw reported a fresh synth frame");
+                require(bezel.refreshedFrame() == (n % 2 == 1),
+                        "Cached draw reported a fresh synth frame");
             }
             bezel.discardPendingFrame();
             require(!bezel.refreshedFrame(), "Discard retained a refresh notification");
@@ -361,6 +550,133 @@ int main(int argc, char **argv) {
                 std::cout << "Cache pass " << pass << " compiles=" << stat.shaderCompilations
                           << " binary_hits=" << stat.shaderCacheHits << "\n";
                 effect->releaseGraphics();
+            }
+            SDL_GL_DestroyContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--layer-copy-audit") {
+            const neon::effects::Destination dest{
+                0, 960, 720, {0, 0, 960, 720}, {210, 0, 540, 720}, 0, false, true};
+            for (const std::string stem :
+                 {"Deflex", "FiveADay", "GoatUp", "GoatUp2", "Gridrunner", "GridrunnerClassic",
+                  "Minos", "MinotaurRescue", "Minotron", "SuperOxWars"}) {
+                auto runtime = loadBakedBezel(stem);
+                runtime->parameters().renderScale = .5f;
+                if (stem == "Gridrunner" || stem == "GridrunnerClassic")
+                    runtime->components().at(3).resolution = 512;
+                unsigned maxDraws = 0, maxLayerCopies = 0, copiedFrames = 0;
+                for (int frame = 0; frame < 24; ++frame) {
+                    runtime->frameSampled(1. / 60, dest);
+                    if (frame >= 4) {
+                        const auto &stats = runtime->statistics();
+                        maxDraws = std::max(maxDraws, stats.drawCalls);
+                        maxLayerCopies = std::max(maxLayerCopies, stats.layerCopies);
+                        copiedFrames += stats.layerCopies != 0;
+                    }
+                }
+                const auto error = glGetError();
+                std::cout << stem << " max_draws=" << maxDraws
+                          << " max_layer_copies=" << maxLayerCopies
+                          << " frames_with_copies=" << copiedFrames << " gl_error=" << error
+                          << "\n";
+            }
+            SDL_GL_DestroyContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 0;
+        }
+        const bool oxCopyCheck = argc == 2 && std::string(argv[1]) == "--superoxwars-copy-check";
+        if (oxCopyCheck || (argc == 2 && std::string(argv[1]) == "--goatup-copy-check")) {
+            using neon::effects::Destination;
+            using neon::effects::Runtime;
+            using Clock = std::chrono::steady_clock;
+            const std::string stem = oxCopyCheck ? "SuperOxWars" : "GoatUp";
+            {
+                for (int turns : {0, 1}) {
+                    for (float scale : {.5f, 1.f}) {
+                        auto optimized = loadBakedBezel(stem);
+                        auto reference = loadBakedBezel(stem);
+                        reference->parameters().copyElision = false;
+                        if (oxCopyCheck)
+                            reference->parameters().nodePreview = 20;
+                        for (auto *runtime : {optimized.get(), reference.get()})
+                            runtime->parameters().renderScale = scale;
+                        constexpr int width = 960, height = 720;
+                        const Destination dest{0,
+                                               width,
+                                               height,
+                                               {0, 0, width, height},
+                                               turns ? neon::effects::Rect{300, 0, 360, height}
+                                                     : neon::effects::Rect{210, 0, 540, height},
+                                               turns,
+                                               false,
+                                               true};
+                        std::vector<uint8_t> after(size_t(width) * height * 4),
+                            before(after.size());
+                        std::vector<double> optimizedMs, referenceMs;
+                        for (int frame = 0; frame < 32; ++frame) {
+                            if (oxCopyCheck || frame == 16) {
+                                for (auto *runtime : {optimized.get(), reference.get()}) {
+                                    auto &controls =
+                                        runtime->authoring().controls(oxCopyCheck ? 24 : 11);
+                                    const auto set = [&](const char *key, float value) {
+                                        auto parameter =
+                                            std::find_if(controls.begin(), controls.end(),
+                                                         [&](const auto &control) {
+                                                             return control.key == key;
+                                                         });
+                                        require(parameter != controls.end(),
+                                                "Missing reactive scene control");
+                                        parameter->enabled = true;
+                                        parameter->value = value;
+                                    };
+                                    if (oxCopyCheck) {
+                                        set("colour.7.red", 1.f + float(frame) / 16);
+                                        set("colour.10.blue", 3.f - float(frame) / 16);
+                                        set("node.20.f.2", float(frame - 16) / 128);
+                                    } else {
+                                        set("node.22.i.2", 46);
+                                    }
+                                }
+                            }
+                            auto render = [&](Runtime &runtime, std::vector<uint8_t> &pixels,
+                                              std::vector<double> &times) {
+                                const auto start = Clock::now();
+                                runtime.frameSampled(1. / 60, dest);
+                                glFinish();
+                                if (frame >= 4 && frame != 16)
+                                    times.push_back(std::chrono::duration<double, std::milli>(
+                                                        Clock::now() - start)
+                                                        .count());
+                                glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                             pixels.data());
+                            };
+                            render(*optimized, after, optimizedMs);
+                            render(*reference, before, referenceMs);
+                            require(after == before, "Copy-elision image mismatch");
+                            if (const auto error = glGetError(); error != GL_NO_ERROR)
+                                throw std::runtime_error(stem + " copy-elision GLES error " +
+                                                         std::to_string(error));
+                        }
+                        const auto &fast = optimized->statistics(), &slow = reference->statistics();
+                        require(fast.layerCopies == 0 &&
+                                    slow.layerCopies >= (oxCopyCheck ? 4u : 5u) &&
+                                    fast.drawCalls + slow.layerCopies == slow.drawCalls,
+                                "The renderer still submits unnecessary layer copies");
+                        require(fast.targets <= slow.targets &&
+                                    fast.targetBytes <= slow.targetBytes,
+                                "Copy elision increases the render-target budget");
+                        const auto average = [](const auto &samples) {
+                            return std::accumulate(samples.begin(), samples.end(), 0.) /
+                                   samples.size();
+                        };
+                        std::cout << stem << " scale=" << scale << " turns=" << turns << " draws "
+                                  << slow.drawCalls << " -> " << fast.drawCalls << " frame_ms "
+                                  << average(referenceMs) << " -> " << average(optimizedMs) << "\n";
+                    }
+                }
             }
             SDL_GL_DestroyContext(context);
             SDL_DestroyWindow(window);

@@ -28,7 +28,9 @@ class FontRegistry {
     FontRegistry(); // neon-hud and vectrex-menu, no system font/ROM dependency
     void add(VectorFont, bool replace = false);
     const VectorFont *find(const std::string &) const;
-    uint64_t revision() const { return revision_; }
+    uint64_t revision() const {
+        return revision_;
+    }
     std::vector<std::string> ids() const;
 
   private:

@@ -362,21 +362,24 @@ void collectible::run() {
     g->bounceOff(this, g->planets);
 }
 
-// Rescued: points (more the closer to the centre in solar mode), a heart, a grunt.
-void collectible::hitBy(entity *by) {
-    spaceWars *g = game;
-    float d = float(by->pos.length());
+int collectible::pointsAt(const spaceWars &game, float d) {
     // The radius is rounded to float first, but this edge multiplier is formed
     // in double precision before storing as float. Float-only subtraction can
     // lose a rescue point at the boundary (22 becomes 21 on the first level).
     double inward = 0.51 - double(d);
     float edge = d <= 0.5f ? float(inward + inward) : 0.02f;
-    float pts = float(double(float(g->level + 1)) * 1.1 * 1000.0);
-    if (!g->sunOn)
+    float pts = float(double(float(game.level + 1)) * 1.1 * 1000.0);
+    if (!game.sunOn)
         pts = pts / 10.0f;
     else
         pts = pts * edge;
-    int points = int(pts);
+    return int(pts);
+}
+
+// Rescued: points (more the closer to the centre in solar mode), a heart, a grunt.
+void collectible::hitBy(entity *by) {
+    spaceWars *g = game;
+    const int points = pointsAt(*g, float(by->pos.length()));
     if (10000 < points)
         g->achieveGoal(2);
     g->levelsNoRescue = 0;
@@ -752,7 +755,7 @@ void theSun::hitBy(entity *by) {
                 // use binary64 around the stored mass and radius values.
                 mass = float(double(mass) * (double(k) * 0.03 + 1.03));
                 size = float(double(size) * (double(k) * 0.1 + 1.1));
-                if (0.18 < double(size)) {
+                if (collapseRadius < double(size)) {
                     size = 0.0001f;
                     collapsed = true;
                     g->playSample(0x16);
@@ -774,8 +777,7 @@ void theSun::hitBy(entity *by) {
         c->size = 0.04f;
         c->blowUp(unsigned(neonRand()), 0x100);
         c->size = 0.02f;
-        if (!g->demo)
-            g->lives[c->joy]--;
+        g->loseShip(c->joy);
         if (g->lives[c->joy] > 0) {
             c->reSpawn();
             c->fc = 120;

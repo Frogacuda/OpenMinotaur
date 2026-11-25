@@ -33,6 +33,9 @@ class History {
     void tick(bool held, bool pressed, bool ok, bool paused = false);
     void drawGrid(GridRenderer &, ActorRenderer &, neon::vec2d, bool paused);
     void drawActors(ActorRenderer &, neon::vec2d, bool paused);
+    bool finished() const {
+        return phase == 12;
+    }
     bool trial() const {
         return phase == 5 || phase == 8 || phase == 11;
     }

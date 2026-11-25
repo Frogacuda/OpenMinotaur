@@ -20,7 +20,8 @@ varying vec2 vUV;
 varying vec2 vScreenUV;
 void main() {
     vScreenUV=aUV;
-    vUV = uClockwise > 0.5 ? vec2(1.0-aUV.y,aUV.x):uClockwise<-.5 ? vec2(aUV.y,1.0-aUV.x):aUV;
+    vUV = uClockwise > 1.5 ? 1.0-aUV : uClockwise > 0.5 ? vec2(1.0-aUV.y,aUV.x)
+                             : uClockwise < -0.5 ? vec2(aUV.y,1.0-aUV.x) : aUV;
     gl_Position = vec4(aPos, 0.0, 1.0);
 }
 )";
@@ -69,6 +70,10 @@ float rowGaps(float row) {
 }
 void main() {
     vec2 uv = vUV;
+    if (uPass > 3.5) {
+        gl_FragColor = texture2D(uTex, vec2(uv.x, 1.0-uv.y));
+        return;
+    }
     if(uPass>0.5){
         vec2 p=vUV;
         if(uPass<1.5){
@@ -244,6 +249,7 @@ void Display::shutdown() {
     if (bezelTex_)
         glDeleteTextures(1, &bezelTex_);
     bezelTex_ = 0;
+    minorolaTexture_ = 0;
     bezelKey_.clear();
     if (presentProg_)
         glDeleteProgram(presentProg_);
@@ -260,6 +266,7 @@ void Display::abandonGraphics() {
     surface_.framebuffer = 0;
     surface_.width = surface_.height = 0;
     colorTex_ = depthRb_ = presentProg_ = quadVbo_ = vao_ = bezelTex_ = 0;
+    minorolaTexture_ = 0;
     bezelKey_.clear();
     uTex_ = uTexSize_ = uOutSize_ = uSharp_ = uClockwise_ = -1;
     uTime_ = uPass_ = uMode_ = uScanlines_ = uPortraitScreen_ = uRasterSize_ = -1;
@@ -319,12 +326,14 @@ void Display::destroySurface() {
 
 // ------------------------------------------------------------- layout -----
 
-bool Display::configure(int windowW, int windowH, NativeFormat native, const DisplaySettings &s) {
+bool Display::configure(int windowW, int windowH, NativeFormat native, const DisplaySettings &s,
+                        unsigned minorolaTexture) {
     winW_ = std::max(windowW, 1);
     winH_ = std::max(windowH, 1);
     filter_ = s.filter;
     backdrop_ = s.backdropColour;
     backdropMode_ = s.backdrop;
+    minorolaTexture_ = minorolaTexture;
     screenMode_ = s.screenMode;
     backdropTurns_ = winW_ >= winH_ ? (s.orientation == Orientation::Portrait        ? 1
                                        : s.orientation == Orientation::PortraitRight ? -1
@@ -334,7 +343,12 @@ bool Display::configure(int windowW, int windowH, NativeFormat native, const Dis
         filter_ = screenMode_ == ScreenMode::Sharp ? Filter::SharpBilinear : Filter::Bilinear;
 
     const auto previous = layout_;
-    layout_ = displayLayout(winW_, winH_, native, s);
+    if (s.backdrop == Backdrop::Minorola && !minorolaTexture_) {
+        auto fallback = s;
+        fallback.backdrop = Backdrop::Colour;
+        layout_ = displayLayout(winW_, winH_, native, fallback);
+    } else
+        layout_ = displayLayout(winW_, winH_, native, s);
     view_ = layout_.view;
     surface_.displayAspect =
         (layout_.turns & 1) ? float(view_.h) / view_.w : float(view_.w) / view_.h;
@@ -492,15 +506,38 @@ void Display::present(unsigned framebuffer) {
     }
 #endif
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glViewport(view_.x, winH_ - (view_.y + view_.h), view_.w, view_.h);
     glBindVertexArray(vao_);
     glUseProgram(presentProg_);
     glActiveTexture(GL_TEXTURE0);
+    glUniform1i(uTex_, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, reinterpret_cast<void *>(0));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 16, reinterpret_cast<void *>(8));
+#ifndef MINO_NO_PRESENTATION_FILTERS
+    const Rect &frame = layout_.minorolaFrame;
+    const bool croppedFrame = frame.w > winW_ || frame.h > winH_;
+    const auto drawMinorola = [&] {
+        glViewport(frame.x, winH_ - frame.y - frame.h, frame.w, frame.h);
+        glBindTexture(GL_TEXTURE_2D, minorolaTexture_);
+        glUniform1f(uClockwise_, float(layout_.minorolaTurns));
+        glUniform1f(uPass_, 4.f);
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDisable(GL_BLEND);
+    };
+    // Paint the cropped frame behind the menu so the entire native fit stays visible.
+    if (frame.w && minorolaTexture_ && croppedFrame)
+        drawMinorola();
+#endif
+    glViewport(view_.x, winH_ - (view_.y + view_.h), view_.w, view_.h);
     glBindTexture(GL_TEXTURE_2D, output);
     GLint f = filter_ == Filter::Nearest ? GL_NEAREST : GL_LINEAR;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
-    glUniform1i(uTex_, 0);
     glUniform1f(uPass_, 0.f);
     glUniform1f(uMode_, screenMode_ == ScreenMode::Sharp ? 2.f : 0.f);
     glUniform1i(uScanlines_, screenMode_ == ScreenMode::Scanlines);
@@ -514,12 +551,12 @@ void Display::present(unsigned framebuffer) {
     glUniform1f(uSharp_, !isCRT(screenMode_) && filter_ == Filter::SharpBilinear ? 1.0f : 0.0f);
     glUniform1f(uClockwise_, float(rotation));
 
-    glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, reinterpret_cast<void *>(0));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 16, reinterpret_cast<void *>(8));
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+#ifndef MINO_NO_PRESENTATION_FILTERS
+    // The fitted frame overlays the menu's rounded screen corners.
+    if (frame.w && minorolaTexture_ && !croppedFrame)
+        drawMinorola();
+#endif
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

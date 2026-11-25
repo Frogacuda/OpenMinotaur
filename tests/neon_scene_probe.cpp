@@ -25,20 +25,20 @@ void capture(const std::filesystem::path &path, int width, int height, int surfa
     if (!out)
         throw std::runtime_error("Scene capture write failed");
 }
-}
+} // namespace
 int main(int argc, char **argv) {
     SDL_Window *window = nullptr;
     SDL_GLContext context = nullptr;
     try {
         if (argc < 4 || argc > 6)
-            throw std::runtime_error("Usage: scene-probe data scene output [hue-turns] [render-scale]");
+            throw std::runtime_error(
+                "Usage: scene-probe data scene output [hue-turns] [render-scale]");
         if (!SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(SDL_GetError());
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        window = SDL_CreateWindow("Scene probe", 1280, 1280,
-                                  SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+        window = SDL_CreateWindow("Scene probe", 1280, 1280, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
         if (!window)
             throw std::runtime_error(SDL_GetError());
         context = SDL_GL_CreateContext(window);
@@ -66,8 +66,8 @@ int main(int argc, char **argv) {
                     glClear(GL_COLOR_BUFFER_BIT);
                     effect.frame(1. / 60., {0, 1280, 1280, {0, 0, size.first, size.second}, {}});
                 }
-                capture(output / (std::to_string(size.first) + "x" +
-                                   std::to_string(size.second) + ".ppm"),
+                capture(output / (std::to_string(size.first) + "x" + std::to_string(size.second) +
+                                  ".ppm"),
                         size.first, size.second, 1280);
             }
         }

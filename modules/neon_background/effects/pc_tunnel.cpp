@@ -6,7 +6,9 @@
 #include <stdexcept>
 namespace neon::pc {
 namespace {
-Point add(Point a, Point b) { return {a.x + b.x, a.y + b.y, a.z + b.z}; }
+Point add(Point a, Point b) {
+    return {a.x + b.x, a.y + b.y, a.z + b.z};
+}
 Point lerp(Point a, Point b, float t) {
     return {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t};
 }
@@ -75,7 +77,9 @@ void TunnelPlayback::scalar(size_t o, float f) {
     std::memcpy(&v, &f, 4);
     word(o, v);
 }
-Point TunnelPlayback::point(size_t o) const { return {scalar(o), scalar(o + 4), scalar(o + 8)}; }
+Point TunnelPlayback::point(size_t o) const {
+    return {scalar(o), scalar(o + 4), scalar(o + 8)};
+}
 void TunnelPlayback::point(size_t o, Point p) {
     scalar(o, p.x);
     scalar(o + 4, p.y);

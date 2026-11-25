@@ -1,0 +1,2654 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "assets": {
+    "fruit": "tp.png"
+  },
+  "templates": {
+    "frameBeam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [
+        [0, 0],
+        [0, 16]
+      ],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "bezelFrame": {
+      "kind": "group",
+      "inputs": {
+        "width": 304,
+        "height": 88
+      },
+      "size": [
+        [
+          "get",
+          "width"
+        ],
+        [
+          "get",
+          "height"
+        ]
+      ],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "width"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frameBeam",
+          "x": [
+            "-",
+            [
+              "get",
+              "width"
+            ],
+            2
+          ],
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "height"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frameBeam",
+          "x": 2,
+          "y": [
+            "-",
+            [
+              "get",
+              "height"
+            ],
+            2
+          ],
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "width"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "height"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0,
+          "lineWidth": 2.4,
+          "color": [0.37, 0.88, 1, 0.76]
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "portrait-top",
+          "kind": "group",
+          "size": [956, 191],
+          "x": [
+            "/",
+            [
+              "-",
+              1000,
+              [
+                "*",
+                956,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ],
+            2
+          ],
+          "y": [
+            "+",
+            [
+              "coalesce",
+              [
+                "read",
+                "portraitInset"
+              ],
+              0
+            ],
+            [
+              "*",
+              15,
+              [
+                "coalesce",
+                [
+                  "read",
+                  "railScale"
+                ],
+                1
+              ]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-top-left"
+          },
+          "children": [
+            {
+              "id": "high-score",
+              "kind": "group",
+              "y": 0,
+              "size": [470, 75],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 75
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "High Score",
+                  "x": 16,
+                  "y": 9,
+                  "size": [438, 28],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "score",
+                  "kind": "text",
+                  "text": "{highScore}",
+                  "x": 16,
+                  "y": 32,
+                  "size": [438, 38],
+                  "font": "neon-hud",
+                  "fontSize": 33,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "highScore": [
+                  "coalesce",
+                  [
+                    "read",
+                    "highScore"
+                  ],
+                  "2,338,600"
+                ]
+              },
+              "x": 0
+            },
+            {
+              "id": "day-best",
+              "kind": "group",
+              "y": 86,
+              "size": [470, 105],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 105
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Day Best",
+                  "x": 16,
+                  "y": 8,
+                  "size": [438, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 22,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule-43",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 36,
+                  "size": [440, 2],
+                  "points": [
+                    [0, 0],
+                    [438, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "score-label",
+                  "kind": "text",
+                  "text": "Score",
+                  "x": 16,
+                  "y": 46,
+                  "size": [178, 27],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "score-value",
+                  "kind": "text",
+                  "text": "{dayBest}",
+                  "x": 204,
+                  "y": 44,
+                  "size": [250, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "lives-label",
+                  "kind": "text",
+                  "text": "Lives",
+                  "x": 16,
+                  "y": 73,
+                  "size": [178, 27],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "lives-value",
+                  "kind": "text",
+                  "text": "{dayLives}",
+                  "x": 204,
+                  "y": 71,
+                  "size": [250, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "dayBest": [
+                  "coalesce",
+                  [
+                    "read",
+                    "dayBest"
+                  ],
+                  "321,880"
+                ],
+                "dayLives": [
+                  "coalesce",
+                  [
+                    "read",
+                    "dayLives"
+                  ],
+                  4
+                ]
+              },
+              "x": 0
+            },
+            {
+              "id": "stats",
+              "kind": "group",
+              "y": 0,
+              "size": [474, 191],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 474,
+                    "height": 191
+                  }
+                },
+                {
+                  "id": "penalty-label",
+                  "kind": "text",
+                  "text": "Score Penalty",
+                  "x": 16,
+                  "y": 23,
+                  "size": [274, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "penalty-value",
+                  "kind": "text",
+                  "text": "{penalty}",
+                  "x": 295,
+                  "y": 21,
+                  "size": [163, 28],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "rule-59",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 64,
+                  "size": [444, 2],
+                  "points": [
+                    [0, 0],
+                    [442, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "lost-label",
+                  "kind": "text",
+                  "text": "Minotaurs Lost",
+                  "x": 16,
+                  "y": 87,
+                  "size": [274, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "lost-value",
+                  "kind": "text",
+                  "text": "{lost}",
+                  "x": 295,
+                  "y": 85,
+                  "size": [163, 28],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "rule-110",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 128,
+                  "size": [444, 2],
+                  "points": [
+                    [0, 0],
+                    [442, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "damage-label",
+                  "kind": "text",
+                  "text": "Damage Taken",
+                  "x": 16,
+                  "y": 151,
+                  "size": [274, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "damage-value",
+                  "kind": "text",
+                  "text": "{damage}",
+                  "x": 295,
+                  "y": 149,
+                  "size": [163, 28],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "penalty": [
+                  "coalesce",
+                  [
+                    "read",
+                    "scorePenalty"
+                  ],
+                  "6%"
+                ],
+                "lost": [
+                  "coalesce",
+                  [
+                    "read",
+                    "minotaursLost"
+                  ],
+                  2
+                ],
+                "damage": [
+                  "coalesce",
+                  [
+                    "read",
+                    "damageTaken"
+                  ],
+                  "3 hits"
+                ]
+              },
+              "x": 482
+            }
+          ],
+          "scale": [
+            "coalesce",
+            [
+              "read",
+              "railScale"
+            ],
+            1
+          ]
+        },
+        {
+          "id": "portrait-bottom",
+          "kind": "group",
+          "size": [956, 214],
+          "x": [
+            "/",
+            [
+              "-",
+              1000,
+              [
+                "*",
+                956,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ],
+            2
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "coalesce",
+                [
+                  "read",
+                  "portraitInset"
+                ],
+                0
+              ],
+              [
+                "*",
+                218,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-bottom-left"
+          },
+          "children": [
+            {
+              "id": "formation-bonus",
+              "kind": "group",
+              "y": 0,
+              "size": [414, 82],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 414,
+                    "height": 82
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Formation Bonus",
+                  "x": 16,
+                  "y": 6,
+                  "size": [265, 22],
+                  "font": "vectrex-menu",
+                  "fontSize": 17,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule-45",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 29,
+                  "size": [384, 2],
+                  "points": [
+                    [0, 0],
+                    [382, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "next-label",
+                  "kind": "text",
+                  "text": "Next Kill",
+                  "x": 16,
+                  "y": 35,
+                  "size": [226, 25],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "next-value",
+                  "kind": "text",
+                  "text": "{next}",
+                  "x": 242,
+                  "y": 34,
+                  "size": [156, 27],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "carrier-0",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 65,
+                  "size": [39, 6],
+                  "color": [
+                    "if",
+                    [
+                      ">",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "formationKills"
+                        ],
+                        3
+                      ],
+                      0
+                    ],
+                    [0.55, 0.81, 1, 1],
+                    [0.22, 0.27, 0.32, 0.32]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "carrier-1",
+                  "kind": "rect",
+                  "x": 62,
+                  "y": 65,
+                  "size": [39, 6],
+                  "color": [
+                    "if",
+                    [
+                      ">",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "formationKills"
+                        ],
+                        3
+                      ],
+                      1
+                    ],
+                    [0.55, 0.81, 1, 1],
+                    [0.22, 0.27, 0.32, 0.32]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "carrier-2",
+                  "kind": "rect",
+                  "x": 108,
+                  "y": 65,
+                  "size": [39, 6],
+                  "color": [
+                    "if",
+                    [
+                      ">",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "formationKills"
+                        ],
+                        3
+                      ],
+                      2
+                    ],
+                    [0.55, 0.81, 1, 1],
+                    [0.22, 0.27, 0.32, 0.32]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "carrier-3",
+                  "kind": "rect",
+                  "x": 154,
+                  "y": 65,
+                  "size": [39, 6],
+                  "color": [
+                    "if",
+                    [
+                      ">",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "formationKills"
+                        ],
+                        3
+                      ],
+                      3
+                    ],
+                    [0.55, 0.81, 1, 1],
+                    [0.22, 0.27, 0.32, 0.32]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "carrier-4",
+                  "kind": "rect",
+                  "x": 200,
+                  "y": 65,
+                  "size": [39, 6],
+                  "color": [
+                    "if",
+                    [
+                      ">",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "formationKills"
+                        ],
+                        3
+                      ],
+                      4
+                    ],
+                    [0.55, 0.81, 1, 1],
+                    [0.22, 0.27, 0.32, 0.32]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "formation-kills",
+                  "kind": "text",
+                  "text": "{kills}",
+                  "x": 266,
+                  "y": 56,
+                  "size": [132, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "boost",
+                  "kind": "text",
+                  "text": "2x Points",
+                  "x": 288,
+                  "y": 7,
+                  "size": [110, 20],
+                  "font": "vectrex-menu",
+                  "fontSize": 15,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "right",
+                  "visible": [
+                    "coalesce",
+                    [
+                      "read",
+                      "doublePoints"
+                    ],
+                    true
+                  ]
+                }
+              ],
+              "inputs": {
+                "kills": [
+                  "coalesce",
+                  [
+                    "read",
+                    "formationCount"
+                  ],
+                  "3 / 5"
+                ],
+                "next": [
+                  "coalesce",
+                  [
+                    "read",
+                    "nextBonus"
+                  ],
+                  "1,505"
+                ]
+              },
+              "visible": [
+                "coalesce",
+                [
+                  "read",
+                  "formationActive"
+                ],
+                true
+              ],
+              "x": 0
+            },
+            {
+              "id": "double-points",
+              "kind": "group",
+              "y": 0,
+              "size": [184, 42],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 184,
+                    "height": 42
+                  }
+                },
+                {
+                  "id": "standalone-boost",
+                  "kind": "text",
+                  "text": "2x Points",
+                  "x": 16,
+                  "y": 8,
+                  "size": [152, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "center",
+                  "visible": [
+                    "coalesce",
+                    [
+                      "read",
+                      "doublePoints"
+                    ],
+                    true
+                  ]
+                }
+              ],
+              "visible": [
+                "if",
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "formationActive"
+                  ],
+                  true
+                ],
+                false,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "doublePoints"
+                  ],
+                  true
+                ]
+              ],
+              "x": 0
+            },
+            {
+              "id": "firepower",
+              "kind": "group",
+              "y": 0,
+              "size": [148, 82],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 148,
+                    "height": 82
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Power",
+                  "x": 12,
+                  "y": 4,
+                  "size": [124, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 20,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "center"
+                },
+                {
+                  "id": "power-meter",
+                  "kind": "radial",
+                  "x": 47,
+                  "y": 24,
+                  "size": [54, 54],
+                  "segments": 16,
+                  "fill": [
+                    "coalesce",
+                    [
+                      "read",
+                      "firepower"
+                    ],
+                    0.72
+                  ],
+                  "color": [0.55, 0.81, 1, 1],
+                  "trackColor": [0.22, 0.27, 0.32, 0.32]
+                }
+              ],
+              "x": 426
+            },
+            {
+              "id": "fruit-trail",
+              "kind": "group",
+              "y": 0,
+              "size": [370, 82],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 370,
+                    "height": 82
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Fruit Trail",
+                  "x": 16,
+                  "y": 8,
+                  "size": [338, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "towed",
+                  "kind": "text",
+                  "text": "{trail}",
+                  "x": 16,
+                  "y": 38,
+                  "size": [338, 37],
+                  "font": "neon-hud",
+                  "fontSize": 32,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "trail": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruitTrail"
+                  ],
+                  "5 / 15"
+                ]
+              },
+              "x": 586
+            },
+            {
+              "id": "five-a-day",
+              "kind": "group",
+              "y": 90,
+              "size": [528, 124],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 528,
+                    "height": 124
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Five a Day",
+                  "x": 16,
+                  "y": 9,
+                  "size": [496, 28],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "box-shadow-0",
+                  "kind": "rect",
+                  "x": 17,
+                  "y": 43,
+                  "size": [94, 62],
+                  "color": [0, 0, 0, 0.23],
+                  "fill": 1
+                },
+                {
+                  "id": "box-0",
+                  "kind": "vector",
+                  "x": 17,
+                  "y": 43,
+                  "size": [95, 63],
+                  "points": [
+                    [0, 0],
+                    [94, 0],
+                    [94, 62],
+                    [0, 62]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.65,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "fruit-0",
+                  "kind": "sprite",
+                  "asset": "fruit",
+                  "x": 40,
+                  "y": 50,
+                  "size": [48, 48],
+                  "frame": [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruit0Frame"
+                    ],
+                    [0, 64, 12, 13]
+                  ],
+                  "visible": [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitSetCount"
+                      ],
+                      3
+                    ],
+                    0
+                  ]
+                },
+                {
+                  "id": "box-shadow-1",
+                  "kind": "rect",
+                  "x": 117,
+                  "y": 43,
+                  "size": [94, 62],
+                  "color": [0, 0, 0, 0.23],
+                  "fill": 1
+                },
+                {
+                  "id": "box-1",
+                  "kind": "vector",
+                  "x": 117,
+                  "y": 43,
+                  "size": [95, 63],
+                  "points": [
+                    [0, 0],
+                    [94, 0],
+                    [94, 62],
+                    [0, 62]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.65,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "fruit-1",
+                  "kind": "sprite",
+                  "asset": "fruit",
+                  "x": 140,
+                  "y": 50,
+                  "size": [48, 48],
+                  "frame": [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruit1Frame"
+                    ],
+                    [51, 126, 14, 15]
+                  ],
+                  "visible": [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitSetCount"
+                      ],
+                      3
+                    ],
+                    1
+                  ]
+                },
+                {
+                  "id": "box-shadow-2",
+                  "kind": "rect",
+                  "x": 217,
+                  "y": 43,
+                  "size": [94, 62],
+                  "color": [0, 0, 0, 0.23],
+                  "fill": 1
+                },
+                {
+                  "id": "box-2",
+                  "kind": "vector",
+                  "x": 217,
+                  "y": 43,
+                  "size": [95, 63],
+                  "points": [
+                    [0, 0],
+                    [94, 0],
+                    [94, 62],
+                    [0, 62]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.65,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "fruit-2",
+                  "kind": "sprite",
+                  "asset": "fruit",
+                  "x": 240,
+                  "y": 50,
+                  "size": [48, 48],
+                  "frame": [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruit2Frame"
+                    ],
+                    [33, 97, 18, 13]
+                  ],
+                  "visible": [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitSetCount"
+                      ],
+                      3
+                    ],
+                    2
+                  ]
+                },
+                {
+                  "id": "box-shadow-3",
+                  "kind": "rect",
+                  "x": 317,
+                  "y": 43,
+                  "size": [94, 62],
+                  "color": [0, 0, 0, 0.23],
+                  "fill": 1
+                },
+                {
+                  "id": "box-3",
+                  "kind": "vector",
+                  "x": 317,
+                  "y": 43,
+                  "size": [95, 63],
+                  "points": [
+                    [0, 0],
+                    [94, 0],
+                    [94, 62],
+                    [0, 62]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.65,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "fruit-3",
+                  "kind": "sprite",
+                  "asset": "fruit",
+                  "x": 340,
+                  "y": 50,
+                  "size": [48, 48],
+                  "frame": [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruit3Frame"
+                    ],
+                    [33, 110, 18, 15]
+                  ],
+                  "visible": [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitSetCount"
+                      ],
+                      3
+                    ],
+                    3
+                  ]
+                },
+                {
+                  "id": "box-shadow-4",
+                  "kind": "rect",
+                  "x": 417,
+                  "y": 43,
+                  "size": [94, 62],
+                  "color": [0, 0, 0, 0.23],
+                  "fill": 1
+                },
+                {
+                  "id": "box-4",
+                  "kind": "vector",
+                  "x": 417,
+                  "y": 43,
+                  "size": [95, 63],
+                  "points": [
+                    [0, 0],
+                    [94, 0],
+                    [94, 62],
+                    [0, 62]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.65,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "fruit-4",
+                  "kind": "sprite",
+                  "asset": "fruit",
+                  "x": 440,
+                  "y": 50,
+                  "size": [48, 48],
+                  "frame": [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruit4Frame"
+                    ],
+                    [33, 126, 17, 17]
+                  ],
+                  "visible": [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitSetCount"
+                      ],
+                      3
+                    ],
+                    4
+                  ]
+                }
+              ],
+              "x": 0
+            },
+            {
+              "id": "lifetime",
+              "kind": "group",
+              "y": 90,
+              "size": [416, 124],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 416,
+                    "height": 124
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Lifetime",
+                  "x": 16,
+                  "y": 9,
+                  "size": [384, 28],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule-43",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 39,
+                  "size": [386, 2],
+                  "points": [
+                    [0, 0],
+                    [384, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "minotaurs-label",
+                  "kind": "text",
+                  "text": "Minotaurs",
+                  "x": 16,
+                  "y": 50,
+                  "size": [235, 27],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "minotaurs-value",
+                  "kind": "text",
+                  "text": "{minotaurs}",
+                  "x": 251,
+                  "y": 48,
+                  "size": [149, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "color": [
+                    "if",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "minotaurGoalComplete"
+                      ],
+                      true
+                    ],
+                    [0.54, 0.91, 0.63, 1],
+                    [0.96, 0.98, 1, 1]
+                  ],
+                  "align": "right"
+                },
+                {
+                  "id": "fruit-label",
+                  "kind": "text",
+                  "text": "Fruit",
+                  "x": 16,
+                  "y": 81,
+                  "size": [235, 27],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "fruit-value",
+                  "kind": "text",
+                  "text": "{fruit}",
+                  "x": 251,
+                  "y": 79,
+                  "size": [149, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "color": [
+                    "if",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "fruitGoalComplete"
+                      ],
+                      false
+                    ],
+                    [0.54, 0.91, 0.63, 1],
+                    [0.96, 0.98, 1, 1]
+                  ],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "minotaurs": [
+                  "coalesce",
+                  [
+                    "read",
+                    "lifetimeMinotaurs"
+                  ],
+                  "1,001"
+                ],
+                "fruit": [
+                  "coalesce",
+                  [
+                    "read",
+                    "lifetimeFruit"
+                  ],
+                  "7,412"
+                ]
+              },
+              "x": 540
+            }
+          ],
+          "scale": [
+            "coalesce",
+            [
+              "read",
+              "railScale"
+            ],
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "fiveaday-landscape",
+    "kind": "group",
+    "children": [
+      {
+        "id": "records",
+        "kind": "group",
+        "size": [410, 237],
+        "x": -24,
+        "y": -468,
+        "pivot": [1, 0],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "high-score",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 96],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 96
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "High Score",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "score",
+                "kind": "text",
+                "text": "{highScore}",
+                "x": 18,
+                "y": 45,
+                "size": [374, 42],
+                "font": "neon-hud",
+                "fontSize": 37,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "highScore": [
+                "coalesce",
+                [
+                  "read",
+                  "highScore"
+                ],
+                "2,338,600"
+              ]
+            }
+          },
+          {
+            "id": "day-best",
+            "kind": "group",
+            "y": 108,
+            "size": [410, 129],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 129
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Day Best",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "rule-43",
+                "kind": "vector",
+                "x": 18,
+                "y": 43,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "score-label",
+                "kind": "text",
+                "text": "Score",
+                "x": 18,
+                "y": 55,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "score-value",
+                "kind": "text",
+                "text": "{dayBest}",
+                "x": 225,
+                "y": 54,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "lives-label",
+                "kind": "text",
+                "text": "Lives",
+                "x": 18,
+                "y": 87,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "lives-value",
+                "kind": "text",
+                "text": "{dayLives}",
+                "x": 225,
+                "y": 86,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "dayBest": [
+                "coalesce",
+                [
+                  "read",
+                  "dayBest"
+                ],
+                "321,880"
+              ],
+              "dayLives": [
+                "coalesce",
+                [
+                  "read",
+                  "dayLives"
+                ],
+                4
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "fruit",
+        "kind": "group",
+        "size": [410, 369],
+        "x": -24,
+        "y": 468,
+        "pivot": [1, 1],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "fruit-trail",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 88],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 88
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Fruit Trail",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "towed",
+                "kind": "text",
+                "text": "{trail}",
+                "x": 18,
+                "y": 44,
+                "size": [374, 36],
+                "font": "neon-hud",
+                "fontSize": 31,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "trail": [
+                "coalesce",
+                [
+                  "read",
+                  "fruitTrail"
+                ],
+                "5 / 15"
+              ]
+            }
+          },
+          {
+            "id": "five-a-day",
+            "kind": "group",
+            "y": 100,
+            "size": [410, 125],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 125
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Five a Day",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "box-shadow-0",
+                "kind": "rect",
+                "x": 19,
+                "y": 48,
+                "size": [64, 60],
+                "color": [0, 0, 0, 0.23],
+                "fill": 1
+              },
+              {
+                "id": "box-0",
+                "kind": "vector",
+                "x": 19,
+                "y": 48,
+                "size": [65, 61],
+                "points": [
+                  [0, 0],
+                  [64, 0],
+                  [64, 60],
+                  [0, 60]
+                ],
+                "closed": true,
+                "lineWidth": 1.65,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "fruit-0",
+                "kind": "sprite",
+                "asset": "fruit",
+                "x": 29,
+                "y": 56,
+                "size": [44, 44],
+                "frame": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruit0Frame"
+                  ],
+                  [0, 64, 12, 13]
+                ],
+                "visible": [
+                  ">",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitSetCount"
+                    ],
+                    3
+                  ],
+                  0
+                ]
+              },
+              {
+                "id": "box-shadow-1",
+                "kind": "rect",
+                "x": 96,
+                "y": 48,
+                "size": [64, 60],
+                "color": [0, 0, 0, 0.23],
+                "fill": 1
+              },
+              {
+                "id": "box-1",
+                "kind": "vector",
+                "x": 96,
+                "y": 48,
+                "size": [65, 61],
+                "points": [
+                  [0, 0],
+                  [64, 0],
+                  [64, 60],
+                  [0, 60]
+                ],
+                "closed": true,
+                "lineWidth": 1.65,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "fruit-1",
+                "kind": "sprite",
+                "asset": "fruit",
+                "x": 106,
+                "y": 56,
+                "size": [44, 44],
+                "frame": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruit1Frame"
+                  ],
+                  [51, 126, 14, 15]
+                ],
+                "visible": [
+                  ">",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitSetCount"
+                    ],
+                    3
+                  ],
+                  1
+                ]
+              },
+              {
+                "id": "box-shadow-2",
+                "kind": "rect",
+                "x": 173,
+                "y": 48,
+                "size": [64, 60],
+                "color": [0, 0, 0, 0.23],
+                "fill": 1
+              },
+              {
+                "id": "box-2",
+                "kind": "vector",
+                "x": 173,
+                "y": 48,
+                "size": [65, 61],
+                "points": [
+                  [0, 0],
+                  [64, 0],
+                  [64, 60],
+                  [0, 60]
+                ],
+                "closed": true,
+                "lineWidth": 1.65,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "fruit-2",
+                "kind": "sprite",
+                "asset": "fruit",
+                "x": 183,
+                "y": 56,
+                "size": [44, 44],
+                "frame": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruit2Frame"
+                  ],
+                  [33, 97, 18, 13]
+                ],
+                "visible": [
+                  ">",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitSetCount"
+                    ],
+                    3
+                  ],
+                  2
+                ]
+              },
+              {
+                "id": "box-shadow-3",
+                "kind": "rect",
+                "x": 250,
+                "y": 48,
+                "size": [64, 60],
+                "color": [0, 0, 0, 0.23],
+                "fill": 1
+              },
+              {
+                "id": "box-3",
+                "kind": "vector",
+                "x": 250,
+                "y": 48,
+                "size": [65, 61],
+                "points": [
+                  [0, 0],
+                  [64, 0],
+                  [64, 60],
+                  [0, 60]
+                ],
+                "closed": true,
+                "lineWidth": 1.65,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "fruit-3",
+                "kind": "sprite",
+                "asset": "fruit",
+                "x": 260,
+                "y": 56,
+                "size": [44, 44],
+                "frame": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruit3Frame"
+                  ],
+                  [33, 110, 18, 15]
+                ],
+                "visible": [
+                  ">",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitSetCount"
+                    ],
+                    3
+                  ],
+                  3
+                ]
+              },
+              {
+                "id": "box-shadow-4",
+                "kind": "rect",
+                "x": 327,
+                "y": 48,
+                "size": [64, 60],
+                "color": [0, 0, 0, 0.23],
+                "fill": 1
+              },
+              {
+                "id": "box-4",
+                "kind": "vector",
+                "x": 327,
+                "y": 48,
+                "size": [65, 61],
+                "points": [
+                  [0, 0],
+                  [64, 0],
+                  [64, 60],
+                  [0, 60]
+                ],
+                "closed": true,
+                "lineWidth": 1.65,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "fruit-4",
+                "kind": "sprite",
+                "asset": "fruit",
+                "x": 337,
+                "y": 56,
+                "size": [44, 44],
+                "frame": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fruit4Frame"
+                  ],
+                  [33, 126, 17, 17]
+                ],
+                "visible": [
+                  ">",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitSetCount"
+                    ],
+                    3
+                  ],
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "id": "lifetime",
+            "kind": "group",
+            "y": 237,
+            "size": [410, 132],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 132
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Lifetime",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "rule-43",
+                "kind": "vector",
+                "x": 18,
+                "y": 43,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "minotaurs-label",
+                "kind": "text",
+                "text": "Minotaurs",
+                "x": 18,
+                "y": 57,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "minotaurs-value",
+                "kind": "text",
+                "text": "{minotaurs}",
+                "x": 225,
+                "y": 56,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [
+                  "if",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "minotaurGoalComplete"
+                    ],
+                    true
+                  ],
+                  [0.54, 0.91, 0.63, 1],
+                  [0.96, 0.98, 1, 1]
+                ],
+                "align": "right"
+              },
+              {
+                "id": "fruit-label",
+                "kind": "text",
+                "text": "Fruit",
+                "x": 18,
+                "y": 91,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "fruit-value",
+                "kind": "text",
+                "text": "{fruit}",
+                "x": 225,
+                "y": 90,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [
+                  "if",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "fruitGoalComplete"
+                    ],
+                    false
+                  ],
+                  [0.54, 0.91, 0.63, 1],
+                  [0.96, 0.98, 1, 1]
+                ],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "minotaurs": [
+                "coalesce",
+                [
+                  "read",
+                  "lifetimeMinotaurs"
+                ],
+                "1,001"
+              ],
+              "fruit": [
+                "coalesce",
+                [
+                  "read",
+                  "lifetimeFruit"
+                ],
+                "7,412"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "combat",
+        "kind": "group",
+        "size": [410, 314],
+        "x": 24,
+        "y": -468,
+        "pivot": [0, 0],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "firepower",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 94],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 94
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Firepower",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "track",
+                "kind": "rect",
+                "x": 18,
+                "y": 56,
+                "size": [374, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1
+              },
+              {
+                "id": "fill",
+                "kind": "rect",
+                "x": 18,
+                "y": 56,
+                "size": [374, 13],
+                "color": [0.55, 0.81, 1, 1],
+                "fill": [
+                  "coalesce",
+                  [
+                    "read",
+                    "firepower"
+                  ],
+                  0.72
+                ]
+              }
+            ]
+          },
+          {
+            "id": "formation-bonus",
+            "kind": "group",
+            "y": 106,
+            "size": [410, 130],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 130
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Formation Bonus",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "rule-45",
+                "kind": "vector",
+                "x": 18,
+                "y": 45,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "next-label",
+                "kind": "text",
+                "text": "Next Kill",
+                "x": 18,
+                "y": 62,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "next-value",
+                "kind": "text",
+                "text": "{next}",
+                "x": 225,
+                "y": 61,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "carrier-0",
+                "kind": "rect",
+                "x": 18,
+                "y": 102,
+                "size": [42, 8],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "formationKills"
+                      ],
+                      3
+                    ],
+                    0
+                  ],
+                  [0.55, 0.81, 1, 1],
+                  [0.22, 0.27, 0.32, 0.32]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "carrier-1",
+                "kind": "rect",
+                "x": 67,
+                "y": 102,
+                "size": [42, 8],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "formationKills"
+                      ],
+                      3
+                    ],
+                    1
+                  ],
+                  [0.55, 0.81, 1, 1],
+                  [0.22, 0.27, 0.32, 0.32]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "carrier-2",
+                "kind": "rect",
+                "x": 116,
+                "y": 102,
+                "size": [42, 8],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "formationKills"
+                      ],
+                      3
+                    ],
+                    2
+                  ],
+                  [0.55, 0.81, 1, 1],
+                  [0.22, 0.27, 0.32, 0.32]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "carrier-3",
+                "kind": "rect",
+                "x": 165,
+                "y": 102,
+                "size": [42, 8],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "formationKills"
+                      ],
+                      3
+                    ],
+                    3
+                  ],
+                  [0.55, 0.81, 1, 1],
+                  [0.22, 0.27, 0.32, 0.32]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "carrier-4",
+                "kind": "rect",
+                "x": 214,
+                "y": 102,
+                "size": [42, 8],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "formationKills"
+                      ],
+                      3
+                    ],
+                    4
+                  ],
+                  [0.55, 0.81, 1, 1],
+                  [0.22, 0.27, 0.32, 0.32]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "formation-kills",
+                "kind": "text",
+                "text": "{kills}",
+                "x": 270,
+                "y": 94,
+                "size": [122, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "kills": [
+                "coalesce",
+                [
+                  "read",
+                  "formationCount"
+                ],
+                "3 / 5"
+              ],
+              "next": [
+                "coalesce",
+                [
+                  "read",
+                  "nextBonus"
+                ],
+                "1,505"
+              ]
+            },
+            "visible": [
+              "coalesce",
+              [
+                "read",
+                "formationActive"
+              ],
+              true
+            ]
+          },
+          {
+            "id": "double-points",
+            "kind": "group",
+            "y": [
+              "if",
+              [
+                "coalesce",
+                [
+                  "read",
+                  "formationActive"
+                ],
+                true
+              ],
+              248,
+              106
+            ],
+            "size": [410, 66],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 66
+                }
+              },
+              {
+                "id": "boost",
+                "kind": "text",
+                "text": "2x Points",
+                "x": 18,
+                "y": 17,
+                "size": [374, 34],
+                "font": "vectrex-menu",
+                "fontSize": 29,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "center"
+              }
+            ],
+            "visible": [
+              "coalesce",
+              [
+                "read",
+                "doublePoints"
+              ],
+              true
+            ]
+          }
+        ]
+      },
+      {
+        "id": "stage-stats",
+        "kind": "group",
+        "size": [410, 171],
+        "x": 24,
+        "y": 468,
+        "pivot": [0, 1],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "stats",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 171],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 171
+                }
+              },
+              {
+                "id": "penalty-label",
+                "kind": "text",
+                "text": "Score Penalty",
+                "x": 18,
+                "y": 23,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "penalty-value",
+                "kind": "text",
+                "text": "{penalty}",
+                "x": 225,
+                "y": 22,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "rule-59",
+                "kind": "vector",
+                "x": 18,
+                "y": 59,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "lost-label",
+                "kind": "text",
+                "text": "Minotaurs Lost",
+                "x": 18,
+                "y": 74,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "lost-value",
+                "kind": "text",
+                "text": "{lost}",
+                "x": 225,
+                "y": 73,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "rule-110",
+                "kind": "vector",
+                "x": 18,
+                "y": 110,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "damage-label",
+                "kind": "text",
+                "text": "Damage Taken",
+                "x": 18,
+                "y": 125,
+                "size": [261, 23],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "damage-value",
+                "kind": "text",
+                "text": "{damage}",
+                "x": 225,
+                "y": 124,
+                "size": [167, 27],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "penalty": [
+                "coalesce",
+                [
+                  "read",
+                  "scorePenalty"
+                ],
+                "6%"
+              ],
+              "lost": [
+                "coalesce",
+                [
+                  "read",
+                  "minotaursLost"
+                ],
+                2
+              ],
+              "damage": [
+                "coalesce",
+                [
+                  "read",
+                  "damageTaken"
+                ],
+                "3 hits"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

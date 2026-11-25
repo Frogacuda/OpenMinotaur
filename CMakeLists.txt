@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(OpenMinotaur VERSION 0.9.6 LANGUAGES C CXX)
+project(OpenMinotaur VERSION 0.9.8 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -407,21 +407,49 @@ if(MINO_LIVE_BEZELS OR (MINO_LIVE_WIDGETS AND MINO_WIDGET_RENDERER))
     target_link_libraries(mino_presentation_assets PRIVATE mino_baked_assets mino_miniz)
 endif()
 if(MINO_LIVE_WIDGETS AND MINO_WIDGET_RENDERER)
+    target_compile_definitions(mino_launcher PRIVATE MINO_LIVE_WIDGETS_OPTION)
+    target_compile_definitions(mino_launcher_checks PRIVATE MINO_LIVE_WIDGETS_OPTION)
     add_library(mino_collection_title STATIC platform/collection_title.cpp)
     target_link_libraries(mino_collection_title PRIVATE mino_baked_assets)
     target_include_directories(mino_collection_title PUBLIC include platform engine/include PRIVATE third_party/miniz)
     target_link_libraries(mino_collection_title PUBLIC mino_widget_renderer mino_neon_background mino_presentation_assets SDL3::SDL3 PRIVATE mino_miniz mino_launcher)
     set(gridrunner_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/gridrunner-landscape.widgetml")
-    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${gridrunner_widgetml}")
+    set(goatup_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/goatup-landscape.widgetml")
+    set(superoxwars_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/superoxwars-landscape.widgetml")
+    set(fiveaday_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/fiveaday-landscape.widgetml")
+    set(minos_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/minos-landscape.widgetml")
+    set(goatup2_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/goatup2.widgetml")
+    set(minotron_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/minotron-landscape.widgetml")
+    set(deflex_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/deflex.widgetml")
+    set(minorescue_widgetml "${CMAKE_CURRENT_SOURCE_DIR}/modules/live_widgets/assets/examples/minorescue.widgetml")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        "${gridrunner_widgetml}" "${goatup_widgetml}" "${superoxwars_widgetml}" "${fiveaday_widgetml}" "${minos_widgetml}" "${goatup2_widgetml}" "${minotron_widgetml}" "${deflex_widgetml}"
+        "${minorescue_widgetml}")
     file(READ "${gridrunner_widgetml}" GRIDRUNNER_WIDGETML)
-    file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/gridrunner_widget_document.h"
+    file(READ "${goatup_widgetml}" GOATUP_WIDGETML)
+    file(READ "${superoxwars_widgetml}" SUPEROXWARS_WIDGETML)
+    file(READ "${fiveaday_widgetml}" FIVEADAY_WIDGETML)
+    file(READ "${minos_widgetml}" MINOS_WIDGETML)
+    file(READ "${goatup2_widgetml}" GOATUP2_WIDGETML)
+    file(READ "${minotron_widgetml}" MINOTRON_WIDGETML)
+    file(READ "${deflex_widgetml}" DEFLEX_WIDGETML)
+    file(READ "${minorescue_widgetml}" MINORESCUE_WIDGETML)
+    file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/gameplay_widget_documents.h"
         CONTENT [=[
 #pragma once
 inline constexpr const char gridrunnerWidgetDocument[] = R"WidgetML(@GRIDRUNNER_WIDGETML@)WidgetML";
+inline constexpr const char goatUpWidgetDocument[] = R"WidgetML(@GOATUP_WIDGETML@)WidgetML";
+inline constexpr const char superOxWarsWidgetDocument[] = R"WidgetML(@SUPEROXWARS_WIDGETML@)WidgetML";
+inline constexpr const char fiveADayWidgetDocument[] = R"WidgetML(@FIVEADAY_WIDGETML@)WidgetML";
+inline constexpr const char minosWidgetDocument[] = R"WidgetML(@MINOS_WIDGETML@)WidgetML";
+inline constexpr const char goatUp2WidgetDocument[] = R"WidgetML(@GOATUP2_WIDGETML@)WidgetML";
+inline constexpr const char minotronWidgetDocument[] = R"WidgetML(@MINOTRON_WIDGETML@)WidgetML";
+inline constexpr const char deflexWidgetDocument[] = R"WidgetML(@DEFLEX_WIDGETML@)WidgetML";
+inline constexpr const char minotaurRescueWidgetDocument[] = R"WidgetML(@MINORESCUE_WIDGETML@)WidgetML";
 ]=] @ONLY)
     foreach(shell_target IN ITEMS ${APP_TARGET} mino_app_resume_checks)
         if(TARGET ${shell_target})
-            target_sources(${shell_target} PRIVATE platform/gridrunner_widgets.cpp)
+            target_sources(${shell_target} PRIVATE platform/gameplay_widgets.cpp platform/in_game_menu.cpp)
             target_include_directories(${shell_target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
             target_link_libraries(${shell_target} PRIVATE mino_collection_title)
             target_compile_definitions(${shell_target} PRIVATE MINO_COLLECTION_TITLE)
@@ -447,6 +475,9 @@ if(MINO_LIVE_BEZELS)
         target_link_libraries(mino_live_bezel_gl_checks PRIVATE mino_live_bezels mino_glad)
         if(MINO_GRAPHICS_CHECKS)
             add_test(NAME live_bezel_gles COMMAND mino_live_bezel_gl_checks)
+            add_test(NAME goatup_live_bezel_copies COMMAND mino_live_bezel_gl_checks --goatup-copy-check)
+            add_test(NAME superoxwars_live_bezel_copies COMMAND mino_live_bezel_gl_checks --superoxwars-copy-check)
+            add_test(NAME minos_live_bezel_batch COMMAND mino_live_bezel_gl_checks --minos-batch-check)
             add_test(NAME neon_runtime_features COMMAND mino_neon_runtime_features ${PROJECT_SOURCE_DIR}/assets/presentation/neon)
         endif()
     endif()

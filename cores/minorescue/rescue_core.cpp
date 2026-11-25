@@ -70,6 +70,9 @@ class RescueCore final : public Core {
     PresentationState presentationState() const override {
         return presentation_.sample(game());
     }
+    PresentationState widgetPresentationState() const override {
+        return startup_.blocking() ? PresentationState{} : presentation_.widgets(game());
+    }
 
     bool init(Host &host, const SurfaceInfo &s) override {
         if (!startup_.begin(host, s))

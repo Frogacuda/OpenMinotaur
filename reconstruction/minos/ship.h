@@ -137,7 +137,9 @@ struct PlayState {
         0;                       // +0x488 values below 2 permit records/goals; owner initializes 1
     int32_t minosSaved = 0;      // +0x48c (goal 6 at > 24)
     int32_t minosSavedTotal = 0; // +0x490 (goals 7 / 8 at > 100 / > 200)
-    bool byte398 = false;        // +0x398 set with a minotaur voice sample
+    int32_t cavernRescues = 0;   // Completed rescues across respawns in this cavern.
+    int32_t lastLandingRating = 0; // Most recent awarded rescue landing, 5 (S) through 1 (D).
+    bool byte398 = false;          // +0x398 set with a minotaur voice sample
     void achieve(uint32_t bit, uint8_t state, const char *name); // the goal block's writes
     // theGame state motherSheep reads/writes (the core mirrors +0x4 and +0x470 each frame)
     int32_t drawMode = 2;          // +0x4 (motherSheep does nothing while it is 5)
@@ -242,8 +244,9 @@ struct PlayState {
     int32_t reportScore = 0, reportKind = 0; // +0x5c, +0x60 (new high score report)
     int32_t missionTime = 0;                 // +0x207850 frames in the cavern
     int32_t parTime = 0, parTimeBase = 0;    // +0x207854, +0x207858
-    float rating = 0, ratingShown = 0;       // +0x20785c, +0x207860
-    float bgeRate = 0.3f;                    // +0x20791c (newLevel 0.3)
+    float missionRating() const;
+    float rating = 0, ratingShown = 0; // +0x20785c, +0x207860
+    float bgeRate = 0.3f;              // +0x20791c (newLevel 0.3)
     // sequenceBonuses (+0x20792c..)
     int32_t scoreBase = 0;                          // +0x20792c
     float bonusT = 0;                               // +0x207930

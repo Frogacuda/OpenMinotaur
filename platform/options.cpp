@@ -120,6 +120,14 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
                         settings_->neonHighQuality("global") ? std::vector<std::string>{"hq", "lq"}
                                                              : std::vector<std::string>{"lq", "hq"},
                         bg == "neon"});
+#ifdef MINO_LIVE_WIDGETS_OPTION
+        rows.push_back(
+            {"LiveWidgets",
+             settings_->liveWidgetsEnabled("global") ? "On" : "Off",
+             "Display live gameplay stats and info in the letterboxed regions of your screen.",
+             "live_widgets",
+             {"on", "off"}});
+#endif
         int wp = std::clamp(std::atoi(get("wallpaper", "0").c_str()), 0, 3);
         rows.push_back(
             {"iOX Wallpaper", wallpaperNames[wp], "Change your iOS Wallpaper.", "wallpaper", {}});
@@ -160,9 +168,13 @@ std::vector<Launcher::OptionRow> Launcher::optionRows() const {
                         "rotate_controls",
                         {"off", "on"}});
         const auto shell = get("shell_audio", "full");
-        rows.push_back({"Title & iOX Audio", shell == "off" ? "Off" : shell == "cues" ? "Cues Only" : "Full",
+        rows.push_back({"Title & iOX Audio",
+                        shell == "off"    ? "Off"
+                        : shell == "cues" ? "Cues Only"
+                                          : "Full",
                         "Set ambience and button sounds for the title and iOX.",
-                        "shell_audio", {"full", "cues", "off"}});
+                        "shell_audio",
+                        {"full", "cues", "off"}});
     }
     return rows;
 }
@@ -175,8 +187,13 @@ MenuRect Launcher::optionButton(int i) const {
         return {w * .5f, top + 39, w * .25f, 28};
     if (i == iox::options::back)
         return {18, top + 8, 84, 27};
-    if (page() == Page::Options)
+    if (page() == Page::Options) {
+#ifdef MINO_LIVE_WIDGETS_OPTION
+        if (desktop_ && !layout_.portrait && optionsScreen_.tab == iox::options::screenTab)
+            return {18, top + 76 + float(i - iox::options::firstRow) * 33, w - 36, 28};
+#endif
         return {18, top + 76 + float(i - iox::options::firstRow) * 38, w - 36, 33};
+    }
     if (page() == Page::Mapping)
         return {w / 2 - 90, layout_.height - 133, 180, 38};
     if (page() == Page::Players)
@@ -344,8 +361,7 @@ void Launcher::drawOptions() {
             glEnable(GL_SCISSOR_TEST);
             glScissor(int(r.x * canvas.scaleX), int((layout_.height - r.y - r.h) * canvas.scaleY),
                       int(r.w * canvas.scaleX), int(r.h * canvas.scaleY));
-            rect(inner, current ? Colour{.29f, .43f, .62f} : Colour{.57f, .67f, .79f},
-                 current ? Colour{.20f, .35f, .55f} : Colour{.43f, .55f, .70f}, true, false, 4);
+            drawTabFill(inner, current);
             glDisable(GL_SCISSOR_TEST);
             if (focused(tab))
                 rect({r.x + 1, r.y + 1, r.w - 2, r.h - 2}, {.02f, .42f, 1.f, focusPulse()},
@@ -382,7 +398,8 @@ void Launcher::drawOptions() {
             const auto r = optionButton(slot);
             const auto &row = rows[i];
             const bool selected = focused(slot);
-            const bool toggle = row.key == "disable_touch" || row.key == "rotate_controls";
+            const bool toggle = row.key == "disable_touch" || row.key == "rotate_controls" ||
+                                row.key == "live_widgets";
             const bool child = row.key == "wallpaper" || row.key == "remap";
             if (selected && row.enabled)
                 selection(group, {r.x, r.y, r.w, r.h + (i + 1 < rows.size() ? 5.f : 0.f)});
@@ -399,7 +416,7 @@ void Launcher::drawOptions() {
                 if (!row.enabled)
                     text("Controller required", track.x - 112, r.cy() - 5.5f, 11, valueColour,
                          false);
-                const bool on = settings_->get("global", row.key, "off") == "on" && row.enabled;
+                const bool on = row.value == "On" && row.enabled;
                 rect(track, {.54f, .56f, .60f}, {.54f, .56f, .60f}, true);
                 rect({track.x + 1, track.y + 1, track.w - 2, track.h - 2},
                      on ? Colour{.14f, .42f, .80f} : Colour{.86f, .87f, .88f},

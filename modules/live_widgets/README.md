@@ -113,14 +113,51 @@ the underlying assets. Render-target/context ownership remains with the shell.
 
 See [font notices](FONT-NOTICES.txt) for font sources.
 
-## Gridrunner landscape prototype
+## Gameplay widget appearance
 
-Set `MINO_GRIDRUNNER_WIDGETS=1`, launch modern Gridrunner, and choose horizontal
-presentation to keep the 3:4 playfield upright. The overlay fits the usable side
+Gameplay LiveWidgets share these beam settings. All values are percentages.
+
+| Element | Brightness | Halo strength | Halo spread | White-hot core | Beam width | Opacity |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Vectrex headings and labels | 70 | 30 | 120 | 10 | 70 | 100 |
+| Readout text | 65 | 30 | 150 | 10 | 60 | 100 |
+| Panel borders | 130 | 50 | 180 | 35 | 60 | 60 |
+| Other vector marks | 55 | 30 | 175 | 10 | 70 | 100 |
+
+Use the `bezelFrame` template in the
+[Gridrunner WidgetML layout](assets/examples/gridrunner-landscape.widgetml)
+as the starting point for new game panels. Its four edges use the panel border
+beam settings and its black shadow is 35% opaque. Meters and sprites use their
+authored opacity and color with 100% gain.
+
+The collection shell loads the game's WidgetML document and samples its
+read-only widget presentation state on the LiveSynth refresh cadence.
+The renderer warms vector and text raster tiles at the display resolution
+during loading. Meter fills and changing values reuse the cached graphics
+where possible. Gameplay widgets stay in the letterboxing and inside a centered
+16:9 or 9:16 boundary on wider or taller screens.
+
+The in-game iOX menu uses the same renderer and has its own input and graphics
+lifecycle. The shell suspends the game while the menu owns input. The
+LiveWidgets display option controls the gameplay overlay.
+
+## Gridrunner letterbox widgets
+
+Enable **LiveWidgets** under **Options → Display** and choose horizontal
+presentation in modern Gridrunner to keep the 3:4 playfield upright. The overlay fits the usable side
 rails inside a centered 16:9 boundary. The checkpoint cards, stats, pickup log
 and cooldown stack share the editable [WidgetML layout](assets/examples/gridrunner-landscape.widgetml).
 The sample inputs exercise the full layout, including six concurrent timers.
 The app supplies live inputs through the core's read-only presentation snapshot.
+
+In upright portrait, the shared `portraitLayout` template places the checkpoint
+stack and run stats above the playfield. It reserves five pickup rows below the
+playfield and aligns two cooldown rows to that panel. The grid fills one column
+at a time from the right, with no drawing for empty cells. The overlay uses the
+actual gameplay bounds and stays inside a centered 9:16 region on taller screens.
+
+The pickup ring has its halo baked into the sprite
+alpha so the live color tint also colors the halo in one draw.
 
 The loading screen is presented before the cached renderer prewarms vector beams,
 glyphs and the radial meter mask at the final widget pixel size. A resize or
@@ -129,6 +166,90 @@ widget inputs and evaluates its layout on the same frames LiveSynth refreshes.
 When LiveSynth reuses a frame at 30 Hz, the overlay composites its previous
 widget draw list over it. The collection title uses its existing rendering path.
 
+## GoatUp letterbox widgets
+
+In landscape, the [GoatUp layout](assets/examples/goatup-landscape.widgetml)
+scales to the side rails. High Score and Run Stats anchor the left side.
+Flight, Mushroom, Protection and Gestation use independent cards that stack
+only while active. The Progress panel tracks the current camera elevation in
+both directions, with ticks at the tower's terrain changes.
+
+Slow Down uses a draining bar based on the remaining climb-speed recovery.
+When five cards overlap, both orientations show the four latest activations.
+
+In portrait, records and run stats sit above the playfield. The horizontal
+progress meter below it uses the same terrain ticks and a goat marker that
+faces the direction of travel. Active cards share the landscape templates and
+pack into a row beneath the meter. The portrait layout stays within a centered
+9:16 region on taller screens.
+
+GoatUp uses the same loading-time cache warm-up and LiveSynth refresh cadence
+as Gridrunner.
+
+## Super Ox Wars letterbox widgets
+
+The [landscape layout](assets/examples/superoxwars-landscape.widgetml) combines
+saved records, baked area target totals with live clears, a polarity readout,
+active combo cards, area progress, and five follower slots. The empty portions
+of the bars use a translucent track. Polarity glyph tints are warmed at load
+and the widgets refresh with LiveSynth.
+
+In portrait, High Score and Area Targets stack above the playfield next to
+Area Bests. Polarity, the radial boss meter and Followers sit below it.
+Active chain cards pack into their own row underneath. The layout stays
+within a centered 9:16 region on taller screens.
+
+## Five a Day letterbox widgets
+
+The [landscape layout](assets/examples/fiveaday-landscape.widgetml) places
+records and fruit tracking on the left, and firepower, formation bonuses, and
+damage stats on the right. Fruit Trail uses the current stage's scripted fruit
+total. The Five a Day slots use the game's own fruit sprites as each clear is
+counted. Lifetime totals cap and turn green at their achievement thresholds.
+Widget caches warm at load, and updates follow the LiveSynth refresh cadence.
+
+In portrait, scores and run stats sit above the playfield. Formation Bonus,
+radial Power and Fruit Trail form the first row below it, with Five a Day and
+Lifetime in the second row. The 2x Points badge fits inside Formation Bonus
+while both are active and has its own card when only the multiplier is active.
+
+## Caverns of Minos letterbox widgets
+
+The [landscape layout](assets/examples/minos-landscape.widgetml) shows records by
+ship, the score multiplier breakdown, cavern and game rescues, the last awarded
+landing grade and current S streak, and clean-run status. The level bonus uses
+the game's rescue, fuel and mission time rules. The current depth marker uses
+the map's surface and objective rows, and the par meter turns red at expiry.
+Widget caches warm at load and updates follow the LiveSynth refresh cadence.
+
+In portrait, records sit above gameplay on the left, with the multiplier and
+rescues on the right. Clean Run and Level Bonus sit below gameplay, next to
+Landing, Mission Time and Par Time. Level Bonus stays in place when Clean Run
+expires.
+
+## GoatUp 2 and Minotron letterbox widgets
+
+GoatUp 2 shows placed objects, minotaurs, tail size and active effects.
+Its counters move to the lower left in portrait. The cooldowns remain on
+the right. See the [GoatUp 2 layout](assets/examples/goatup2.widgetml).
+
+Minotron shows stage records, next extra life, weapon, beasties, pickups and
+effect timers. Landscape uses narrow score readouts with compact millions
+above six digits. Portrait shows full scores and uses vertical pickup expiry
+bars. See the [Minotron layout](assets/examples/minotron-landscape.widgetml).
+
+## Deflex and Minotaur Rescue letterbox widgets
+
+Deflex places level scores on the left and bats, shell and the active chain
+timer on the right. In upright portrait these two groups sit above the
+playfield. See the [Deflex layout](assets/examples/deflex.widgetml).
+
+Minotaur Rescue uses the current single-player Solar or Deep Space leaderboard,
+including the Survival variants. Solar adds sun stability, minotaur losses and
+rescue efficiency. Efficiency compares actual points from rescued minotaurs with
+the sum of their theoretical center values. In portrait, the bottom cards form a
+centered row that adjusts to the visible cards.
+See the [Minotaur Rescue layout](assets/examples/minorescue.widgetml).
 
 ## WidgetML
 

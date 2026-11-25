@@ -124,6 +124,7 @@ void LiveBezel::update(const std::string &game, PresentationState state, double 
             auto path = std::string("bezels/") + stem;
             std::istringstream scene(asset(path + ".neonb"));
             i.effect = neon::effects::Runtime::loadBaked(scene, {}, effectRead, &i.rate);
+            i.effect->parameters().skipTransparentMixerPasses = game == "minotron";
             i.effect->setShaderCacheDirectory(i.shaderCache);
             i.baselineHue = i.effect->parameters().hueShift;
             std::istringstream definitions(asset(path + ".nhml"));
@@ -305,9 +306,10 @@ bool LiveBezel::draw(unsigned framebuffer, int width, int height, int x, int y, 
             i.lastHeight = height;
             i.lastTurns = turns;
         }
-        const neon::effects::Destination destination{framebuffer,           width,        height,
-                                                     {0, 0, width, height}, {x, y, w, h}, turns,
-                                                     !exclusivePass,        exclusivePass};
+        const neon::effects::Destination destination{
+            framebuffer,           width,         height,
+            {0, 0, width, height}, {x, y, w, h},  turns,
+            !exclusivePass,        exclusivePass, i.game == "minos" || i.game == "minotron"};
         const bool due = i.pacer.due(cadenceDivisor());
         if (!due) {
             if (i.effect->presentCached(destination)) {

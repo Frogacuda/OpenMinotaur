@@ -237,13 +237,16 @@ void liveCarryAttackAndExitRoutes() {
         auto *exit = w->contactObjects;
         w->spawnPickup({.3, .05}, 0);
         w->preparePresentation();
-        StageSession session; StageHud hud;
+        StageSession session;
+        StageHud hud;
         session.beginRun(*w);
-        for (uint32_t tick = 0; tick < 600 && session.phase() == StageSession::Phase::Playing; ++tick) {
+        for (uint32_t tick = 0; tick < 600 && session.phase() == StageSession::Phase::Playing;
+             ++tick) {
             session.prepareOuterFrame(*w, hud, tick);
             const double move = tick >= 10 && tick < 40 ? .1 : tick >= 40 && tick < 70 ? -.1 : 0;
             w->advanceLocomotion(move, 0, tick, uint8_t(tick));
-            if (tick < 10) CHECK(exit->headbuttState == 0 && w->goat->state == 0);
+            if (tick < 10)
+                CHECK(exit->headbuttState == 0 && w->goat->state == 0);
         }
         CHECK(session.phase() == StageSession::Phase::BetweenLevels);
         CHECK(w->requiredFruit == 0 && w->score == 1200 && w->exitBonus == 1100);
@@ -339,12 +342,16 @@ void pickupVariantsAndExit() {
                               1000, 1000, 10000, 1000,  1000, 200};
     for (uint32_t variant = 0; variant < 12; ++variant) {
         auto w = arena();
-        w->spawnPickup({.1, .1}, variant);
+        w->spawnPickup({.1, .1}, variant, true);
         auto *item = static_cast<PickupActor *>(w->contactObjects);
         item->hitBy(w->goat.get());
         CHECK(w->score == awards[variant] && item->headbuttState == 1);
         CHECK(w->goat->followingCount == (variant == 10 ? 0 : 1) && w->requiredFruit == 0);
         CHECK(w->lives == 3); // variant 10 grants energy/shield, not an extra life
+        const int counted = variant != 9 && variant != 10;
+        CHECK(w->levelObjects == counted && w->foundObjects == counted);
+        CHECK(w->levelMinotaurs == (variant == 1) && w->foundMinotaurs == (variant == 1));
+        CHECK(w->goat->teaProtection == (variant == 10));
         if (variant == 3)
             CHECK(w->sharedGrace == 1000);
         if (variant == 8)
@@ -1600,14 +1607,37 @@ void frontendLifecycle() {
     auto reset = std::find_if(ui.buttons().begin(), ui.buttons().end(),
                               [](const auto &b) { return b.action == StageFrontend::Reset; });
     CHECK(reset != ui.buttons().end() && reset->alpha == 1); // packed colour writes alpha too
+    w->terrainPalette[0] = {.2, .4, .6, .8};
+    ui.focusAction(StageFrontend::Reset);
+    const auto resetColour = [&] {
+        ui.prepareDraws(*w);
+        const auto &foreground = ui.foregroundDraws();
+        const auto resetDraw =
+            std::find_if(foreground.begin(), foreground.end(),
+                         [&](const auto &d) { return d.frame == reset->sprite + 2; });
+        CHECK(resetDraw != foreground.end());
+        CHECK(std::count_if(foreground.begin(), foreground.end(), [](const auto &d) {
+                  return d.frame == 2 && d.colour.r == .2 && d.colour.g == .4 && d.colour.b == .6 &&
+                         d.colour.a == 1;
+              }) == 4);
+        return resetDraw->colour;
+    };
+    const auto firstTint = resetColour();
+    for (uint32_t frame = 34; frame < 50; ++frame)
+        ui.tick(*w, frame);
+    const auto secondTint = resetColour();
+    CHECK(firstTint.r == 1 && secondTint.r == 1);
+    CHECK((firstTint.g == 1 && secondTint.g == 0) || (firstTint.g == 0 && secondTint.g == 1));
+    CHECK(firstTint.b == (firstTint.g == 1 ? 0. : 112. / 255));
+    CHECK(secondTint.b == (secondTint.g == 1 ? 0. : 112. / 255));
     ui.touch(neon::input::TouchPhase::Down, 42, {0, -.17});
-    CHECK(ui.tick(*w, 35) == StageFrontend::Reset);
+    CHECK(ui.tick(*w, 51) == StageFrontend::Reset);
     ui.armReset();
     ui.touch(neon::input::TouchPhase::Up, 42, {0, -.17});
-    ui.tick(*w, 36);
+    ui.tick(*w, 52);
     CHECK(ui.resetTicks() == 59);
     ui.touch(neon::input::TouchPhase::Down, 42, {0, -.17});
-    CHECK(ui.tick(*w, 37) == StageFrontend::Reset && ui.resetTicks() == 58);
+    CHECK(ui.tick(*w, 53) == StageFrontend::Reset && ui.resetTicks() == 58);
     ui.capabilities(false, true, *w);
     const auto has = [&](int action) {
         return std::any_of(ui.buttons().begin(), ui.buttons().end(),
@@ -1621,10 +1651,10 @@ void frontendLifecycle() {
     ui.enter(StageFrontend::Page::Title, *w);
     pad.buttons = pad.pressed = 0;
     ui.pads(&pad, 1);
-    ui.tick(*w, 40);
+    ui.tick(*w, 56);
     pad.buttons = pad.pressed = neon::input::East;
     ui.pads(&pad, 1);
-    CHECK(ui.tick(*w, 41) == StageFrontend::Exit);
+    CHECK(ui.tick(*w, 57) == StageFrontend::Exit);
     ui.enter(StageFrontend::Page::Credits, *w);
     for (int tick = 0; tick < 301; ++tick)
         ui.tick(*w, uint32_t(tick));

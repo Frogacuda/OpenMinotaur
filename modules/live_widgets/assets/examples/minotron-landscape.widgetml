@@ -1,0 +1,2186 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "assets": {
+    "minotron": "minotron.png"
+  },
+  "templates": {
+    "portrait-effect": {
+      "kind": "group",
+      "inputs": {
+        "name": "",
+        "seconds": "",
+        "sprite": [0, 0, 1, 1],
+        "remaining": 0
+      },
+      "size": [282, 100],
+      "children": [
+        {
+          "id": "frame",
+          "use": "frame",
+          "inputs": {
+            "width": 282,
+            "height": 100
+          }
+        },
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{name}",
+          "x": 14,
+          "y": 12,
+          "size": [253, 28],
+          "fontSize": 19,
+          "color": [1, 0.89, 0.36, 1],
+          "align": "left",
+          "font": "vectrex-menu"
+        },
+        {
+          "id": "sprite",
+          "kind": "sprite",
+          "asset": "minotron",
+          "frame": ["get", "sprite"],
+          "x": 14,
+          "y": 49,
+          "size": [34, 34],
+          "fit": "contain"
+        },
+        {
+          "id": "seconds",
+          "kind": "text",
+          "text": "{seconds}",
+          "x": 77,
+          "y": 45,
+          "size": [188, 28],
+          "fontSize": 19,
+          "color": [0.96, 0.98, 1, 1],
+          "align": "right",
+          "font": "neon-hud"
+        },
+        {
+          "id": "bar",
+          "use": "timer-bar",
+          "x": 64,
+          "y": 72,
+          "inputs": {
+            "width": 202,
+            "height": 12,
+            "remaining": ["get", "remaining"]
+          }
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "top-left",
+          "kind": "group",
+          "size": [450, 351],
+          "x": [
+            "+",
+            [
+              "*",
+              0.5,
+              [
+                "-",
+                1000,
+                [
+                  "*",
+                  1000,
+                  ["read", "railScale"]
+                ]
+              ]
+            ],
+            [
+              "*",
+              24,
+              ["read", "railScale"]
+            ]
+          ],
+          "y": [
+            "+",
+            ["read", "portraitInset"],
+            [
+              "*",
+              40,
+              ["read", "railScale"]
+            ]
+          ],
+          "children": [
+            {
+              "id": "high-score",
+              "kind": "group",
+              "size": [450, 109],
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "frame",
+                  "inputs": {
+                    "width": 450,
+                    "height": 109
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "High Score",
+                  "x": 16,
+                  "y": 14,
+                  "size": [410, 32],
+                  "fontSize": 23,
+                  "color": [1, 0.89, 0.36, 1],
+                  "align": "left",
+                  "font": "vectrex-menu"
+                },
+                {
+                  "id": "value",
+                  "kind": "text",
+                  "text": "{value}",
+                  "x": 16,
+                  "y": 48,
+                  "size": [418, 55],
+                  "fontSize": ["read", "highFont"],
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                }
+              ],
+              "inputs": {
+                "value": ["read", "highScoreFull"]
+              }
+            },
+            {
+              "id": "stage-best",
+              "kind": "group",
+              "size": [450, 131],
+              "x": 0,
+              "y": 123,
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "frame",
+                  "inputs": {
+                    "width": 450,
+                    "height": 131
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Stage Best",
+                  "x": 16,
+                  "y": 14,
+                  "size": [410, 32],
+                  "fontSize": 23,
+                  "color": [1, 0.89, 0.36, 1],
+                  "align": "left",
+                  "font": "vectrex-menu"
+                },
+                {
+                  "id": "value",
+                  "kind": "text",
+                  "text": "{value}",
+                  "x": 16,
+                  "y": 46,
+                  "size": [418, 55],
+                  "fontSize": ["read", "stageFont"],
+                  "color": [0.48, 0.86, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "lives",
+                  "kind": "text",
+                  "text": "{lives}",
+                  "x": 16,
+                  "y": 96,
+                  "size": [415, 28],
+                  "fontSize": 19,
+                  "color": [0.68, 0.78, 0.88, 1],
+                  "align": "left",
+                  "font": "neon-hud",
+                  "visible": ["read", "hasStageBest"]
+                }
+              ],
+              "inputs": {
+                "value": ["read", "stageBestFull"],
+                "lives": ["read", "savedLives"]
+              }
+            },
+            {
+              "id": "next-life",
+              "kind": "group",
+              "size": [450, 90],
+              "x": 0,
+              "y": 268,
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "frame",
+                  "inputs": {
+                    "width": 450,
+                    "height": 90
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Next Extra Life",
+                  "x": 16,
+                  "y": 14,
+                  "size": [410, 32],
+                  "fontSize": 23,
+                  "color": [1, 0.89, 0.36, 1],
+                  "align": "left",
+                  "font": "vectrex-menu"
+                },
+                {
+                  "id": "value",
+                  "kind": "text",
+                  "text": "{value}",
+                  "x": 16,
+                  "y": 48,
+                  "size": [418, 36],
+                  "fontSize": 27,
+                  "color": [
+                    "if",
+                    ["read", "lifePending"],
+                    [0.58, 1, 0.65, 1],
+                    [0.96, 0.98, 1, 1]
+                  ],
+                  "align": "left",
+                  "font": "neon-hud"
+                }
+              ],
+              "inputs": {
+                "value": ["read", "nextLife"]
+              },
+              "visible": ["read", "lifeAvailable"]
+            }
+          ],
+          "placement": {
+            "origin": "screen-top-left"
+          },
+          "scale": ["read", "railScale"]
+        },
+        {
+          "id": "top-right",
+          "kind": "group",
+          "size": [450, 358],
+          "x": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "*",
+                0.5,
+                [
+                  "-",
+                  1000,
+                  [
+                    "*",
+                    1000,
+                    ["read", "railScale"]
+                  ]
+                ]
+              ],
+              [
+                "*",
+                474,
+                ["read", "railScale"]
+              ]
+            ]
+          ],
+          "y": [
+            "+",
+            ["read", "portraitInset"],
+            [
+              "*",
+              40,
+              ["read", "railScale"]
+            ]
+          ],
+          "children": [
+            {
+              "id": "weapon",
+              "kind": "group",
+              "size": [450, 168],
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "frame",
+                  "inputs": {
+                    "width": 450,
+                    "height": 168
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Weapon",
+                  "x": 16,
+                  "y": 14,
+                  "size": [410, 32],
+                  "fontSize": 23,
+                  "color": [1, 0.89, 0.36, 1],
+                  "align": "left",
+                  "font": "vectrex-menu"
+                },
+                {
+                  "id": "pattern-fill",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 58,
+                  "size": [134, 94],
+                  "color": [0.13, 0.21, 0.28, 0.33]
+                },
+                {
+                  "id": "pattern-label",
+                  "kind": "text",
+                  "text": "Pattern",
+                  "x": 24,
+                  "y": 66,
+                  "size": [118, 22],
+                  "fontSize": 13,
+                  "color": [0.68, 0.78, 0.88, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "pattern-value",
+                  "kind": "text",
+                  "text": "{pattern}",
+                  "x": 24,
+                  "y": 96,
+                  "size": [118, 28],
+                  "fontSize": 19,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "behavior-fill",
+                  "kind": "rect",
+                  "x": 158,
+                  "y": 58,
+                  "size": [134, 94],
+                  "color": [0.13, 0.21, 0.28, 0.33]
+                },
+                {
+                  "id": "behavior-label",
+                  "kind": "text",
+                  "text": "Behaviour",
+                  "x": 166,
+                  "y": 66,
+                  "size": [118, 22],
+                  "fontSize": 13,
+                  "color": [0.68, 0.78, 0.88, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "behavior-value",
+                  "kind": "text",
+                  "text": "{behavior}",
+                  "x": 166,
+                  "y": 96,
+                  "size": [118, 28],
+                  "fontSize": 17,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "behavior-second",
+                  "kind": "text",
+                  "text": "Explode",
+                  "x": 166,
+                  "y": 120,
+                  "size": [118, 24],
+                  "fontSize": 15,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud",
+                  "visible": ["read", "both"]
+                },
+                {
+                  "id": "multiplier-fill",
+                  "kind": "rect",
+                  "x": 300,
+                  "y": 58,
+                  "size": [134, 94],
+                  "color": [0.13, 0.21, 0.28, 0.33]
+                },
+                {
+                  "id": "multiplier-label",
+                  "kind": "text",
+                  "text": "Multiplier",
+                  "x": 308,
+                  "y": 66,
+                  "size": [118, 22],
+                  "fontSize": 13,
+                  "color": [0.68, 0.78, 0.88, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "multiplier-value",
+                  "kind": "text",
+                  "text": "{multiplier}",
+                  "x": 308,
+                  "y": 96,
+                  "size": [118, 28],
+                  "fontSize": 19,
+                  "color": [0.48, 0.86, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                }
+              ],
+              "inputs": {
+                "pattern": ["read", "pattern"],
+                "behavior": ["read", "behavior"],
+                "multiplier": ["read", "multiplier"]
+              }
+            },
+            {
+              "id": "beasties",
+              "kind": "group",
+              "size": [450, 176],
+              "x": 0,
+              "y": 182,
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "frame",
+                  "inputs": {
+                    "width": 450,
+                    "height": 176
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Beasties",
+                  "x": 16,
+                  "y": 14,
+                  "size": [410, 32],
+                  "fontSize": 23,
+                  "color": [1, 0.89, 0.36, 1],
+                  "align": "left",
+                  "font": "vectrex-menu"
+                },
+                {
+                  "id": "following-label",
+                  "kind": "text",
+                  "text": "Following",
+                  "x": 16,
+                  "y": 62,
+                  "size": [300, 26],
+                  "fontSize": 17,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "following",
+                  "kind": "text",
+                  "text": "{following}",
+                  "x": 354,
+                  "y": 56,
+                  "size": [80, 34],
+                  "fontSize": 25,
+                  "color": [0.48, 0.86, 1, 1],
+                  "align": "right",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "killed-label",
+                  "kind": "text",
+                  "text": "Killed",
+                  "x": 16,
+                  "y": 116,
+                  "size": [300, 26],
+                  "fontSize": 17,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left",
+                  "font": "neon-hud"
+                },
+                {
+                  "id": "killed",
+                  "kind": "text",
+                  "text": "{killed}",
+                  "x": 354,
+                  "y": 110,
+                  "size": [80, 34],
+                  "fontSize": 25,
+                  "color": [1, 0.66, 0.4, 1],
+                  "align": "right",
+                  "font": "neon-hud"
+                }
+              ],
+              "inputs": {
+                "following": ["read", "following"],
+                "killed": ["read", "killed"]
+              }
+            }
+          ],
+          "placement": {
+            "origin": "screen-top-right"
+          },
+          "scale": ["read", "railScale"]
+        },
+        {
+          "id": "bottom-left",
+          "kind": "group",
+          "size": [300, 336],
+          "x": [
+            "+",
+            [
+              "*",
+              0.5,
+              [
+                "-",
+                1000,
+                [
+                  "*",
+                  1000,
+                  ["read", "railScale"]
+                ]
+              ]
+            ],
+            [
+              "*",
+              24,
+              ["read", "railScale"]
+            ]
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              ["read", "portraitInset"],
+              [
+                "*",
+                360,
+                ["read", "railScale"]
+              ]
+            ]
+          ],
+          "children": [
+            {
+              "id": "frame",
+              "use": "frame",
+              "inputs": {
+                "width": 300,
+                "height": 336
+              }
+            },
+            {
+              "id": "heading",
+              "kind": "text",
+              "text": "Last 5 Items",
+              "x": 15,
+              "y": 13,
+              "size": [270, 30],
+              "fontSize": 21,
+              "color": [1, 0.89, 0.36, 1],
+              "align": "left",
+              "font": "vectrex-menu"
+            },
+            {
+              "id": "top-rule",
+              "kind": "vector",
+              "x": 15,
+              "y": 47,
+              "size": [271, 2],
+              "points": [
+                [0, 0],
+                [270, 0]
+              ],
+              "color": [0.34, 0.66, 0.78, 0.8],
+              "lineWidth": 1.5
+            },
+            {
+              "id": "history",
+              "kind": "repeat",
+              "items": ["read", "history"],
+              "key": "id",
+              "maximum": 5,
+              "x": 0,
+              "y": 59,
+              "size": [300, 215],
+              "layout": {
+                "type": "column",
+                "cell": [300, 43]
+              },
+              "template": {
+                "id": "entry",
+                "kind": "group",
+                "children": [
+                  {
+                    "id": "label",
+                    "kind": "logic",
+                    "value": ["get", "item.label"]
+                  },
+                  {
+                    "id": "sprite",
+                    "kind": "sprite",
+                    "asset": "minotron",
+                    "frame": ["get", "item.frame"],
+                    "x": 16,
+                    "y": 3,
+                    "size": [31, 31],
+                    "fit": "contain"
+                  },
+                  {
+                    "id": "name",
+                    "kind": "text",
+                    "text": "{label}",
+                    "x": 62,
+                    "y": 10,
+                    "size": [225, 26],
+                    "fontSize": 17,
+                    "color": [0.96, 0.98, 1, 1],
+                    "align": "left",
+                    "font": "neon-hud"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "bottom-rule",
+              "kind": "vector",
+              "x": 15,
+              "y": 282,
+              "size": [271, 2],
+              "points": [
+                [0, 0],
+                [270, 0]
+              ],
+              "color": [0.34, 0.66, 0.78, 0.8],
+              "lineWidth": 1.5
+            },
+            {
+              "id": "pickup-label",
+              "kind": "text",
+              "text": "Pickups",
+              "x": 15,
+              "y": 300,
+              "size": [150, 28],
+              "fontSize": 19,
+              "color": [1, 0.89, 0.36, 1],
+              "align": "left",
+              "font": "vectrex-menu"
+            },
+            {
+              "id": "count",
+              "kind": "text",
+              "text": "{pickups}",
+              "x": 212,
+              "y": 294,
+              "size": [71, 36],
+              "fontSize": 27,
+              "color": [0.48, 0.86, 1, 1],
+              "align": "right",
+              "font": "neon-hud"
+            }
+          ],
+          "placement": {
+            "origin": "screen-bottom-left"
+          },
+          "inputs": {
+            "pickups": ["read", "collected"]
+          },
+          "scale": ["read", "railScale"]
+        },
+        {
+          "id": "bottom-center",
+          "kind": "group",
+          "size": [282, 212],
+          "x": [
+            "+",
+            [
+              "*",
+              0.5,
+              [
+                "-",
+                1000,
+                [
+                  "*",
+                  1000,
+                  ["read", "railScale"]
+                ]
+              ]
+            ],
+            [
+              "*",
+              359,
+              ["read", "railScale"]
+            ]
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              ["read", "portraitInset"],
+              [
+                "*",
+                [
+                  "if",
+                  [
+                    "and",
+                    [
+                      ">",
+                      ["read", "loveFill"],
+                      0
+                    ],
+                    [
+                      ">",
+                      ["read", "invincibleFill"],
+                      0
+                    ]
+                  ],
+                  236,
+                  124
+                ],
+                ["read", "railScale"]
+              ]
+            ]
+          ],
+          "children": [
+            {
+              "id": "love",
+              "use": "portrait-effect",
+              "x": 0,
+              "y": 0,
+              "inputs": {
+                "name": "Beast Love",
+                "sprite": [250, 73, 18, 18],
+                "seconds": ["read", "loveText"],
+                "remaining": ["read", "loveFill"]
+              },
+              "visible": [
+                ">",
+                ["read", "loveFill"],
+                0
+              ]
+            },
+            {
+              "id": "invincible",
+              "use": "portrait-effect",
+              "x": 0,
+              "y": [
+                "if",
+                [
+                  ">",
+                  ["read", "loveFill"],
+                  0
+                ],
+                112,
+                0
+              ],
+              "inputs": {
+                "name": "Invincible",
+                "sprite": [389, 203, 48, 39],
+                "seconds": ["read", "invincibleText"],
+                "remaining": ["read", "invincibleFill"]
+              },
+              "visible": [
+                ">",
+                ["read", "invincibleFill"],
+                0
+              ]
+            }
+          ],
+          "placement": {
+            "origin": "screen-bottom-left"
+          },
+          "scale": ["read", "railScale"]
+        },
+        {
+          "id": "bottom-right",
+          "kind": "group",
+          "size": [
+            302,
+            ["read", "portraitExpiryHeight"]
+          ],
+          "x": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "*",
+                0.5,
+                [
+                  "-",
+                  1000,
+                  [
+                    "*",
+                    1000,
+                    ["read", "railScale"]
+                  ]
+                ]
+              ],
+              [
+                "*",
+                326,
+                ["read", "railScale"]
+              ]
+            ]
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              ["read", "portraitInset"],
+              [
+                "*",
+                [
+                  "+",
+                  24,
+                  ["read", "portraitExpiryHeight"]
+                ],
+                ["read", "railScale"]
+              ]
+            ]
+          ],
+          "children": [
+            {
+              "id": "frame",
+              "use": "frame",
+              "inputs": {
+                "width": 302,
+                "height": ["read", "portraitExpiryHeight"]
+              }
+            },
+            {
+              "id": "heading",
+              "kind": "text",
+              "text": "Pickup Expiry",
+              "x": 14,
+              "y": 13,
+              "size": [272, 28],
+              "fontSize": 19,
+              "color": [1, 0.89, 0.36, 1],
+              "align": "left",
+              "font": "vectrex-menu"
+            },
+            {
+              "id": "live-pickups",
+              "kind": "repeat",
+              "items": ["read", "expiry"],
+              "key": "id",
+              "maximum": 64,
+              "x": 10,
+              "y": 51,
+              "size": [282, 1],
+              "layout": {
+                "type": "column",
+                "cell": [0, 0]
+              },
+              "template": {
+                "id": "entry",
+                "kind": "group",
+                "children": [
+                  {
+                    "id": "icon",
+                    "kind": "sprite",
+                    "asset": "minotron",
+                    "frame": ["get", "item.frame"],
+                    "x": 10,
+                    "y": 0,
+                    "size": [36, 36],
+                    "fit": "contain"
+                  },
+                  {
+                    "id": "track",
+                    "kind": "rect",
+                    "x": 21,
+                    "y": 39,
+                    "size": [14, 82],
+                    "color": [0.17, 0.23, 0.29, 0.8]
+                  },
+                  {
+                    "id": "bar",
+                    "kind": "group",
+                    "x": 21,
+                    "y": [
+                      "-",
+                      121,
+                      [
+                        "*",
+                        82,
+                        ["get", "remaining"]
+                      ]
+                    ],
+                    "size": [
+                      14,
+                      [
+                        "*",
+                        82,
+                        ["get", "remaining"]
+                      ]
+                    ],
+                    "children": [
+                      {
+                        "id": "fill",
+                        "kind": "rect",
+                        "color": ["get", "fillColor"]
+                      }
+                    ],
+                    "inputs": {
+                      "fillColor": [
+                        "if",
+                        [
+                          "<",
+                          ["get", "item.remaining"],
+                          0.2
+                        ],
+                        [1, 0.22, 0.2, 1],
+                        [1, 0.89, 0.36, 1]
+                      ],
+                      "remaining": ["get", "item.remaining"]
+                    }
+                  }
+                ],
+                "x": [
+                  "-",
+                  ["get", "item.x"],
+                  [
+                    "*",
+                    28,
+                    ["read", "portraitExpiryScale"]
+                  ]
+                ],
+                "y": ["get", "item.y"],
+                "size": [56, 140],
+                "scale": ["read", "portraitExpiryScale"]
+              }
+            }
+          ],
+          "placement": {
+            "origin": "screen-bottom-right"
+          },
+          "visible": [
+            ">",
+            ["read", "portraitExpiryHeight"],
+            0
+          ],
+          "scale": ["read", "railScale"]
+        }
+      ]
+    },
+    "frame-beam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [
+        [0, 0],
+        [0, 16]
+      ],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "frame": {
+      "kind": "group",
+      "inputs": {
+        "width": 192,
+        "height": 50
+      },
+      "size": [
+        ["get", "width"],
+        ["get", "height"]
+      ],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frame-beam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "width"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frame-beam",
+          "x": [
+            "-",
+            ["get", "width"],
+            2
+          ],
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "height"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frame-beam",
+          "x": 2,
+          "y": [
+            "-",
+            ["get", "height"],
+            2
+          ],
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "width"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frame-beam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "height"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        }
+      ]
+    },
+    "score-number": {
+      "kind": "group",
+      "inputs": {
+        "lead": "",
+        "fraction": "",
+        "size": 24,
+        "leadLength": 1,
+        "millions": false,
+        "tint": [0.96, 0.98, 1, 1]
+      },
+      "size": [173, 37],
+      "children": [
+        {
+          "id": "digits",
+          "kind": "text",
+          "text": "{lead}",
+          "x": 0,
+          "y": 0,
+          "size": [173, 26],
+          "fontSize": ["get", "size"],
+          "align": "left",
+          "font": "neon-hud",
+          "color": ["get", "tint"]
+        },
+        {
+          "id": "fraction",
+          "kind": "text",
+          "text": "{fraction}",
+          "x": [
+            "*",
+            [
+              "+",
+              ["get", "leadLength"],
+              1
+            ],
+            ["get", "size"]
+          ],
+          "y": 0,
+          "size": [108, 26],
+          "fontSize": ["get", "size"],
+          "align": "left",
+          "font": "neon-hud",
+          "color": ["get", "tint"],
+          "visible": ["get", "millions"]
+        },
+        {
+          "id": "decimal",
+          "kind": "rect",
+          "x": [
+            "*",
+            [
+              "+",
+              ["get", "leadLength"],
+              0.22
+            ],
+            ["get", "size"]
+          ],
+          "y": [
+            "*",
+            0.84,
+            ["get", "size"]
+          ],
+          "size": [3.8, 3.8],
+          "color": [1, 0.95, 0.7, 1],
+          "visible": ["get", "millions"]
+        },
+        {
+          "id": "million-suffix",
+          "kind": "vector",
+          "x": [
+            "+",
+            [
+              "*",
+              [
+                "+",
+                ["get", "leadLength"],
+                4
+              ],
+              ["get", "size"]
+            ],
+            1
+          ],
+          "y": [
+            "*",
+            0.45,
+            ["get", "size"]
+          ],
+          "size": [22, 18],
+          "scale": [
+            "/",
+            ["get", "size"],
+            25
+          ],
+          "lineWidth": 1.65,
+          "color": ["get", "tint"],
+          "visible": ["get", "millions"],
+          "points": [
+            [0, 14],
+            [0, 0],
+            [0, 4],
+            [4, 0],
+            [7, 0],
+            [9.5, 4],
+            [9.5, 14],
+            [9.5, 4],
+            [13, 0],
+            [16, 0],
+            [19, 3.5],
+            [19, 14]
+          ]
+        }
+      ]
+    },
+    "timer-bar": {
+      "kind": "group",
+      "inputs": {
+        "width": 123,
+        "height": 13,
+        "remaining": 0
+      },
+      "size": [
+        ["get", "width"],
+        ["get", "height"]
+      ],
+      "children": [
+        {
+          "id": "track",
+          "kind": "rect",
+          "color": [0.17, 0.23, 0.29, 0.8]
+        },
+        {
+          "id": "fill",
+          "kind": "rect",
+          "size": [
+            [
+              "*",
+              ["get", "width"],
+              ["get", "remaining"]
+            ],
+            ["get", "height"]
+          ],
+          "color": [
+            "if",
+            [
+              "<",
+              ["get", "remaining"],
+              0.2
+            ],
+            [1, 0.22, 0.2, 1],
+            [1, 0.89, 0.36, 1]
+          ]
+        }
+      ]
+    },
+    "effect-card": {
+      "kind": "group",
+      "inputs": {
+        "label": "",
+        "seconds": "",
+        "sprite": [0, 0, 1, 1],
+        "remaining": 0
+      },
+      "size": [192, 72],
+      "children": [
+        {
+          "id": "frame",
+          "use": "frame",
+          "inputs": {
+            "width": 192,
+            "height": 72
+          }
+        },
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{label}",
+          "x": 10,
+          "y": 9,
+          "size": [172, 26],
+          "fontSize": 14,
+          "align": "left",
+          "font": "vectrex-menu",
+          "color": [1, 0.89, 0.36, 1]
+        },
+        {
+          "id": "seconds",
+          "kind": "text",
+          "text": "{seconds}",
+          "x": 59,
+          "y": 29,
+          "size": [121, 26],
+          "fontSize": 15,
+          "align": "right",
+          "font": "neon-hud",
+          "color": [0.96, 0.98, 1, 1]
+        },
+        {
+          "id": "icon",
+          "kind": "sprite",
+          "asset": "minotron",
+          "frame": ["get", "sprite"],
+          "x": 12,
+          "y": 30,
+          "size": [30, 30],
+          "fit": "contain"
+        },
+        {
+          "id": "bar",
+          "use": "timer-bar",
+          "x": 58,
+          "y": 51,
+          "inputs": {
+            "width": 122,
+            "height": 11,
+            "remaining": ["get", "remaining"]
+          }
+        }
+      ]
+    },
+    "expiry-list": {
+      "kind": "group",
+      "inputs": {
+        "items": [],
+        "height": 0,
+        "row": 42,
+        "icon": 32,
+        "bar": 13
+      },
+      "size": [
+        192,
+        ["get", "height"]
+      ],
+      "children": [
+        {
+          "id": "frame",
+          "use": "frame",
+          "inputs": {
+            "width": 192,
+            "height": ["get", "height"]
+          }
+        },
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "Pickup Expiry",
+          "x": 10,
+          "y": 10,
+          "size": [172, 26],
+          "fontSize": 14,
+          "align": "left",
+          "font": "vectrex-menu",
+          "color": [1, 0.89, 0.36, 1]
+        },
+        {
+          "id": "entries",
+          "kind": "repeat",
+          "items": ["get", "items"],
+          "key": "id",
+          "maximum": 64,
+          "x": 9,
+          "y": 36,
+          "size": [173, 1],
+          "template": {
+            "id": "entry",
+            "kind": "group",
+            "x": 0,
+            "y": [
+              "*",
+              ["get", "item.row"],
+              ["get", "row"]
+            ],
+            "size": [
+              173,
+              ["get", "row"]
+            ],
+            "children": [
+              {
+                "id": "icon",
+                "kind": "sprite",
+                "asset": "minotron",
+                "frame": ["get", "item.frame"],
+                "x": 3,
+                "y": [
+                  "/",
+                  [
+                    "-",
+                    ["get", "row"],
+                    ["get", "icon"]
+                  ],
+                  2
+                ],
+                "size": [
+                  ["get", "icon"],
+                  ["get", "icon"]
+                ],
+                "fit": "contain"
+              },
+              {
+                "id": "bar",
+                "use": "timer-bar",
+                "x": 49,
+                "y": [
+                  "/",
+                  [
+                    "-",
+                    ["get", "row"],
+                    ["get", "bar"]
+                  ],
+                  2
+                ],
+                "inputs": {
+                  "remaining": ["get", "item.remaining"],
+                  "height": ["get", "bar"]
+                }
+              }
+            ],
+            "inputs": {
+              "row": ["get", "row"],
+              "icon": ["get", "icon"],
+              "bar": ["get", "bar"]
+            }
+          },
+          "layout": {
+            "type": "column",
+            "cell": [0, 0]
+          },
+          "inputs": {
+            "row": ["get", "row"],
+            "icon": ["get", "icon"],
+            "bar": ["get", "bar"]
+          }
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "minotron",
+    "kind": "group",
+    "children": [
+      {
+        "id": "records",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-top-left"
+        },
+        "x": [
+          "+",
+          ["read", "landscapeInset"],
+          [
+            "*",
+            15,
+            ["read", "railScale"]
+          ]
+        ],
+        "y": [
+          "*",
+          18,
+          ["read", "railScale"]
+        ],
+        "children": [
+          {
+            "id": "high-score",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [192, 81],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 81
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "High Score",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 14,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "score",
+                "use": "score-number",
+                "x": 10,
+                "y": 34,
+                "inputs": {
+                  "lead": ["read", "highScore.lead"],
+                  "fraction": ["read", "highScore.fraction"],
+                  "size": ["read", "highScore.size"],
+                  "leadLength": ["read", "highScore.leadLength"],
+                  "millions": ["read", "highScore.millions"],
+                  "tint": [0.96, 0.98, 1, 1]
+                }
+              }
+            ]
+          },
+          {
+            "id": "stage-best",
+            "kind": "group",
+            "x": 0,
+            "y": 94,
+            "size": [192, 108],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 108
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Stage Best",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 14,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "lives",
+                "kind": "text",
+                "text": "{savedLives}",
+                "x": 10,
+                "y": 76,
+                "font": "neon-hud",
+                "fontSize": 17,
+                "size": [173, 23],
+                "color": [0.66, 0.75, 0.86, 1],
+                "align": "left",
+                "visible": ["read", "hasStageBest"]
+              },
+              {
+                "id": "score",
+                "use": "score-number",
+                "x": 10,
+                "y": 34,
+                "inputs": {
+                  "lead": ["read", "stageBest.lead"],
+                  "fraction": ["read", "stageBest.fraction"],
+                  "size": ["read", "stageBest.size"],
+                  "leadLength": ["read", "stageBest.leadLength"],
+                  "millions": ["read", "stageBest.millions"],
+                  "tint": [0.48, 0.86, 1, 1]
+                }
+              }
+            ],
+            "inputs": {
+              "savedLives": ["read", "savedLives"]
+            }
+          }
+        ],
+        "scale": ["read", "railScale"]
+      },
+      {
+        "id": "pickup-log",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-bottom-left"
+        },
+        "x": [
+          "+",
+          ["read", "landscapeInset"],
+          [
+            "*",
+            15,
+            ["read", "railScale"]
+          ]
+        ],
+        "y": [
+          "-",
+          0,
+          [
+            "*",
+            267,
+            ["read", "railScale"]
+          ]
+        ],
+        "children": [
+          {
+            "id": "items",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [192, 249],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 249
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Last 5 Items",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 14,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "top-rule",
+                "kind": "vector",
+                "x": 11,
+                "y": 34,
+                "size": [171, 2],
+                "points": [
+                  [0, 0],
+                  [170, 0]
+                ],
+                "color": [0.34, 0.66, 0.78, 0.8],
+                "lineWidth": 1.5
+              },
+              {
+                "id": "bottom-rule",
+                "kind": "vector",
+                "x": 11,
+                "y": 198,
+                "size": [171, 2],
+                "points": [
+                  [0, 0],
+                  [170, 0]
+                ],
+                "color": [0.34, 0.66, 0.78, 0.8],
+                "lineWidth": 1.5
+              },
+              {
+                "id": "pickup-heading",
+                "kind": "text",
+                "text": "Pickups",
+                "x": 11,
+                "y": 216,
+                "font": "vectrex-menu",
+                "fontSize": 14,
+                "size": [87, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "pickup-count",
+                "kind": "text",
+                "text": "{collected}",
+                "x": 126,
+                "y": 209,
+                "font": "neon-hud",
+                "fontSize": 23,
+                "size": [55, 29],
+                "color": [0.48, 0.86, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "history",
+                "kind": "repeat",
+                "items": ["read", "history"],
+                "key": "id",
+                "maximum": 5,
+                "x": 0,
+                "y": 43,
+                "size": [192, 155],
+                "template": {
+                  "id": "entry",
+                  "kind": "group",
+                  "y": [
+                    "*",
+                    ["get", "item.row"],
+                    31
+                  ],
+                  "size": [192, 30],
+                  "children": [
+                    {
+                      "id": "label",
+                      "kind": "logic",
+                      "value": ["get", "item.label"]
+                    },
+                    {
+                      "id": "icon",
+                      "kind": "sprite",
+                      "asset": "minotron",
+                      "frame": ["get", "item.frame"],
+                      "x": 11,
+                      "y": 0,
+                      "size": [23, 23],
+                      "fit": "contain"
+                    },
+                    {
+                      "id": "item-name",
+                      "kind": "text",
+                      "text": "{label}",
+                      "x": 43,
+                      "y": 5,
+                      "size": [138, 26],
+                      "fontSize": 12,
+                      "align": "left",
+                      "font": "neon-hud",
+                      "color": [0.96, 0.98, 1, 1]
+                    }
+                  ]
+                },
+                "layout": {
+                  "type": "column",
+                  "cell": [0, 0]
+                }
+              }
+            ],
+            "inputs": {
+              "collected": ["read", "collected"]
+            }
+          }
+        ],
+        "scale": ["read", "railScale"]
+      },
+      {
+        "id": "combat",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-top-right"
+        },
+        "x": [
+          "-",
+          0,
+          [
+            "+",
+            ["read", "landscapeInset"],
+            [
+              "*",
+              207,
+              ["read", "railScale"]
+            ]
+          ]
+        ],
+        "y": [
+          "*",
+          18,
+          ["read", "railScale"]
+        ],
+        "children": [
+          {
+            "id": "weapon",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [192, 197],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 197
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Weapon",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 16,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "pattern-pane",
+                "kind": "rect",
+                "x": 11,
+                "y": 34,
+                "size": [170, 42],
+                "color": [0.15, 0.27, 0.32, 0.27]
+              },
+              {
+                "id": "pattern-label",
+                "kind": "text",
+                "text": "Pattern",
+                "x": 17,
+                "y": 39,
+                "font": "neon-hud",
+                "fontSize": 11,
+                "size": [153, 17],
+                "color": [0.66, 0.75, 0.86, 1],
+                "align": "left"
+              },
+              {
+                "id": "pattern-value",
+                "kind": "text",
+                "text": "{pattern}",
+                "x": 17,
+                "y": 53,
+                "font": "neon-hud",
+                "fontSize": 17,
+                "size": [153, 23],
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "behaviour-pane",
+                "kind": "rect",
+                "x": 11,
+                "y": 81,
+                "size": [170, 57],
+                "color": [0.15, 0.27, 0.32, 0.27]
+              },
+              {
+                "id": "behaviour-label",
+                "kind": "text",
+                "text": "Behaviour",
+                "x": 17,
+                "y": 86,
+                "font": "neon-hud",
+                "fontSize": 11,
+                "size": [153, 17],
+                "color": [0.66, 0.75, 0.86, 1],
+                "align": "left"
+              },
+              {
+                "id": "behaviour-value",
+                "kind": "text",
+                "text": "{behavior}",
+                "x": 17,
+                "y": 100,
+                "font": "neon-hud",
+                "fontSize": 15,
+                "size": [153, 23],
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "multiply-pane",
+                "kind": "rect",
+                "x": 11,
+                "y": 143,
+                "size": [170, 42],
+                "color": [0.15, 0.27, 0.32, 0.27]
+              },
+              {
+                "id": "multiply-label",
+                "kind": "text",
+                "text": "Multiplier",
+                "x": 17,
+                "y": 148,
+                "font": "neon-hud",
+                "fontSize": 11,
+                "size": [153, 17],
+                "color": [0.66, 0.75, 0.86, 1],
+                "align": "left"
+              },
+              {
+                "id": "multiply-value",
+                "kind": "text",
+                "text": "{multiplier}",
+                "x": 17,
+                "y": 162,
+                "font": "neon-hud",
+                "fontSize": 17,
+                "size": [153, 23],
+                "color": [0.48, 0.86, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "explosive",
+                "kind": "text",
+                "text": "Explode",
+                "x": 17,
+                "y": 118,
+                "size": [153, 26],
+                "fontSize": 15,
+                "align": "left",
+                "font": "neon-hud",
+                "color": [0.96, 0.98, 1, 1],
+                "visible": ["read", "both"]
+              }
+            ],
+            "inputs": {
+              "pattern": ["read", "pattern"],
+              "behavior": ["read", "behavior"],
+              "multiplier": ["read", "multiplier"]
+            }
+          },
+          {
+            "id": "beasties",
+            "kind": "group",
+            "x": 0,
+            "y": 209,
+            "size": [192, 98],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 98
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Beasties",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 14,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "herd-label",
+                "kind": "text",
+                "text": "Following",
+                "x": 11,
+                "y": 42,
+                "font": "neon-hud",
+                "fontSize": 14,
+                "size": [130, 20],
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "herd",
+                "kind": "text",
+                "text": "{following}",
+                "x": 138,
+                "y": 38,
+                "font": "neon-hud",
+                "fontSize": 19,
+                "size": [43, 25],
+                "color": [0.48, 0.86, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "killed-label",
+                "kind": "text",
+                "text": "Killed",
+                "x": 11,
+                "y": 70,
+                "font": "neon-hud",
+                "fontSize": 14,
+                "size": [130, 20],
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "killed",
+                "kind": "text",
+                "text": "{killed}",
+                "x": 138,
+                "y": 66,
+                "font": "neon-hud",
+                "fontSize": 19,
+                "size": [43, 25],
+                "color": [
+                  "if",
+                  [
+                    ">",
+                    ["read", "killed"],
+                    0
+                  ],
+                  [1, 0.66, 0.4, 1],
+                  [0.48, 0.86, 1, 1]
+                ],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "following": ["read", "following"],
+              "killed": ["read", "killed"]
+            }
+          },
+          {
+            "id": "extra-life",
+            "kind": "group",
+            "x": 0,
+            "y": 319,
+            "size": [192, 75],
+            "children": [
+              {
+                "id": "frame",
+                "use": "frame",
+                "inputs": {
+                  "width": 192,
+                  "height": 75
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Next Extra Life",
+                "x": 10,
+                "y": 10,
+                "font": "vectrex-menu",
+                "fontSize": 12,
+                "size": [172, 20],
+                "color": [1, 0.89, 0.36, 1],
+                "align": "left"
+              },
+              {
+                "id": "value",
+                "kind": "text",
+                "text": "{nextLife}",
+                "x": 10,
+                "y": 35,
+                "font": "neon-hud",
+                "fontSize": [
+                  "if",
+                  ["read", "lifePending"],
+                  15,
+                  17
+                ],
+                "size": [173, 28],
+                "color": [
+                  "if",
+                  ["read", "lifePending"],
+                  [0.58, 1, 0.65, 1],
+                  [0.96, 0.98, 1, 1]
+                ],
+                "align": "left"
+              }
+            ],
+            "inputs": {
+              "nextLife": ["read", "nextLife"]
+            },
+            "visible": ["read", "lifeAvailable"]
+          }
+        ],
+        "scale": ["read", "railScale"]
+      },
+      {
+        "id": "effects",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-bottom-right"
+        },
+        "x": [
+          "-",
+          0,
+          [
+            "+",
+            ["read", "landscapeInset"],
+            [
+              "*",
+              207,
+              ["read", "railScale"]
+            ]
+          ]
+        ],
+        "y": [
+          "-",
+          0,
+          [
+            "*",
+            [
+              "+",
+              18,
+              ["read", "bottomHeight"]
+            ],
+            ["read", "railScale"]
+          ]
+        ],
+        "children": [
+          {
+            "id": "love",
+            "use": "effect-card",
+            "x": 0,
+            "y": 0,
+            "inputs": {
+              "label": "Beast Love",
+              "sprite": [250, 73, 18, 18],
+              "seconds": ["read", "loveText"],
+              "remaining": ["read", "loveFill"]
+            },
+            "visible": [
+              ">",
+              ["read", "loveFill"],
+              0
+            ]
+          },
+          {
+            "id": "invincible",
+            "use": "effect-card",
+            "x": 0,
+            "y": [
+              "if",
+              [
+                ">",
+                ["read", "loveFill"],
+                0
+              ],
+              82,
+              0
+            ],
+            "inputs": {
+              "label": "Invincible",
+              "sprite": [389, 203, 48, 39],
+              "seconds": ["read", "invincibleText"],
+              "remaining": ["read", "invincibleFill"]
+            },
+            "visible": [
+              ">",
+              ["read", "invincibleFill"],
+              0
+            ]
+          },
+          {
+            "id": "expiry",
+            "use": "expiry-list",
+            "x": 0,
+            "y": ["read", "effectsHeight"],
+            "inputs": {
+              "items": ["read", "expiry"],
+              "height": ["read", "expiryHeight"]
+            },
+            "visible": [
+              ">",
+              ["read", "expiryHeight"],
+              0
+            ]
+          }
+        ],
+        "scale": ["read", "railScale"]
+      },
+      {
+        "id": "overflow",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-bottom-left"
+        },
+        "x": [
+          "+",
+          ["read", "landscapeInset"],
+          [
+            "*",
+            15,
+            ["read", "railScale"]
+          ]
+        ],
+        "y": [
+          "-",
+          0,
+          [
+            "*",
+            [
+              "+",
+              279,
+              ["read", "overflowHeight"]
+            ],
+            ["read", "railScale"]
+          ]
+        ],
+        "scale": ["read", "railScale"],
+        "children": [
+          {
+            "id": "expiry",
+            "use": "expiry-list",
+            "x": 0,
+            "y": 0,
+            "inputs": {
+              "items": ["read", "overflow"],
+              "height": ["read", "overflowHeight"],
+              "row": ["read", "overflowRow"],
+              "icon": ["read", "overflowIcon"],
+              "bar": ["read", "overflowBar"]
+            },
+            "visible": [
+              ">",
+              ["read", "overflowHeight"],
+              0
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

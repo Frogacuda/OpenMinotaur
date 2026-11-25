@@ -10,6 +10,8 @@ struct CollectionRecord {
     std::array<uint32_t, 16> bonuses{};
     int uniqueBonuses = 0, billyGoats = 0, mostKids = 0, highestPlatform = 0;
 };
+enum class WidgetEffect { Flight, Mushroom, Protection, Gestation, SlowDown, Count };
+
 struct DenizenContext {
     ClimbContext &game;
     Climber &goat;
@@ -18,13 +20,17 @@ struct DenizenContext {
     CollectionRecord &records;
     std::array<uint32_t, 16> runBonuses{};
     int uniqueRunBonuses = 0, runBillyGoats = 0, runBirths = 0, score = 0;
-    int mode = 0, hazardGrace = 0, hazardWarning = 0, hazardFlash = 0, pendingKidLoss = 0,
-        rewardKids = 0;
+    int mode = 0, hazardGrace = 0, hazardDuration = 0, hazardWarning = 0, hazardFlash = 0,
+        pendingKidLoss = 0, rewardKids = 0;
     // theGoat snapshots its kid count at the start of each active player run
     // (native 3c4); all later contact rewards in that tick use this value.
     uint32_t achievements = 0;
     bool paused = false, tablet = false;
     float flash = 0; // Original +434 request; no active read identified.
+    float slowDownDeficit = 0, slowDownRemaining = 0;
+    int slowDownNoticeTicks = 0;
+    int64_t effectSequence = 0;
+    std::array<int64_t, size_t(WidgetEffect::Count)> effectOrder{};
     // Original +3f4 is one shared value: poison timer, player gravity/jump
     // variation, terrain brightness, caption gate and feedback intensity.
     float &poison = game.tower.fade;
@@ -38,6 +44,10 @@ struct DenizenContext {
     std::function<Vec2(int)> spriteSize{};
     std::function<bool(Platform &)> checkBridge{};
     void award(int);
+    void activateEffect(WidgetEffect effect);
+    void grantProtection(int ticks);
+    void updateSlowDownMeter();
+    double slowDownMeter() const;
     void play(int sample, int gainShift = 12);
     void showScore(int points, Vec2, float vx, float vy, float radius);
 };

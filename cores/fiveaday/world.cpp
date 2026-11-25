@@ -107,6 +107,7 @@ void World::start(int day, int startingLives, int startingScore, bool demonstrat
     gameOverTicks = 0;
     gameOverFade = 0;
     ordinaryFruitTotal = powerFruitTotal = 0;
+    minotaursLost = 0;
     perfectDay = true;
     messages = {};
     input = {};
@@ -131,6 +132,7 @@ void World::newLevel() {
     bossLaunched = bossDefeated = false;
     bonusRemaining = 0;
     formationKills = 0;
+    damageTaken = 0;
     cleanStage = true;
     ship.init();
     script = demo ? original::DemoLevel : original::Levels[size_t(std::max(level + 1, 0) % 30)];
@@ -164,6 +166,10 @@ void World::newLevel() {
                   (date / 5) % 30 + 1, original::months[size_t((date / 150) % 6)]);
     message(9, label, 300);
     message(11, original::times[size_t(date % 5)], 300);
+}
+int World::formationKillPoints() const {
+    const int bonus = formationBonusMultiplier * (100 << formationKills);
+    return int(float(float(bonus) * scoreMultiplier));
 }
 
 Launch World::launch() {

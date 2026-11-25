@@ -29,8 +29,17 @@ void Launcher::openApp(Page destination, int initialFocus) {
     if (inputBlocked())
         return;
     const auto homeNavigation = navigation_;
-    const auto homeSurface = surface_;
     open(destination, initialFocus);
+    if (!captureAppPage())
+        return; // Keep the destination usable if capture is unavailable.
+    navigation_ = homeNavigation;
+    launchPage_ = destination;
+    launchFocus_ = initialFocus;
+    exitPose_ = iox::AppLaunch::homePose(0);
+    appLaunch_.start();
+    pause(false);
+}
+bool Launcher::captureAppPage() {
     glGenTextures(1, &appTexture_);
     glBindTexture(GL_TEXTURE_2D, appTexture_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface_.width, surface_.height, 0, GL_RGBA,
@@ -44,20 +53,16 @@ void Launcher::openApp(Page destination, int initialFocus) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, appTexture_, 0);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         cancelAppLaunch();
-        return; // Keep the destination usable if capture is unavailable.
+        return false;
     }
+    const unsigned previousFramebuffer = surface_.framebuffer;
     surface_.framebuffer = appFramebuffer_;
-    frame(0); // Capture the actual page, including bars and its initial focus.
-    surface_ = homeSurface;
-    navigation_ = homeNavigation;
-    launchPage_ = destination;
-    launchFocus_ = initialFocus;
-    exitPose_ = iox::AppLaunch::homePose(0);
-    appLaunch_.start();
-    pause(false);
+    frame(0);
+    surface_.framebuffer = previousFramebuffer;
+    return true;
 }
 void Launcher::drawAppLaunch() {
-    const float p = appLaunch_.progress(), scale = iox::AppLaunch::imageScale(p);
+    const float p = appLaunch_.poseProgress(), scale = iox::AppLaunch::imageScale(p);
     const float width = layout_.width * scale, height = layout_.height * scale;
     const Colour colour{1, 1, 1, iox::AppLaunch::imageProgress(p)};
     // FBO images have bottom-up UVs and their stored alpha is not display opacity.

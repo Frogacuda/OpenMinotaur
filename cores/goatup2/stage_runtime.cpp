@@ -687,6 +687,7 @@ void GoatActor::resetFromCheckpoint() {
     forcedJumpTicks = 0;
     sprite = 107;
     invulnerability = 150;
+    teaProtection = false;
     riding = nullptr;
     renderOffset = .008f;
     bubbleThreshold = 64;

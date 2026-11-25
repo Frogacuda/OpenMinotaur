@@ -15,6 +15,8 @@
 
 namespace mino {
 
+class Display;
+
 class Launcher final : public Core {
   public:
     enum class Action {
@@ -36,14 +38,19 @@ class Launcher final : public Core {
     };
 
     void setPaths(const std::string &prefDir);
-    void setShellAudio(ShellAudio &audio) { audio_ = &audio; }
+    void setShellAudio(ShellAudio &audio) {
+        audio_ = &audio;
+    }
     void setPortrait(bool portrait);
+    bool configureDisplay(Display &, int width, int height, const DisplaySettings &);
+    unsigned minorolaArtwork();
+    void captureHomeEntrance(const SurfaceInfo &);
     void refresh(); // Reload icons and bundled-resource availability; GL must be current.
     // GL must be current. Empty selects the built-in orientation pair; a failed external
     // image leaves the current wallpaper intact. Selection/persistence belong
     // to the Options UI, independently of this external-image loader.
     bool setWallpaper(const std::string &imagePath);
-    void returnHome();
+    void returnHome(bool entrance = true);
     void selectGame(const std::string &id);
     void showMessage(const std::string &title, const std::string &message);
     Request takeRequest();
@@ -68,6 +75,11 @@ class Launcher final : public Core {
         calibrationArmed_ = false;
     }
     void mappingFinished(const std::string &message);
+    void openGameOptions(bool controls);
+    void closeGameOptions();
+    bool gameOptionsOpen() const {
+        return gameOptions_ && page() != Page::Home;
+    }
 
     const CoreInfo &info() const override;
     bool init(Host &, const SurfaceInfo &) override;
@@ -104,6 +116,7 @@ class Launcher final : public Core {
     void open(Page destination, int initialFocus = 0);
     void close();
     void openApp(Page destination, int initialFocus = 0);
+    bool captureAppPage();
     void cancelAppLaunch();
     void drawAppLaunch();
     void activateHome();
@@ -118,6 +131,7 @@ class Launcher final : public Core {
     void drawFooter();
     std::string footerStatus() const;
     bool calibratingTilt_ = false, calibrationArmed_ = false;
+    bool gameOptions_ = false;
     bool controllerPresent_ = false;
     std::string selectLabel_, backLabel_;
     // One registration point binds each screen's behavior. New screens do not
@@ -201,6 +215,7 @@ class Launcher final : public Core {
     void prepareAbout();
     void drawAbout();
     float focusPulse() const;
+    void drawTabFill(const MenuRect &, bool selected, bool gloss = false);
     void recessedButton(const MenuRect &, const std::string &, bool, bool arrow = false,
                         bool brown = false);
     void drawGridrunnerPreview(const MenuRect &, bool classic);
@@ -209,11 +224,12 @@ class Launcher final : public Core {
               Colour bottom, bool gray = false);
     void rect(const MenuRect &, Colour top, Colour bottom, bool rounded = false, float gloss = 0,
               float cornerRadius = -1);
+    enum class TextEffect { Plain, SoftShadow };
     void text(const std::string &, float x, float y, float size, Colour colour,
-              bool centered = true, bool bold = false);
+              bool centered = true, bool bold = false, TextEffect effect = TextEffect::Plain);
     float textWidth(const std::string &, float size, bool bold = false) const;
     void paragraph(const std::string &, float y, float scale);
-    enum class ImageMode { Normal, Shadow, Halo, Capture };
+    enum class ImageMode { Normal, Shadow, Halo, Capture, TextShadow };
     void draw(unsigned texture, bool rounded = false, float gloss = 0, bool gray = false,
               float sdfWidth = 0, bool circle = false, ImageMode mode = ImageMode::Normal);
     unsigned loadTexture(const std::string &path, int *imageW = nullptr, int *imageH = nullptr);
@@ -232,6 +248,7 @@ class Launcher final : public Core {
     std::array<Icon, 9> icons_{};
     std::array<unsigned, 3> systemIcons_{};
     unsigned dockTexture_ = 0;
+    unsigned minorolaTexture_ = 0;
     std::array<unsigned, 2> gridrunnerPreviews_{};
     unsigned gridrunnerAtlas_ = 0;
     struct Wallpaper {

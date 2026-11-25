@@ -178,6 +178,12 @@ void PickupActor::hitBy(StageActor *other) {
     other->onContact(this);
     if (other != owner().goat.get() || other->category != 1 || owner().goat->state != 0)
         return;
+    if (uncountedLevelPickup) {
+        uncountedLevelPickup = false;
+        ++owner().foundObjects;
+        if (category == 9)
+            ++owner().foundMinotaurs;
+    }
     auto &goat = *owner().goat;
     if (category != 16) {
         goat.followingCount = add(goat.followingCount, 1);
@@ -225,7 +231,7 @@ void PickupActor::hitBy(StageActor *other) {
         owner().addScore(rewardValue);
         labelScale = 7;
         if (!owner().headbuttDisabled) {
-            owner().sharedGrace = 1000;
+            owner().sharedGrace = vindalooTicks;
             sample = 63;
         } else {
             owner().headbuttDisabled = false;
@@ -268,7 +274,8 @@ void PickupActor::hitBy(StageActor *other) {
     } else if (category == 16) {
         const double hunger = double(goat.hunger) + .2;
         goat.hunger = hunger > .98 ? .98f : float(hunger);
-        goat.invulnerability = 100;
+        goat.invulnerability = teaProtectionTicks;
+        goat.teaProtection = true;
         dead = true;
     }
 }
@@ -413,8 +420,15 @@ void ExitTotalizer::run() {
     }
 }
 
-void StageRuntime::spawnPickup(neon::vec2d p, uint32_t flags) {
+void StageRuntime::spawnPickup(neon::vec2d p, uint32_t flags, bool placedInLevel) {
     auto child = std::make_unique<PickupActor>(*this, allocation, p, flags);
+    // Flowers regrow and tea is used immediately. Neither counts toward the level tally.
+    if (placedInLevel && child->category != 15 && child->category != 16) {
+        child->uncountedLevelPickup = true;
+        ++levelObjects;
+        if (child->category == 9)
+            ++levelMinotaurs;
+    }
     neon::entities::prepend<StageActor>(contactObjects, *child);
     child.release();
 }
@@ -449,6 +463,7 @@ void StageRuntime::spawnOriginalObjects(const PlacementTable &placements) {
             throw std::logic_error("actor record outside reconstructed campaigns");
     }
     requiredFruit = 0;
+    levelObjects = foundObjects = levelMinotaurs = foundMinotaurs = 0;
     int slot = 0;
     for (const auto &p : placements.entries()) {
         switch (p.type) {
@@ -459,7 +474,7 @@ void StageRuntime::spawnOriginalObjects(const PlacementTable &placements) {
             spawnKid({p.x, p.y}, p.flags != 0);
             break;
         case 2:
-            spawnPickup({p.x, p.y}, p.flags);
+            spawnPickup({p.x, p.y}, p.flags, true);
             break;
         case 3: {
             auto child =

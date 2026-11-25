@@ -2,9 +2,336 @@
   "widgetML": 1,
   "region": "bezel",
   "assets": {
-    "pickup-atlas": "gridrunner.png"
+    "pickup-ring": "widget-pickup-ring.png"
   },
   "templates": {
+    "checkpointStack": {
+      "kind": "group",
+      "size": [304, 188],
+      "x": -22,
+      "y": -468,
+      "visible": ["coalesce", ["read", "checkpointVisible"], true],
+      "pivot": [1, 0],
+      "scale": ["get", "railScale"],
+      "placement": {
+        "landscape": "gameplay-left"
+      },
+      "children": [
+        {
+          "id": "checkpoint-score",
+          "use": "statBox",
+          "inputs": {
+            "label": "Checkpoint Score",
+            "value": ["coalesce", ["read", "checkpointScore"], "238,600"],
+            "stacked": true
+          }
+        },
+        {
+          "id": "next-checkpoint",
+          "use": "statBox",
+          "y": 100,
+          "inputs": {
+            "label": "Next Checkpoint",
+            "value": ["coalesce", ["read", "nextCheckpoint"], "Grid 9"],
+            "stacked": true
+          }
+        }
+      ],
+      "inputs": {
+        "railScale": ["get", "railScale"]
+      }
+    },
+    "runStats": {
+      "kind": "group",
+      "size": [304, 138],
+      "x": -22,
+      "y": 468,
+      "pivot": [1, 1],
+      "scale": ["get", "railScale"],
+      "placement": {
+        "landscape": "gameplay-left"
+      },
+      "children": [
+        {
+          "id": "stats-frame",
+          "use": "bezelFrame",
+          "inputs": {
+            "height": 138
+          }
+        },
+        {
+          "id": "stats",
+          "kind": "repeat",
+          "items": ["get", "stats"],
+          "y": 13,
+          "maximum": 4,
+          "layout": {
+            "type": "column",
+            "cell": [304, 30]
+          },
+          "template": {
+            "id": "row",
+            "kind": "group",
+            "opacity": ["if", ["get", "item.completed"], 0.75, 1],
+            "children": [
+              {
+                "id": "rowLabel",
+                "kind": "logic",
+                "value": ["get", "item.label"]
+              },
+              {
+                "id": "rowValue",
+                "kind": "logic",
+                "value": ["get", "item.value"]
+              },
+              {
+                "id": "name",
+                "kind": "text",
+                "text": "{rowLabel}",
+                "fontSize": 13,
+                "lineWidth": 1.35,
+                "color": ["if", ["get", "item.completed"], [0.53, 1, 0.63, 1], [0.79, 0.87, 0.94, 1]],
+                "x": 15,
+                "y": 1,
+                "font": "neon-hud"
+              },
+              {
+                "id": "value",
+                "kind": "text",
+                "text": "{rowValue}",
+                "fontSize": 16,
+                "lineWidth": 1.35,
+                "color": ["if", ["get", "item.completed"], [0.53, 1, 0.63, 1], [0.97, 0.99, 1, 1]],
+                "x": 15,
+                "y": 0,
+                "size": [274, 19],
+                "align": "right",
+                "font": "neon-hud"
+              }
+            ]
+          }
+        }
+      ],
+      "inputs": {
+        "railScale": ["get", "railScale"],
+        "stats": ["get", "stats"]
+      }
+    },
+    "pickupLog": {
+      "kind": "group",
+      "size": [304, ["get", "logHeight"]],
+      "x": 22,
+      "y": -468,
+      "pivot": [0, 0],
+      "scale": ["get", "railScale"],
+      "placement": {
+        "landscape": "gameplay-right"
+      },
+      "children": [
+        {
+          "id": "logHeight",
+          "kind": "logic",
+          "value": ["+", 59, ["*", 30, ["max", ["get", "reservedRows"], ["min", 5, ["count", ["get", "pickups"]]]]]]
+        },
+        {
+          "id": "pickup-panel",
+          "use": "panel",
+          "inputs": {
+            "title": "Last 5 Pickups",
+            "height": ["get", "logHeight"]
+          }
+        },
+        {
+          "id": "pickups",
+          "kind": "repeat",
+          "items": ["get", "pickups"],
+          "y": 47,
+          "maximum": 5,
+          "layout": {
+            "type": "column",
+            "cell": [304, 30]
+          },
+          "template": {
+            "id": "row",
+            "kind": "group",
+            "children": [
+              {
+                "id": "rowLabel",
+                "kind": "logic",
+                "value": ["get", "item.label"]
+              },
+              {
+                "id": "tint",
+                "kind": "logic",
+                "value": ["get", "item.tint"]
+              },
+              {
+                "id": "icon",
+                "kind": "sprite",
+                "asset": "pickup-ring",
+                "x": 12,
+                "y": -3,
+                "size": [28, 28],
+                "color": ["get", "tint"]
+              },
+              {
+                "id": "name",
+                "kind": "text",
+                "text": "{rowLabel}",
+                "fontSize": 16,
+                "lineWidth": 1.35,
+                "color": [0.97, 0.99, 1, 1],
+                "x": 47,
+                "y": 3,
+                "font": "neon-hud"
+              }
+            ]
+          }
+        }
+      ],
+      "inputs": {
+        "railScale": ["get", "railScale"],
+        "pickups": ["get", "pickups"],
+        "reservedRows": 0
+      }
+    },
+    "cooldownRow": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "rowLabel",
+          "kind": "logic",
+          "value": ["get", "item.label"]
+        },
+        {
+          "id": "remaining",
+          "kind": "logic",
+          "value": ["get", "item.remaining"]
+        },
+        {
+          "id": "duration",
+          "kind": "logic",
+          "value": ["get", "item.duration"]
+        },
+        {
+          "id": "timeText",
+          "kind": "logic",
+          "value": ["get", "item.timeText"]
+        },
+        {
+          "id": "tint",
+          "kind": "logic",
+          "value": ["get", "item.tint"]
+        },
+        {
+          "id": "card",
+          "use": "cooldownCard",
+          "inputs": {
+            "rowLabel": ["get", "rowLabel"],
+            "remaining": ["get", "remaining"],
+            "duration": ["get", "duration"],
+            "timeText": ["get", "timeText"],
+            "tint": ["get", "tint"],
+            "width": ["get", "cardWidth"],
+            "height": ["get", "cardHeight"]
+          }
+        }
+      ],
+      "inputs": {
+        "cardWidth": 304,
+        "cardHeight": 80
+      }
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "checkpoint-stack",
+          "use": "checkpointStack",
+          "placement": {
+            "origin": "screen-top-left"
+          },
+          "scale": ["*", 1.02, ["get", "railScale"]],
+          "x": ["*", 24, ["get", "railScale"]],
+          "y": ["coalesce", ["read", "portraitInset"], 15],
+          "pivot": [0, 0]
+        },
+        {
+          "id": "run-stats",
+          "use": "runStats",
+          "placement": {
+            "origin": "screen-top-right"
+          },
+          "scale": ["*", 1.35, ["get", "railScale"]],
+          "x": ["*", -24, ["get", "railScale"]],
+          "y": ["coalesce", ["read", "portraitInset"], 15],
+          "pivot": [1, 0]
+        },
+        {
+          "id": "pickup-log",
+          "use": "pickupLog",
+          "placement": {
+            "origin": "screen-bottom-left"
+          },
+          "scale": ["*", 0.95, ["get", "railScale"]],
+          "x": ["*", 24, ["get", "railScale"]],
+          "y": ["-", 0, ["coalesce", ["read", "portraitInset"], 15]],
+          "pivot": [0, 1],
+          "inputs": {
+            "reservedRows": 5
+          }
+        },
+        {
+          "id": "cooldown-grid",
+          "kind": "group",
+          "placement": {
+            "origin": "screen-bottom-right"
+          },
+          "pivot": [1, 1],
+          "x": ["*", -24, ["get", "railScale"]],
+          "y": ["-", 0, ["coalesce", ["read", "portraitInset"], 15]],
+          "scale": ["*", 0.85, ["get", "railScale"]],
+          "size": [758, ["get", "gridHeight"]],
+          "inputs": {
+            "railScale": ["get", "railScale"],
+            "effects": ["get", "effects"]
+          },
+          "children": [
+            {
+              "id": "gridHeight",
+              "kind": "logic",
+              "value": ["/", ["*", 209, 0.95], 0.85]
+            },
+            {
+              "id": "cardHeight",
+              "kind": "logic",
+              "value": ["/", ["-", ["get", "gridHeight"], 14], 2]
+            },
+            {
+              "id": "cooldowns",
+              "kind": "repeat",
+              "items": ["get", "effects"],
+              "maximum": 6,
+              "inputs": {"cardHeight": ["get", "cardHeight"]},
+              "layout": {
+                "type": "column",
+                "cell": [0, 0]
+              },
+              "template": {
+                "id": "row",
+                "use": "cooldownRow",
+                "x": ["*", 258, ["-", 2, ["get", "item.column"]]],
+                "y": ["*", ["get", "item.row"], ["+", ["get", "cardHeight"], 14]],
+                "inputs": {
+                  "cardWidth": 242,
+                  "cardHeight": ["get", "cardHeight"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
     "frameBeam": {
       "kind": "vector",
       "size": [2, 17],
@@ -13,7 +340,8 @@
         [0, 16]
       ],
       "lineWidth": 1.9,
-      "color": [0.32, 0.65, 0.82, 0.55]
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.60
     },
     "bezelFrame": {
       "kind": "group",
@@ -302,28 +630,31 @@
     },
     "cooldownCard": {
       "kind": "group",
-      "size": [304, 80],
+      "size": [["get", "width"], ["get", "height"]],
       "inputs": {
         "rowLabel": "",
         "remaining": 0,
         "duration": 1,
         "timeText": "",
         "tint": [0.39, 0.86, 0.96, 1],
-        "labelFont": "neon-hud"
+        "labelFont": "neon-hud",
+        "width": 304,
+        "height": 80
       },
       "children": [
         {
           "id": "frame",
           "use": "bezelFrame",
           "inputs": {
-            "height": 80
+            "width": ["get", "width"],
+            "height": ["get", "height"]
           }
         },
         {
           "id": "ring",
           "use": "radialFace",
           "x": 17,
-          "y": 5,
+          "y": ["+", 5, ["/", ["-", ["get", "height"], 80], 2]],
           "scale": 0.54,
           "inputs": {
             "remaining": ["get", "remaining"],
@@ -340,7 +671,7 @@
           "lineWidth": 1.35,
           "color": [0.97, 0.99, 1, 1],
           "x": 92,
-          "y": 33,
+          "y": ["+", 33, ["/", ["-", ["get", "height"], 80], 2]],
           "font": ["get", "labelFont"]
         }
       ]
@@ -468,228 +799,9 @@
       ]
     },
     "children": [
-      {
-        "id": "left-top",
-        "kind": "group",
-        "size": [304, 188],
-        "x": -22,
-        "y": -468,
-        "visible": [
-          "coalesce",
-          ["read", "checkpointVisible"],
-          true
-        ],
-        "pivot": [1, 0],
-        "scale": ["get", "railScale"],
-        "placement": {
-          "landscape": "gameplay-left"
-        },
-        "children": [
-          {
-            "id": "checkpoint-score",
-            "use": "statBox",
-            "inputs": {
-              "label": "Checkpoint Score",
-              "value": [
-                "coalesce",
-                ["read", "checkpointScore"],
-                "238,600"
-              ],
-              "stacked": true
-            }
-          },
-          {
-            "id": "next-checkpoint",
-            "use": "statBox",
-            "y": 100,
-            "inputs": {
-              "label": "Next Checkpoint",
-              "value": [
-                "coalesce",
-                ["read", "nextCheckpoint"],
-                "Grid 9"
-              ],
-              "stacked": true
-            }
-          }
-        ],
-        "inputs": {
-          "railScale": ["get", "railScale"]
-        }
-      },
-      {
-        "id": "left-bottom",
-        "kind": "group",
-        "size": [304, 138],
-        "x": -22,
-        "y": 468,
-        "pivot": [1, 1],
-        "scale": ["get", "railScale"],
-        "placement": {
-          "landscape": "gameplay-left"
-        },
-        "children": [
-          {
-            "id": "stats-frame",
-            "use": "bezelFrame",
-            "inputs": {
-              "height": 138
-            }
-          },
-          {
-            "id": "stats",
-            "kind": "repeat",
-            "items": ["get", "stats"],
-            "y": 13,
-            "maximum": 4,
-            "layout": {
-              "type": "column",
-              "cell": [304, 30]
-            },
-            "template": {
-              "id": "row",
-              "kind": "group",
-              "children": [
-                {
-                  "id": "rowLabel",
-                  "kind": "logic",
-                  "value": ["get", "item.label"]
-                },
-                {
-                  "id": "rowValue",
-                  "kind": "logic",
-                  "value": ["get", "item.value"]
-                },
-                {
-                  "id": "name",
-                  "kind": "text",
-                  "text": "{rowLabel}",
-                  "fontSize": 13,
-                  "lineWidth": 1.35,
-                  "color": [0.79, 0.87, 0.94, 1],
-                  "x": 15,
-                  "y": 1,
-                  "font": "neon-hud"
-                },
-                {
-                  "id": "value",
-                  "kind": "text",
-                  "text": "{rowValue}",
-                  "fontSize": 16,
-                  "lineWidth": 1.35,
-                  "color": [0.97, 0.99, 1, 1],
-                  "x": 15,
-                  "y": 0,
-                  "size": [274, 19],
-                  "align": "right",
-                  "font": "neon-hud"
-                }
-              ]
-            }
-          }
-        ],
-        "inputs": {
-          "railScale": ["get", "railScale"],
-          "stats": ["get", "stats"]
-        }
-      },
-      {
-        "id": "right-top",
-        "kind": "group",
-        "size": [
-          304,
-          ["get", "logHeight"]
-        ],
-        "x": 22,
-        "y": -468,
-        "pivot": [0, 0],
-        "scale": ["get", "railScale"],
-        "placement": {
-          "landscape": "gameplay-right"
-        },
-        "children": [
-          {
-            "id": "logHeight",
-            "kind": "logic",
-            "value": [
-              "+",
-              59,
-              [
-                "*",
-                30,
-                [
-                  "min",
-                  5,
-                  [
-                    "count",
-                    ["get", "pickups"]
-                  ]
-                ]
-              ]
-            ]
-          },
-          {
-            "id": "pickup-panel",
-            "use": "panel",
-            "inputs": {
-              "title": "Last 5 Pickups",
-              "height": ["get", "logHeight"]
-            }
-          },
-          {
-            "id": "pickups",
-            "kind": "repeat",
-            "items": ["get", "pickups"],
-            "y": 47,
-            "maximum": 5,
-            "layout": {
-              "type": "column",
-              "cell": [304, 30]
-            },
-            "template": {
-              "id": "row",
-              "kind": "group",
-              "children": [
-                {
-                  "id": "rowLabel",
-                  "kind": "logic",
-                  "value": ["get", "item.label"]
-                },
-                {
-                  "id": "tint",
-                  "kind": "logic",
-                  "value": ["get", "item.tint"]
-                },
-                {
-                  "id": "icon",
-                  "kind": "sprite",
-                  "asset": "pickup-atlas",
-                  "x": 15,
-                  "y": 0,
-                  "size": [22, 22],
-                  "frame": [0, 121, 14, 14],
-                  "color": ["get", "tint"]
-                },
-                {
-                  "id": "name",
-                  "kind": "text",
-                  "text": "{rowLabel}",
-                  "fontSize": 16,
-                  "lineWidth": 1.35,
-                  "color": [0.97, 0.99, 1, 1],
-                  "x": 47,
-                  "y": 3,
-                  "font": "neon-hud"
-                }
-              ]
-            }
-          }
-        ],
-        "inputs": {
-          "railScale": ["get", "railScale"],
-          "pickups": ["get", "pickups"]
-        }
-      },
+      {"id": "left-top", "use": "checkpointStack"},
+      {"id": "left-bottom", "use": "runStats"},
+      {"id": "right-top", "use": "pickupLog"},
       {
         "id": "right-bottom",
         "kind": "group",
@@ -741,45 +853,7 @@
             },
             "template": {
               "id": "row",
-              "kind": "group",
-              "children": [
-                {
-                  "id": "rowLabel",
-                  "kind": "logic",
-                  "value": ["get", "item.label"]
-                },
-                {
-                  "id": "remaining",
-                  "kind": "logic",
-                  "value": ["get", "item.remaining"]
-                },
-                {
-                  "id": "duration",
-                  "kind": "logic",
-                  "value": ["get", "item.duration"]
-                },
-                {
-                  "id": "timeText",
-                  "kind": "logic",
-                  "value": ["get", "item.timeText"]
-                },
-                {
-                  "id": "tint",
-                  "kind": "logic",
-                  "value": ["get", "item.tint"]
-                },
-                {
-                  "id": "card",
-                  "use": "cooldownCard",
-                  "inputs": {
-                    "rowLabel": ["get", "rowLabel"],
-                    "remaining": ["get", "remaining"],
-                    "duration": ["get", "duration"],
-                    "timeText": ["get", "timeText"],
-                    "tint": ["get", "tint"]
-                  }
-                }
-              ]
+              "use": "cooldownRow"
             }
           }
         ],

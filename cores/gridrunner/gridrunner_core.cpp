@@ -59,7 +59,9 @@ class GridrunnerCore final : public Core {
           shaderHistory_(history) {
         renderState_.shaderCycles = history;
     }
-    const CoreInfo &info() const override { return classic_ ? kClassicInfo : kInfo; }
+    const CoreInfo &info() const override {
+        return classic_ ? kClassicInfo : kInfo;
+    }
     NativeFormat nativeFormat() const override {
         return gridrunner::nativeFormat(classic_ ? gridrunner::GameVersion::ClassicVic20
                                                  : gridrunner::GameVersion::Enhanced);
@@ -102,8 +104,15 @@ class GridrunnerCore final : public Core {
         PresentationState state{true, paused_ || suspended_, presentationSession_, {}};
         state.values["widgets.shipsLost"] = shipsLost_;
         state.values["widgets.deathless"] = int64_t(native_->ac.gridsWithoutDeath);
-        state.values["widgets.swarmers"] = int64_t(native_->ac.swarmerKills);
-        state.values["widgets.deflections"] = int64_t(native_->ac.deflectionCount);
+        auto achievementProgress = [&](const std::string &key, int64_t count, int goal,
+                                       int64_t target) {
+            const bool completed = (achievementRecord_.unlocked & (1u << goal)) != 0;
+            state.values[key] = completed ? target : std::clamp(count, int64_t(0), target);
+            state.values[key + ".target"] = target;
+            state.values[key + ".completed"] = completed;
+        };
+        achievementProgress("widgets.swarmers", native_->ac.swarmerKills, 9, 50);
+        achievementProgress("widgets.deflections", native_->ac.deflectionCount, 2, 501);
         const auto next = (int64_t(native_->level()) / 4 + 1) * 4;
         if (!survival_ && next / 4 < gridrunner::CampaignProgress::kSlots) {
             state.values["widgets.nextCheckpoint"] = next + 1;
@@ -117,7 +126,8 @@ class GridrunnerCore final : public Core {
             if (remaining > 0) {
                 state.collections["widgets.effects"].push_back({uint64_t(kind), remaining, kind});
                 state.values["widgets.duration." + std::to_string(kind)] =
-                    int64_t(gr::reconstruction::ios::Powerup::duration[size_t(kind)] + (kind == 5 ? 20 : 0));
+                    int64_t(gr::reconstruction::ios::Powerup::duration[size_t(kind)] +
+                            (kind == 5 ? 20 : 0));
             }
         }
         for (int kind = 0; kind < 8; ++kind) {
@@ -431,7 +441,9 @@ class GridrunnerCore final : public Core {
         if (suspended && !paused_)
             openPause();
     }
-    void mixAudio(float *output, int frames) override { mixer_.mix(output, frames); }
+    void mixAudio(float *output, int frames) override {
+        mixer_.mix(output, frames);
+    }
     void save() override {
         auto bind = renderState_.bind();
         if (!host_)
@@ -515,7 +527,9 @@ class GridrunnerCore final : public Core {
         return !classic_ && !active_ && !frontend_.levelSelect() && !paused_ && !scoresOpen_ &&
                !nameEntry_;
     }
-    int startLevel() const { return devStart_ ? devLevel_ : survival_ ? 0 : selectedLevel_; }
+    int startLevel() const {
+        return devStart_ ? devLevel_ : survival_ ? 0 : selectedLevel_;
+    }
     gridrunner::GameMode mode() const {
         if (classic_)
             return gridrunner::GameMode::Pure;
@@ -536,7 +550,9 @@ class GridrunnerCore final : public Core {
                : devStart_ ? 3
                            : progress_.at(startLevel()).lives;
     }
-    int best() const { return std::max(shownScore(), scores_.entry(int(mode()), 0).score); }
+    int best() const {
+        return std::max(shownScore(), scores_.entry(int(mode()), 0).score);
+    }
     void cancelInput() {
         controllerFrame_.clear();
         pad_ = {};
@@ -710,7 +726,9 @@ class GridrunnerCore final : public Core {
         }
         rebuildButtons();
     }
-    void startGame() { startNative(false); }
+    void startGame() {
+        startNative(false);
+    }
     void startNative(bool demo) {
         if (!demo) {
             ++presentationSession_;

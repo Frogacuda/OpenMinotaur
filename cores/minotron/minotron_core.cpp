@@ -74,6 +74,9 @@ class MinotronCore final : public Core {
     PresentationState presentationState() const override {
         return presentation_.sample(gameHost_.game());
     }
+    PresentationState widgetPresentationState() const override {
+        return presentation_.widgets(gameHost_.game());
+    }
 
     bool init(Host &host, const SurfaceInfo &s) override {
         if (!startup_.begin(host, s))

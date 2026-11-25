@@ -239,6 +239,7 @@ int main(int argc, char **argv) {
         press(mino::PAD_B);
         check(host.quit, "Scores return through title to launcher");
         core->shutdown();
+        host.quit = false;
         check(core->init(host, display.surface()), "Frontend restart");
         finishStartup(*core, display);
         press(mino::PAD_A);
@@ -246,21 +247,29 @@ int main(int argc, char **argv) {
             display.beginFrame();
             core->frame(1. / 60);
         }
+        for (auto button : {mino::PAD_A, mino::PAD_B, mino::PAD_X, mino::PAD_Y}) {
+            press(button);
+            const auto state = core->widgetPresentationState();
+            check(state.gameplay && !state.paused && !host.quit,
+                  "Face buttons leave active gameplay running");
+        }
+        check(core->back() && core->widgetPresentationState().paused,
+              "System Back still opens the pause menu");
+        press(mino::PAD_B);
+        check(!core->widgetPresentationState().paused, "B still dismisses the pause menu");
         const auto surface = display.surface();
         core->touch({mino::TouchPhase::Down, 99, surface.width * .5f, surface.height * .15f});
         display.beginFrame();
         core->frame(1. / 60);
         capture(out / "touch-faded-pause.png", display.surface());
         core->touch({mino::TouchPhase::Up, 99, surface.width * .5f, surface.height * .15f});
+        press(mino::PAD_B); // resume the invisible touch hotspot's pause
         mino::PadState pad;
-        pad.connected = true;
-        pad.buttons = pad.pressed = mino::PAD_B;
-        core->pads(&pad, 1); // resume the invisible touch hotspot's pause
-        pad = {};
         pad.connected = true;
         core->pads(&pad, 1);
         pad.buttons = pad.pressed = mino::PAD_START;
         core->pads(&pad, 1);
+        check(core->widgetPresentationState().paused, "Start still opens the pause menu");
         for (int n = 0; n < 24; ++n) {
             display.beginFrame();
             core->frame(1. / 60);
@@ -528,7 +537,7 @@ int main(int argc, char **argv) {
               "Day selector fixture record");
         core.reset(mino::kFiveADayCore.create());
         // A single held gesture must remain on day selection. Two B presses should
-        // then return to title and iOX; if it started gameplay they pause/resume.
+        // then return to title and iOX; in gameplay neither press would exit.
         for (bool touch : {false, true}) {
             host.quit = false;
             check(core->init(host, display.surface()), "Held-input selector regression");

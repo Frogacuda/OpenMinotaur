@@ -106,6 +106,15 @@ int main(int argc, char **argv) {
     raw.axes = {-.7f, .4f, .8f, -.2f, 0, 0};
     auto p = defaults.apply(raw);
     assert(p.lx == -.7f && p.ly == .4f && p.rx == .8f && p.ry == -.2f);
+    raw = {};
+    raw.connected = true;
+    raw.buttons[SDL_GAMEPAD_BUTTON_BACK] = true;
+    assert(defaults.apply(raw).buttons == 0);
+    auto reserved = defaults;
+    reserved.sources.fill(SDL_GAMEPAD_BUTTON_BACK);
+    p = ControlMapping::decode(reserved.encode()).apply(raw);
+    assert(p.buttons == 0 && p.lx == 0 && p.ly == 0 && p.rx == 0 && p.ry == 0 && p.lt == 0 &&
+           p.rt == 0);
     MappingCapture capture;
     capture.begin(2);
     raw = {};
@@ -118,11 +127,17 @@ int main(int argc, char **argv) {
         raw.connected = true;
         capture.update(raw);
         assert(!capture.waitingForRelease());
+        if (i == 0) {
+            raw.buttons[SDL_GAMEPAD_BUTTON_BACK] = true;
+            capture.update(raw);
+            assert(capture.step() == 0);
+            raw.buttons[SDL_GAMEPAD_BUTTON_BACK] = false;
+        }
         if (i < 8)
             raw.buttons[size_t(9 + i % 2)] = true;
         else if (i >= 18)
-            raw.buttons[size_t(i == 18 ? SDL_GAMEPAD_BUTTON_START : SDL_GAMEPAD_BUTTON_BACK)] =
-                true;
+            raw.buttons[size_t(i == 18 ? SDL_GAMEPAD_BUTTON_START
+                                       : SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)] = true;
         else if (i >= 16)
             raw.axes[size_t(i - 12)] = 1;
         else

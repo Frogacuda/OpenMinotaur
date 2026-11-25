@@ -9,6 +9,7 @@
 #include <vector>
 
 namespace goatup2 {
+inline constexpr int32_t teaProtectionTicks = 100, vindalooTicks = 1000;
 class StageRuntime;
 class EnemyActor;
 int32_t fruitSpriteForStage(int32_t stageIndex);
@@ -123,6 +124,7 @@ class GoatActor final : public StageActor {
     bool heldJumpFinished = true, jumpConsumed = false, headbuttFlag = false;
     int32_t heldJumpTicks = 0, invulnerability = 150, activeTicks = 0;
     int32_t state = 0, followingCount = 0;
+    bool teaProtection = false;
     int32_t attractCountdown = -10;    // +72d4, settle then camera-sweep counter
     int32_t lastCheckpointDevice = -1; // +72c8, case-3 placement slot identity
     bool deathSoundSuppressed = false;
@@ -160,6 +162,7 @@ class PickupActor final : public StageActor {
     void hitBy(StageActor *) override;
     void preparePresentation() override;
     bool drawMarker = false, drawMain = true;
+    bool uncountedLevelPickup = false;
     neon::vec2d markerWorldPosition;
 };
 class GrassBonusActor final : public StageActor {
@@ -269,6 +272,7 @@ class StageRuntime final : public MediumOutput,
     int32_t activeFollowers = 0, exitOrdinal = 1, exitBonus = 0;
     int32_t requiredFruit = 0, initialFruit = 0, fruitPaletteIndex = 0, stageIndex = 0;
     int32_t grassSequence = 1, bonusPickups = 0, bestStageTime = 0, timeRecordCounter = 0;
+    int32_t levelObjects = 0, foundObjects = 0, levelMinotaurs = 0, foundMinotaurs = 0;
     bool unlockExit = false, newBestStageTime = false;
     std::array<StatusMessage, 4> messages;
     float exitBonusStep = 0, exitBonusProgress = 0, sourceTime = 0;
@@ -288,7 +292,7 @@ class StageRuntime final : public MediumOutput,
 
     void spawnGoat(neon::vec2d position, bool inverted, neon::vec2d spriteScale);
     void spawnKid(neon::vec2d position, bool inverted);
-    void spawnPickup(neon::vec2d position, uint32_t flags);
+    void spawnPickup(neon::vec2d position, uint32_t flags, bool placedInLevel = false);
     void spawnExit(neon::vec2d position);
     void spawnOriginalObjects(const PlacementTable &);
     void spawnGrassBonuses();

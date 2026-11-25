@@ -308,9 +308,11 @@ int main(int argc, char **argv) {
     step(0, 0);
     check(historyFront.page == Frontend::Page::History, "Info starts native interactive history");
     bool modes[3] = {}, placed[3] = {};
-    int trialTicks = 0, lastPhase = -1;
-    try {
-        for (int frame = 0; frame < 20000 && historyFront.history()->phase != 12; ++frame) {
+    auto finishStory = [&](bool touchOK) {
+        int trialTicks = 0, lastPhase = -1;
+        for (int frame = 0;
+             frame < 20000 && historyFront.history() && !historyFront.history()->finished();
+             ++frame) {
             int phase = historyFront.history()->phase;
             if (phase != lastPhase) {
                 std::printf("History phase %d at scripted frame %d\n", phase, frame);
@@ -322,16 +324,21 @@ int main(int argc, char **argv) {
                       "only C64 history uses the source main ball list; PET/VIC use overlay");
                 modes[phase == 5 ? 0 : phase == 8 ? 1 : 2] = true;
                 // Source controls finish their entrance before accepting placement.
-                if (++trialTicks == 100)
-                    step(Start, Start);
-                else if (trialTicks == 60) {
+                if (++trialTicks == 100) {
+                    if (touchOK && phase == 11) {
+                        historyFront.touch(1, 0, {0, .43});
+                        historyFront.touch(1, 2, {0, .43});
+                        step(0, 0);
+                    } else
+                        step(Start, Start);
+                } else if (trialTicks == 60) {
                     step(East, East);
                     check(historyFront.world().input.pending.has_value() == (phase == 11),
                           "overlay PET/VIC consume a new control before tick end; C64 queues it "
                           "for next tick");
                 } else
                     step(0, 0);
-                if (historyFront.history()->trial()) {
+                if (historyFront.history() && historyFront.history()->trial()) {
                     auto &grid = historyFront.world().level.grid;
                     for (int y = 0; y <= grid.rows; ++y)
                         for (int x = 0; x <= grid.cols; ++x) {
@@ -346,13 +353,35 @@ int main(int argc, char **argv) {
                 step(activate ? South : 0, frame % 12 == 0 ? South : 0);
             }
         }
-        check(
-            historyFront.history()->phase == 12 && modes[0] && modes[1] && modes[2],
-            "original scripts reach PET, VIC and C64 interactive trials and their terminal state");
+        check(historyFront.history() && historyFront.history()->finished(),
+              "the final confirmation leaves the star field on screen");
+    };
+    try {
+        finishStory(false);
+        check(modes[0] && modes[1] && modes[2],
+              "original scripts reach all three interactive trials");
         check(placed[0] && placed[1] && placed[2],
               "direct canonical controller input places deflectors in every character trial");
         check(out.quads > 100 && out.finite, "console backgrounds, original glyphs and character "
                                              "actors produce finite draw commands");
+        step(Start, 0);
+        check(historyFront.page == Frontend::Page::History,
+              "holding the final confirmation keeps the star field on screen");
+        step(0, 0);
+        step(West, West);
+        step(West, 0);
+        check(historyFront.page == Frontend::Page::Info,
+              "a fresh controller button exits the star field");
+        step(0, 0);
+        step(South, South);
+        step(0, 0);
+        finishStory(true);
+        historyFront.touch(2, 0, {-.36, -.31});
+        historyFront.touch(2, 2, {-.36, -.31});
+        check(historyFront.page == Frontend::Page::Info,
+              "a fresh tap away from the OK button exits the star field");
+        step(0, 0);
+        step(South, South);
         step(0, 0);
         step(Back, Back);
         step(Back, 0);

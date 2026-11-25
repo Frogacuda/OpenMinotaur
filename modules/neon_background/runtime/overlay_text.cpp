@@ -39,7 +39,9 @@ void OverlayTextLayer::set(const std::string &id, OverlayText text) {
         ++stats_.totalLayoutBuilds;
     }
 }
-bool OverlayTextLayer::remove(const std::string &id) { return entries_.erase(id) != 0; }
+bool OverlayTextLayer::remove(const std::string &id) {
+    return entries_.erase(id) != 0;
+}
 void OverlayTextLayer::clear() {
     entries_.clear();
     frame_ = {};

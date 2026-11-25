@@ -301,6 +301,50 @@ class GoatUpCore final : public Core {
                  {"mushroom.active", world_->actors.poison > 0},
                  {"billyGoats.kissed", uint64_t(std::max(0, world_->actors.runBillyGoats))}}};
     }
+    PresentationState widgetPresentationState() const override {
+        if (!world_ || front_.screen != goatup::Frontend::Screen::Playing || world_->game.demo ||
+            world_->game.gameOver)
+            return {};
+        const auto &w = *world_;
+        // TowerSurface advances four cells per platform at ten cells per scroll unit.
+        // The ninth terrain theme begins at platform 512, where the summit settles.
+        constexpr double homeScroll = -.2f, summitScroll = 512 * 4. / 10.;
+        const double progress =
+            w.game.summitVisited || w.game.diveRequested
+                ? 1.
+                : std::clamp((w.tower.scroll - homeScroll) / (summitScroll - homeScroll), 0., 1.);
+        const auto order = [&](goatup::WidgetEffect effect) {
+            return w.actors.effectOrder[size_t(effect)];
+        };
+        return {true,
+                w.paused || suspended_.load(),
+                presentationSession_,
+                {{"recordScore", int64_t(best_)},
+                 {"recordPlatform", int64_t(records_.highestPlatform)},
+                 {"totalKisses", int64_t(records_.billyGoats)},
+                 {"totalItems", int64_t(records_.uniqueBonuses)},
+                 {"kids", int64_t(w.goat.kids)},
+                 {"mostKids", int64_t(w.kidState.mostInRun)},
+                 {"kisses", int64_t(w.actors.runBillyGoats)},
+                 {"uniqueItems", int64_t(w.actors.uniqueRunBonuses)},
+                 {"progress", progress},
+                 {"returning", w.game.returning || w.game.diveRequested},
+                 {"gestationActive", w.game.pregnant},
+                 {"gestation", std::clamp(double(w.goat.pregnancy) / 4., 0., 1.)},
+                 {"slowDown", w.actors.slowDownMeter()},
+                 {"flightOrder", order(goatup::WidgetEffect::Flight)},
+                 {"mushroomOrder", order(goatup::WidgetEffect::Mushroom)},
+                 {"protectionOrder", order(goatup::WidgetEffect::Protection)},
+                 {"gestationOrder", order(goatup::WidgetEffect::Gestation)},
+                 {"slowDownOrder", order(goatup::WidgetEffect::SlowDown)},
+                 {"flightTicks", int64_t(w.game.flightTicks)},
+                 {"mushroomTicks",
+                  int64_t(std::ceil(std::clamp(double(w.actors.poison), 0., 1.) * 500))},
+                 {"protectionTicks", int64_t(w.actors.hazardGrace)},
+                 {"protectionDuration", int64_t(w.actors.hazardDuration)}},
+                {},
+                {}};
+    }
     const CoreInfo &info() const override {
         return Info;
     }

@@ -1,4 +1,5 @@
 #include "launcher.h"
+#include "display.h"
 #include "launcher_dock.h"
 #include "about_screen.h"
 #include "launcher_settings_icon.h"
@@ -48,7 +49,16 @@ uniform float uRoundEdge;
 uniform vec2 uRoundScale;
 varying vec2 vUV;
 varying vec4 vColour;
+float softShadowCoverage(float distance, float edgeWidth) {
+    return 1.0 - smoothstep(-edgeWidth, edgeWidth, distance);
+}
 void main() {
+    if (uRounded > 5.5) {
+        // Expand around the glyph contour. The fade fits within the SDF's padded range.
+        float distance = 0.5 - texture2D(uTexture, vUV).r;
+        gl_FragColor = vec4(vColour.rgb, vColour.a * softShadowCoverage(distance - 0.14, 0.31));
+        return;
+    }
     if (uRounded > 4.5) {
         gl_FragColor=vec4(texture2D(uTexture,vUV).rgb*vColour.rgb,vColour.a);
         return;
@@ -68,7 +78,7 @@ void main() {
         // analytic penumbra needs one quad, with no blur textures or passes.
         vec2 q = abs(vUV-0.5)-vec2(0.32/1.26);
         float distance = length(max(q,vec2(0.0))) + min(max(q.x,q.y),0.0) - 0.18/1.26;
-        float coverage = 1.0-smoothstep(-0.055,0.055,distance);
+        float coverage = softShadowCoverage(distance, 0.055);
         gl_FragColor = vec4(vColour.rgb,vColour.a*coverage);
         return;
     }
@@ -107,6 +117,29 @@ void Launcher::setPortrait(bool portrait) {
 }
 const CoreInfo &Launcher::info() const {
     return layout_.portrait ? kPortrait : kLandscape;
+}
+
+bool Launcher::configureDisplay(Display &display, int width, int height,
+                                const DisplaySettings &settings) {
+    const auto native = nativeFormat();
+    const bool useMinorola = displayLayout(width, height, native, settings).minorolaFrame.w > 0;
+    return display.configure(width, height, native, settings, useMinorola ? minorolaArtwork() : 0);
+}
+
+unsigned Launcher::minorolaArtwork() {
+    if (!minorolaTexture_) {
+        const auto image = ui::minorolaBezel();
+        minorolaTexture_ = loadTexture(image.data, image.size);
+    }
+    return minorolaTexture_;
+}
+
+void Launcher::captureHomeEntrance(const SurfaceInfo &target) {
+    const auto previous = surface_;
+    returnHome();
+    resize(target);
+    frame(0);
+    resize(previous);
 }
 
 bool Launcher::init(Host &host, const SurfaceInfo &surface) {
@@ -428,12 +461,11 @@ void Launcher::drawHomeIcons() {
                             : i == 9  ? "Settings"
                             : i == 10 ? "Achievements"
                                       : "About";
-        text(label, r.cx(), artTop + 84, i == 10 ? 13.f : 16.f, {0, 0, 0, .85f}, true, true);
-        text(label, r.cx(), artTop + 83, i == 10 ? 13.f : 16.f, {1, 1, 1}, true, true);
-        if (game && game->label2[0]) {
-            text(game->label2, r.cx(), r.y + 109, 16, {0, 0, 0, .85f}, true, true);
-            text(game->label2, r.cx(), r.y + 108, 16, {1, 1, 1}, true, true);
-        }
+        text(label, r.cx(), artTop + 83, i == 10 ? 13.f : 16.f, {1, 1, 1}, true, true,
+             TextEffect::SoftShadow);
+        if (game && game->label2[0])
+            text(game->label2, r.cx(), r.y + 108, 16, {1, 1, 1}, true, true,
+                 TextEffect::SoftShadow);
     }
     drawTransform_ = {};
 }
@@ -468,13 +500,19 @@ void Launcher::drawDialog() {
     text(title, w / 2, 76, 23, {1, 1, 1}, true, true);
     paragraph(body, 123, 17);
     for (int i = 0; i < (calibratingTilt_ ? 0 : buttonCount()); ++i) {
-        MenuRect r = pageButton(i);
-        if (focused(i))
-            rect({r.x - 3, r.y - 3, r.w + 6, r.h + 6}, {0.5f, 0.87f, 1}, {0.25f, 0.65f, 0.88f},
-                 true);
-        rect(r, {0.45f, 0.56f, 0.68f}, {0.14f, 0.23f, 0.35f}, true, true);
+        const auto r = pageButton(i);
         const char *label = i == 0 ? first : second;
-        text(label, r.cx(), r.y + 12, 18, {1, 1, 1}, true, true);
+        const bool selected = focused(i);
+        if (page() == Page::Quit) {
+            rect(r, {.13f, .20f, .30f}, {.24f, .33f, .45f}, true, false, 5);
+            drawTabFill({r.x + 1, r.y + 1, r.w - 2, r.h - 2}, selected, true);
+            rect({r.x + 4, r.y + 1, r.w - 8, 3}, {0, 0, 0, selected ? .34f : .22f}, {0, 0, 0, 0});
+            const Colour ink = selected ? Colour{1, 1, 1} : Colour{.07f, .12f, .20f};
+            if (selected)
+                text(label, r.cx(), r.cy() - 8.6f, 16, {.12f, .20f, .31f, .6f}, true, true);
+            text(label, r.cx(), r.cy() - 8, 16, ink, true, true);
+        } else
+            recessedButton(r, label, selected);
     }
 }
 void Launcher::drawWallpaper() {
@@ -566,7 +604,7 @@ void Launcher::frame(double dt) {
         selectionTime_ = std::fmod(selectionTime_ + dt, 1.8);
     repeat_ -= std::clamp(dt, 0.0, 0.1);
     if (appLaunch_.active())
-        exitPose_ = iox::AppLaunch::homePose(appLaunch_.progress());
+        exitPose_ = iox::AppLaunch::homePose(appLaunch_.poseProgress());
     glBindFramebuffer(GL_FRAMEBUFFER, surface_.framebuffer);
     glViewport(0, 0, surface_.width, surface_.height);
     glDisable(GL_SCISSOR_TEST);
@@ -642,8 +680,10 @@ void Launcher::frame(double dt) {
         if (appLaunch_.progress() >= 1) {
             const auto destination = launchPage_;
             const int initialFocus = launchFocus_;
+            const bool returning = appLaunch_.returning();
             cancelAppLaunch();
-            open(destination, initialFocus);
+            if (!returning)
+                open(destination, initialFocus);
         } else
             appLaunch_.advance(dt);
     } else if (page() == Page::Home && !externalLaunch_)
@@ -686,14 +726,17 @@ void Launcher::shutdown() {
         glDeleteTextures(1, &white_);
     if (dockTexture_)
         glDeleteTextures(1, &dockTexture_);
+    if (minorolaTexture_)
+        glDeleteTextures(1, &minorolaTexture_);
     if (vbo_)
         glDeleteBuffers(1, &vbo_);
     if (program_)
         glDeleteProgram(program_);
-    font_ = white_ = dockTexture_ = vbo_ = program_ = 0;
+    font_ = white_ = dockTexture_ = minorolaTexture_ = vbo_ = program_ = 0;
 }
 void Launcher::abandonGraphics() {
-    program_ = vbo_ = white_ = font_ = notesFont_ = dockTexture_ = gridrunnerAtlas_ = 0;
+    program_ = vbo_ = white_ = font_ = notesFont_ = dockTexture_ = gridrunnerAtlas_ =
+        minorolaTexture_ = 0;
     appTexture_ = appFramebuffer_ = 0;
     for (auto &i : icons_)
         i.texture = 0;

@@ -281,6 +281,7 @@ void Frontend::back() {
     }
 }
 void Frontend::pads(uint32_t held, uint32_t pressed, const ControllerState *pads, int count) {
+    const bool buttonPressed = pressed != 0;
     controllerFocus = keyboardNavigation;
     if (pads)
         for (int i = 0; i < std::clamp(count, 0, MaxControllers); ++i)
@@ -308,11 +309,13 @@ void Frontend::pads(uint32_t held, uint32_t pressed, const ControllerState *pads
         return;
     }
     if (page == Page::History) {
+        if ((pressed & Back) || (history_->finished() && buttonPressed)) {
+            back();
+            return;
+        }
         world().input.captureControllers(pads, count);
         historyPressed_ |= (pressed & South) != 0;
         historyOK_ |= (pressed & (Start | North)) != 0;
-        if (pressed & Back)
-            back();
         return;
     }
     if (page == Page::Game) {
@@ -404,6 +407,10 @@ void Frontend::touch(uint32_t id, int phase, neon::vec2d p) {
         return;
     }
     if (page == Page::History) {
+        if (history_->finished() && phase == 0) {
+            back();
+            return;
+        }
         historyPressed_ |= phase == 0;
         historyOK_ |=
             phase == 2 && history_->trial() && std::fabs(p.x) < .12 && std::fabs(p.y - .43) < .08;

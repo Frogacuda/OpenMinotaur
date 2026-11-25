@@ -27,6 +27,8 @@ struct Destination {
     // Opt in only when this pass precedes the host's opaque game/UI composition.
     // False retains the exclusion rectangle's existing destination pixels.
     bool clearDestination = false;
+    // Batch flat bezel strips into one draw when this pass clears the viewport.
+    bool batchBezel = false;
 };
 struct Parameters {
     ScreenFraming framing{};
@@ -38,6 +40,7 @@ struct Parameters {
     float renderScale = 1; // explicit quality/cost control; destination stays native
     int vectorScene = 1;
     bool copyElision = true; // Disable for renderer equivalence diagnostics.
+    bool skipTransparentMixerPasses = false;
     bool sourceOnly = false;
     int componentPreviewId = 0; // inspection only; zero presents the full component scene
     int nodePreview = -1;       // transient node inspection; never stored in scene files
@@ -52,6 +55,7 @@ struct PresetInfo {
 };
 struct Statistics {
     unsigned drawCalls = 0, triangles = 0, targets = 0;
+    unsigned layerCopies = 0;
     std::size_t targetBytes = 0, uploadedBytes = 0;
     unsigned droppedTicks = 0;
     unsigned textureBuilds = 0;

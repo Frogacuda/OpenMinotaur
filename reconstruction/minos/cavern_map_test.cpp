@@ -1,6 +1,7 @@
 // Compare cavern generation with original-execution fixtures. Regenerate inputs
 // from each fixture header before comparing lines and generation state.
 #include "cavern_map.h"
+#include "cavern_widget_data.h"
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -213,14 +214,24 @@ int main(int argc, char **argv) {
         int sectors = 0;
         while (def.zones[sectors] >= 0)
             sectors++;
+        const int cavernRows = sectors * map.sectorLength();
         int firstFailure = 0;
-        for (int y = -4; y < sectors * map.sectorLength() + 30; y++) {
+        WidgetRoute route{0, -1, -1};
+        for (int y = -4; y < cavernRows + 30; y++) {
             host.launches.clear();
             map.getLine(0, y, 0);
             Fnv f;
             for (int i = 0; i < 21; i++)
                 f.value(int32_t(map.tiles[size_t(i)]));
             for (const Launch &l : host.launches) {
+                if (y >= 0 && y < cavernRows) {
+                    if (l.kind == 'M')
+                        ++route.rescues;
+                    else if (l.kind == 'S')
+                        route.surfaceRow = l.row;
+                    else if (l.kind == 'G')
+                        route.goalRow = l.row;
+                }
                 f.value(uint8_t(l.kind));
                 f.value(l.pos.x);
                 f.value(l.pos.y);
@@ -245,6 +256,13 @@ int main(int argc, char **argv) {
                 }
                 failed++;
             }
+        }
+        const auto &expectedRoute = kWidgetRoutes[size_t(c)];
+        if (route.rescues != expectedRoute.rescues ||
+            route.surfaceRow != expectedRoute.surfaceRow ||
+            route.goalRow != expectedRoute.goalRow) {
+            std::fprintf(stderr, "cavern %d widget route does not match map markers\n", c);
+            failed++;
         }
     }
     std::printf("cavern lines: %d checked, %d mismatched (%zu witness rows)\n", checked, failed,

@@ -3,6 +3,7 @@
 #include "scene.h"
 #include "controls.h"
 #include "superoxwars_presentation.h"
+#include "superoxwars_widgets.h"
 #include "frontend.h"
 #include "original_tables.h"
 #include "neon/controller_session.h"
@@ -301,6 +302,13 @@ class SuperOxWarsCore final : public Core {
             front_.phase == superoxwars::Frontend::Phase::Play &&
                 (front_.screen == Screen::Playing || front_.screen == Screen::Paused),
             suspended_ || world_->paused);
+    }
+    PresentationState widgetPresentationState() const override {
+        if (!world_ || !scene_ || front_.phase != superoxwars::Frontend::Phase::Play ||
+            (front_.screen != Screen::Playing && front_.screen != Screen::Paused))
+            return {};
+        return superoxwars::widgetSnapshot(*world_, *scene_, front_.records, presentationSession_,
+                                           suspended_ || world_->paused);
     }
     void frame(double dt) override {
         if (startup_.frame(dt))

@@ -7,6 +7,7 @@
 #include "minos_game_host.h"
 #include "engine/game.h"
 #include "enemies.h"
+#include "cavern_widget_data.h"
 #include "engine/neon_audio.h"
 #include "engine/neon_device.h"
 #include "engine/neon_modules.h"
@@ -152,6 +153,51 @@ class MinosCore final : public Core {
                  {"minotaurs.rescued", int64_t(g->play.minosSavedTotal)},
                  {"game.phase", int64_t(g->play.runState)},
                  {"gravity.influence", double(g->play.shotDrift)}}};
+    }
+
+    PresentationState widgetPresentationState() const override {
+        const auto *g = game();
+        if (!g || g->state != 4 || scorePage_ != ScorePage::Closed)
+            return {};
+        const auto &p = g->play;
+        const auto *ship = dynamic_cast<const minos::Ship *>(p.shipList);
+        if (!ship || p.muted || p.gameOver || p.cavernIndex < 0 ||
+            p.cavernIndex >= minos::cavern::kCavernCount)
+            return {};
+
+        const auto &route = minos::cavern::kWidgetRoutes[size_t(p.cavernIndex)];
+        const int board = p.shipKind * 100;
+        const int cavernLives = p.prefs[board + p.cavernIndex + 0x30];
+        const int cavernBest = cavernLives > 0 ? p.prefs[board + p.cavernIndex + 0x10] : -1;
+        const int fuelBonus = p.respawnedThisCavern ? 0 : int(double(p.fuel) * 20000.0);
+        const int timeBonus =
+            p.parTime > p.parTimeBase ? int(double(p.missionRating()) * 2000.0) : 0;
+        const double depth =
+            (ship->mapPos.y - route.surfaceRow) / (route.goalRow - route.surfaceRow);
+        return {true,
+                p.paused || suspended_,
+                1,
+                {{"highScore", int64_t(p.prefs[board])},
+                 {"cavernBest", int64_t(cavernBest)},
+                 {"cavernBestLives", int64_t(cavernLives)},
+                 {"rescuedForMultiplier", int64_t(p.minosSaved)},
+                 {"shipKind", int64_t(p.shipKind)},
+                 {"shipName", std::string(minos::kRankNames[p.shipKind])},
+                 {"cavernRescued", int64_t(p.cavernRescues)},
+                 {"cavernTotal", int64_t(route.rescues)},
+                 {"gameRescues", int64_t(p.minosSavedTotal)},
+                 {"landingRating", int64_t(p.lastLandingRating)},
+                 {"landingStreak", int64_t(p.perfectLandingStreak)},
+                 {"cleanRun", p.cleanRun},
+                 {"rescueBonus", int64_t(p.rescueBonus)},
+                 {"fuelBonus", int64_t(fuelBonus)},
+                 {"timeBonus", int64_t(timeBonus)},
+                 {"cavernDepth", std::clamp(depth, 0.0, 1.0)},
+                 {"returning", p.flag203808},
+                 {"missionTime", int64_t(p.missionTime)},
+                 {"parTime", int64_t(p.parTime)}},
+                {},
+                {}};
     }
 
     bool init(Host &host, const SurfaceInfo &s) override {

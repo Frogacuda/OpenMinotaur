@@ -126,6 +126,10 @@ bool Settings::neonHighQuality(const std::string &game) const {
     return value == "hq" || (value != "lq" && !mobile);
 }
 
+bool Settings::liveWidgetsEnabled(const std::string &game) const {
+    return get(game, "live_widgets", "on") == "on";
+}
+
 InputSettings Settings::input(const std::string &game) const {
     InputSettings i;
     i.deadzone =

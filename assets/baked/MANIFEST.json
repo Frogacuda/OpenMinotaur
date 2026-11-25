@@ -2,6 +2,13 @@
   "format": 1,
   "assets": [
     {
+      "file": "platform/ui_assets/minorola_bezel.png",
+      "bytes": 300346,
+      "sha256": "035aad5295e4a737eadda13c2feac68ffe5529dc70dcbf5d02325315a58c7e98",
+      "consumer": "platform/ui_assets.cpp",
+      "symbol": "kMinorolaBezel"
+    },
+    {
       "file": "platform/ui_assets/kFontPng.png",
       "bytes": 113982,
       "sha256": "e549175e0a4a3643c25f6a020bc2835cdf90f6102a8fca83e0d7bf27a14c227e",
@@ -150,8 +157,8 @@
     },
     {
       "file": "platform/presentation_archive/bytes.zip",
-      "bytes": 2902659,
-      "sha256": "cbfb72d1f0a1435a3722ee507e0fade837f3ce0a30d1ad06a9043eb9736d85a9",
+      "bytes": 2902670,
+      "sha256": "cd192c0240b04bbed28397915f5c9fca6cdd5b5a340f0cef9998fa17f52b7f75",
       "consumer": "platform/presentation_archive.cpp",
       "symbol": "bytes"
     },

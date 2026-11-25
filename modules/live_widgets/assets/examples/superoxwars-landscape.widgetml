@@ -1,0 +1,1925 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "templates": {
+    "frameBeam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [[0, 0], [0, 16]],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "bezelFrame": {
+      "kind": "group",
+      "inputs": {
+        "width": 304,
+        "height": 88
+      },
+      "size": [["get", "width"], ["get", "height"]],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "width"], 4], 16]],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frameBeam",
+          "x": ["-", ["get", "width"], 2],
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "height"], 4], 16]],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frameBeam",
+          "x": 2,
+          "y": ["-", ["get", "height"], 2],
+          "scale": [1, ["/", ["-", ["get", "width"], 4], 16]],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "height"], 4], 16]],
+          "rotation": 0,
+          "lineWidth": 2.4,
+          "color": [0.37, 0.88, 1, 0.76]
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "portrait-top",
+          "kind": "group",
+          "size": [956, 192],
+          "x": ["/", ["-", 1000, ["*", 956, ["coalesce", ["read", "railScale"], 1]]], 2],
+          "y": [
+            "+",
+            ["coalesce", ["read", "portraitInset"], 0],
+            ["*", 17, ["coalesce", ["read", "railScale"], 1]]
+          ],
+          "placement": {
+            "portrait": "screen-top-left"
+          },
+          "children": [
+            {
+              "id": "high-score",
+              "kind": "group",
+              "x": 0,
+              "y": 0,
+              "size": [470, 77],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 77
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "High Score",
+                  "x": 16,
+                  "y": 7,
+                  "size": [438, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "score",
+                  "kind": "text",
+                  "text": "{highScore}",
+                  "x": 16,
+                  "y": 31,
+                  "size": [438, 38],
+                  "font": "neon-hud",
+                  "fontSize": 34,
+                  "lineWidth": 2.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "highScore": ["coalesce", ["read", "highScore"], "2,338,600"]
+              }
+            },
+            {
+              "id": "area-targets",
+              "kind": "group",
+              "x": 0,
+              "y": 87,
+              "size": [470, 105],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 105
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Area Targets",
+                  "x": 16,
+                  "y": 7,
+                  "size": [438, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 35,
+                  "size": [440, 2],
+                  "points": [[0, 0], [438, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "label-0",
+                  "kind": "text",
+                  "text": "Caprichoso",
+                  "x": 16,
+                  "y": 44,
+                  "size": [438, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [0.36, 0.69, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-0",
+                  "kind": "text",
+                  "text": "{blueTargets}",
+                  "x": 251,
+                  "y": 43,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "label-1",
+                  "kind": "text",
+                  "text": "Garantido",
+                  "x": 16,
+                  "y": 72,
+                  "size": [438, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [1, 0.39, 0.43, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-1",
+                  "kind": "text",
+                  "text": "{redTargets}",
+                  "x": 251,
+                  "y": 71,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "blueTargets": ["coalesce", ["read", "blueTargets"], "6 / 17"],
+                "redTargets": ["coalesce", ["read", "redTargets"], "11 / 17"]
+              }
+            },
+            {
+              "id": "area-bests",
+              "kind": "group",
+              "x": 484,
+              "y": 0,
+              "size": [472, 192],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 472,
+                    "height": 192
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Area Bests",
+                  "x": 16,
+                  "y": 11,
+                  "size": [440, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "area",
+                  "kind": "text",
+                  "text": "{area}",
+                  "x": 322,
+                  "y": 14,
+                  "size": [134, 21],
+                  "font": "neon-hud",
+                  "fontSize": 17,
+                  "lineWidth": 2.1,
+                  "color": [0.82, 0.88, 0.95, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 42,
+                  "size": [442, 2],
+                  "points": [[0, 0], [440, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "label-0",
+                  "kind": "text",
+                  "text": "Caprichoso",
+                  "x": 16,
+                  "y": 54,
+                  "size": [440, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [0.36, 0.69, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-0",
+                  "kind": "text",
+                  "text": "{blueBest}",
+                  "x": 253,
+                  "y": 53,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "label-1",
+                  "kind": "text",
+                  "text": "Garantido",
+                  "x": 16,
+                  "y": 87,
+                  "size": [440, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [1, 0.39, 0.43, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-1",
+                  "kind": "text",
+                  "text": "{redBest}",
+                  "x": 253,
+                  "y": 86,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "label-2",
+                  "kind": "text",
+                  "text": "Combined",
+                  "x": 16,
+                  "y": 120,
+                  "size": [440, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-2",
+                  "kind": "text",
+                  "text": "{combined}",
+                  "x": 253,
+                  "y": 119,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "label-3",
+                  "kind": "text",
+                  "text": "Saved Lives",
+                  "x": 16,
+                  "y": 153,
+                  "size": [440, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-3",
+                  "kind": "text",
+                  "text": "{savedLives}",
+                  "x": 253,
+                  "y": 152,
+                  "size": [203, 26],
+                  "font": "neon-hud",
+                  "fontSize": 22,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "area": ["coalesce", ["read", "area"], "ALPHA"],
+                "blueBest": ["coalesce", ["read", "blueBest"], "321,880"],
+                "redBest": ["coalesce", ["read", "redBest"], "411,640"],
+                "combined": ["coalesce", ["read", "combined"], "733,520"],
+                "savedLives": ["coalesce", ["read", "savedLives"], 4]
+              }
+            }
+          ],
+          "scale": ["coalesce", ["read", "railScale"], 1]
+        },
+        {
+          "id": "portrait-bottom",
+          "kind": "group",
+          "size": [956, 195],
+          "x": ["/", ["-", 1000, ["*", 956, ["coalesce", ["read", "railScale"], 1]]], 2],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              ["coalesce", ["read", "portraitInset"], 0],
+              ["*", 210, ["coalesce", ["read", "railScale"], 1]]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-bottom-left"
+          },
+          "children": [
+            {
+              "id": "polarity",
+              "kind": "group",
+              "x": 0,
+              "y": 0,
+              "size": [356, 135],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 356,
+                    "height": 135
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Polarity",
+                  "x": 16,
+                  "y": 9,
+                  "size": [324, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 37,
+                  "size": [326, 2],
+                  "points": [[0, 0], [324, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "percent",
+                  "kind": "text",
+                  "text": "{polarityText}",
+                  "x": 16,
+                  "y": 43,
+                  "size": [324, 47],
+                  "font": "vectrex-menu",
+                  "fontSize": 43,
+                  "lineWidth": 3.4,
+                  "color": [
+                    [
+                      "lerp",
+                      0.91,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 0.2],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      0.39,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.16, 0.5],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      0.85,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.12, 1],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      1,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 1],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ]
+                  ],
+                  "align": "center"
+                },
+                {
+                  "id": "name",
+                  "kind": "text",
+                  "text": "{leadingPolarity}",
+                  "x": 16,
+                  "y": 98,
+                  "size": [324, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 22,
+                  "lineWidth": 2.55,
+                  "color": [
+                    [
+                      "lerp",
+                      0.91,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 0.2],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      0.39,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.16, 0.5],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      0.85,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.12, 1],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ],
+                    [
+                      "lerp",
+                      1,
+                      ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 1],
+                      [
+                        "clamp",
+                        [
+                          "max",
+                          ["coalesce", ["read", "polarityStrength"], 0.56],
+                          ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                        ],
+                        0,
+                        1
+                      ]
+                    ]
+                  ],
+                  "align": "center"
+                }
+              ],
+              "inputs": {
+                "polarityText": ["coalesce", ["read", "polarityText"], "78%"],
+                "leadingPolarity": ["coalesce", ["read", "leadingPolarity"], "Garantido"]
+              }
+            },
+            {
+              "id": "area-progress",
+              "kind": "group",
+              "x": 370,
+              "y": 0,
+              "size": [163, 135],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 163,
+                    "height": 135
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Progress",
+                  "x": 16,
+                  "y": 10,
+                  "size": [131, 22],
+                  "font": "vectrex-menu",
+                  "fontSize": 18,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "center"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 37,
+                  "size": [133, 2],
+                  "points": [[0, 0], [131, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "boss-progress",
+                  "kind": "radial",
+                  "x": 34.5,
+                  "y": 40,
+                  "size": [94, 94],
+                  "segments": 16,
+                  "fill": ["coalesce", ["read", "areaProgress"], 0.63],
+                  "color": [0.38, 0.9, 0.79, 1],
+                  "trackColor": [0.22, 0.27, 0.32, 0.32]
+                },
+                {
+                  "id": "to-boss",
+                  "kind": "text",
+                  "text": "To",
+                  "x": 12,
+                  "y": 66,
+                  "size": [139, 18],
+                  "font": "neon-hud",
+                  "fontSize": 14,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "center",
+                  "visible": ["==", ["coalesce", ["read", "areaPhase"], "To Boss"], "To Boss"]
+                },
+                {
+                  "id": "phase",
+                  "kind": "text",
+                  "text": "{phase}",
+                  "x": 12,
+                  "y": ["if", ["==", ["coalesce", ["read", "areaPhase"], "To Boss"], "To Boss"], 85, 77],
+                  "size": [139, 18],
+                  "font": "neon-hud",
+                  "fontSize": 14,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "center"
+                }
+              ],
+              "inputs": {
+                "phase": [
+                  "if",
+                  ["==", ["coalesce", ["read", "areaPhase"], "To Boss"], "To Boss"],
+                  "Boss",
+                  ["coalesce", ["read", "areaPhase"], "To Boss"]
+                ]
+              }
+            },
+            {
+              "id": "followers",
+              "kind": "group",
+              "x": 547,
+              "y": 0,
+              "size": [409, 135],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 409,
+                    "height": 135
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Followers",
+                  "x": 16,
+                  "y": 9,
+                  "size": [377, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 37,
+                  "size": [379, 2],
+                  "points": [[0, 0], [377, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "track-0",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 48,
+                  "size": [377, 9],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "bar-0",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 48,
+                  "size": [377, 9],
+                  "color": ["coalesce", ["read", "follower1Tint"], [1, 0.39, 0.43, 1]],
+                  "fill": ["coalesce", ["read", "follower1Fill"], 0.94],
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "track-1",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 64,
+                  "size": [377, 9],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "bar-1",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 64,
+                  "size": [377, 9],
+                  "color": ["coalesce", ["read", "follower2Tint"], [1, 0.39, 0.43, 1]],
+                  "fill": ["coalesce", ["read", "follower2Fill"], 0.68],
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "track-2",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 80,
+                  "size": [377, 9],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "bar-2",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 80,
+                  "size": [377, 9],
+                  "color": ["coalesce", ["read", "follower3Tint"], [1, 0.39, 0.43, 1]],
+                  "fill": ["coalesce", ["read", "follower3Fill"], 0.41],
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "track-3",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 96,
+                  "size": [377, 9],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "bar-3",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 96,
+                  "size": [377, 9],
+                  "color": ["coalesce", ["read", "follower4Tint"], [1, 0.39, 0.43, 1]],
+                  "fill": ["coalesce", ["read", "follower4Fill"], 0.22],
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "track-4",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 112,
+                  "size": [377, 9],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "bar-4",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 112,
+                  "size": [377, 9],
+                  "color": ["coalesce", ["read", "follower5Tint"], [0.36, 0.69, 1, 1]],
+                  "fill": ["coalesce", ["read", "follower5Fill"], 0],
+                  "fillDirection": "right"
+                }
+              ]
+            },
+            {
+              "id": "formation-chain",
+              "kind": "group",
+              "x": 0,
+              "y": 146,
+              "size": [471, 49],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 471,
+                    "height": 49
+                  }
+                },
+                {
+                  "id": "name",
+                  "kind": "text",
+                  "text": "Formation Chain",
+                  "x": 16,
+                  "y": 12,
+                  "size": [295, 24],
+                  "font": "vectrex-menu",
+                  "fontSize": 20,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "count",
+                  "kind": "text",
+                  "text": "{count}",
+                  "x": 377,
+                  "y": 10,
+                  "size": [78, 30],
+                  "font": "neon-hud",
+                  "fontSize": 26,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "count": ["coalesce", ["read", "formationChain"], 8]
+              },
+              "visible": [">", ["coalesce", ["read", "formationChain"], 8], 0]
+            },
+            {
+              "id": "ox-block",
+              "kind": "group",
+              "x": ["if", [">", ["coalesce", ["read", "formationChain"], 8], 0], 485, 0],
+              "y": 146,
+              "size": [471, 49],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 471,
+                    "height": 49
+                  }
+                },
+                {
+                  "id": "name",
+                  "kind": "text",
+                  "text": "OX Block Combo",
+                  "x": 16,
+                  "y": 6,
+                  "size": [290, 22],
+                  "font": "vectrex-menu",
+                  "fontSize": 18,
+                  "lineWidth": 2.55,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "count",
+                  "kind": "text",
+                  "text": "{count}",
+                  "x": 377,
+                  "y": 4,
+                  "size": [78, 27],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "track",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 35,
+                  "size": [439, 6],
+                  "color": [0.22, 0.27, 0.32, 0.32],
+                  "fill": 1,
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "fill",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 35,
+                  "size": [439, 6],
+                  "color": [0.38, 0.9, 0.79, 1],
+                  "fill": ["coalesce", ["read", "oxWindow"], 0.64],
+                  "fillDirection": "right"
+                },
+                {
+                  "id": "cap",
+                  "kind": "vector",
+                  "x": ["+", 16, ["*", 439, ["coalesce", ["read", "oxWindow"], 0.64]]],
+                  "y": 33,
+                  "size": [2, 10],
+                  "points": [[0, 0], [0, 10]],
+                  "lineWidth": 2,
+                  "color": [0.78, 1, 0.94, 1]
+                }
+              ],
+              "inputs": {
+                "count": ["coalesce", ["read", "oxCombo"], 6]
+              },
+              "visible": [">", ["coalesce", ["read", "oxCombo"], 6], 0]
+            }
+          ],
+          "scale": ["coalesce", ["read", "railScale"], 1]
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "superoxwars-landscape",
+    "kind": "group",
+    "children": [
+      {
+        "id": "scores",
+        "kind": "group",
+        "x": -24,
+        "y": -468,
+        "size": [410, 322],
+        "children": [
+          {
+            "id": "high-score",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [410, 96],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 96
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "High Score",
+                "x": 18,
+                "y": 13,
+                "size": [374, 25],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "score",
+                "kind": "text",
+                "text": "{highScore}",
+                "x": 18,
+                "y": 43,
+                "size": [374, 41],
+                "font": "neon-hud",
+                "fontSize": 37,
+                "lineWidth": 2.8,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "highScore": ["coalesce", ["read", "highScore"], "2,338,600"]
+            }
+          },
+          {
+            "id": "area-bests",
+            "kind": "group",
+            "x": 0,
+            "y": 108,
+            "size": [410, 214],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 214
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Area Bests",
+                "x": 18,
+                "y": 13,
+                "size": [374, 25],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "area",
+                "kind": "text",
+                "text": "{area}",
+                "x": 218,
+                "y": 16,
+                "size": [174, 19],
+                "font": "neon-hud",
+                "fontSize": 15,
+                "lineWidth": 2.1,
+                "color": [0.82, 0.88, 0.95, 1],
+                "align": "right"
+              },
+              {
+                "id": "rule",
+                "kind": "vector",
+                "x": 18,
+                "y": 46,
+                "size": [376, 2],
+                "points": [[0, 0], [374, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "label-0",
+                "kind": "text",
+                "text": "Caprichoso",
+                "x": 18,
+                "y": 61,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.36, 0.69, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-0",
+                "kind": "text",
+                "text": "{blueBest}",
+                "x": 206,
+                "y": 59,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "label-1",
+                "kind": "text",
+                "text": "Garantido",
+                "x": 18,
+                "y": 97,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [1, 0.39, 0.43, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-1",
+                "kind": "text",
+                "text": "{redBest}",
+                "x": 206,
+                "y": 95,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "label-2",
+                "kind": "text",
+                "text": "Combined",
+                "x": 18,
+                "y": 133,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-2",
+                "kind": "text",
+                "text": "{combined}",
+                "x": 206,
+                "y": 131,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "label-3",
+                "kind": "text",
+                "text": "Saved Lives",
+                "x": 18,
+                "y": 169,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-3",
+                "kind": "text",
+                "text": "{savedLives}",
+                "x": 206,
+                "y": 167,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "area": ["coalesce", ["read", "area"], "ALPHA"],
+              "blueBest": ["coalesce", ["read", "blueBest"], "321,880"],
+              "redBest": ["coalesce", ["read", "redBest"], "411,640"],
+              "combined": ["coalesce", ["read", "combined"], "733,520"],
+              "savedLives": ["coalesce", ["read", "savedLives"], 4]
+            }
+          }
+        ],
+        "pivot": [1, 0],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      },
+      {
+        "id": "polarity",
+        "kind": "group",
+        "x": -24,
+        "y": 468,
+        "size": [410, 171],
+        "children": [
+          {
+            "id": "frame",
+            "use": "bezelFrame",
+            "inputs": {
+              "width": 410,
+              "height": 171
+            }
+          },
+          {
+            "id": "heading",
+            "kind": "text",
+            "text": "Polarity",
+            "x": 18,
+            "y": 13,
+            "size": [374, 25],
+            "font": "vectrex-menu",
+            "fontSize": 21,
+            "lineWidth": 2.55,
+            "color": [1, 0.88, 0.24, 1],
+            "align": "left"
+          },
+          {
+            "id": "rule",
+            "kind": "vector",
+            "x": 18,
+            "y": 46,
+            "size": [376, 2],
+            "points": [[0, 0], [374, 0]],
+            "lineWidth": 1.6,
+            "color": [0.42, 0.72, 0.82, 0.62]
+          },
+          {
+            "id": "percent",
+            "kind": "text",
+            "text": "{polarityText}",
+            "x": 18,
+            "y": 52,
+            "size": [374, 57],
+            "font": "vectrex-menu",
+            "fontSize": 53,
+            "lineWidth": 3.4,
+            "color": [
+              [
+                "lerp",
+                0.91,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 0.2],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                0.39,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.16, 0.5],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                0.85,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.12, 1],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                1,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 1],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ]
+            ],
+            "align": "center"
+          },
+          {
+            "id": "name",
+            "kind": "text",
+            "text": "{leadingPolarity}",
+            "x": 18,
+            "y": 122,
+            "size": [374, 27],
+            "font": "vectrex-menu",
+            "fontSize": 23,
+            "lineWidth": 2.55,
+            "color": [
+              [
+                "lerp",
+                0.91,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 0.2],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                0.39,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.16, 0.5],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                0.85,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 0.12, 1],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ],
+              [
+                "lerp",
+                1,
+                ["if", [">", ["coalesce", ["read", "polarityStrength"], 0.56], 0], 1, 1],
+                [
+                  "clamp",
+                  [
+                    "max",
+                    ["coalesce", ["read", "polarityStrength"], 0.56],
+                    ["-", 0, ["coalesce", ["read", "polarityStrength"], 0.56]]
+                  ],
+                  0,
+                  1
+                ]
+              ]
+            ],
+            "align": "center"
+          }
+        ],
+        "inputs": {
+          "polarityText": ["coalesce", ["read", "polarityText"], "78%"],
+          "leadingPolarity": ["coalesce", ["read", "leadingPolarity"], "Garantido"]
+        },
+        "pivot": [1, 1],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      },
+      {
+        "id": "target-chains",
+        "kind": "group",
+        "x": 24,
+        "y": -468,
+        "size": [410, 305],
+        "children": [
+          {
+            "id": "area-targets",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [410, 132],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 132
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Area Targets",
+                "x": 18,
+                "y": 13,
+                "size": [374, 25],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "rule",
+                "kind": "vector",
+                "x": 18,
+                "y": 46,
+                "size": [376, 2],
+                "points": [[0, 0], [374, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "label-0",
+                "kind": "text",
+                "text": "Caprichoso",
+                "x": 18,
+                "y": 59,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [0.36, 0.69, 1, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-0",
+                "kind": "text",
+                "text": "{blueTargets}",
+                "x": 206,
+                "y": 57,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "label-1",
+                "kind": "text",
+                "text": "Garantido",
+                "x": 18,
+                "y": 95,
+                "size": [374, 22],
+                "font": "neon-hud",
+                "fontSize": 18,
+                "lineWidth": 2.1,
+                "color": [1, 0.39, 0.43, 1],
+                "align": "left"
+              },
+              {
+                "id": "value-1",
+                "kind": "text",
+                "text": "{redTargets}",
+                "x": 206,
+                "y": 93,
+                "size": [186, 26],
+                "font": "neon-hud",
+                "fontSize": 22,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "blueTargets": ["coalesce", ["read", "blueTargets"], "3 / 18"],
+              "redTargets": ["coalesce", ["read", "redTargets"], "11 / 20"]
+            }
+          },
+          {
+            "id": "formation-chain",
+            "kind": "group",
+            "x": 0,
+            "y": 144,
+            "size": [410, 61],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 61
+                }
+              },
+              {
+                "id": "name",
+                "kind": "text",
+                "text": "Formation Chain",
+                "x": 18,
+                "y": 17,
+                "size": [295, 24],
+                "font": "vectrex-menu",
+                "fontSize": 20,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "count",
+                "kind": "text",
+                "text": "{count}",
+                "x": 314,
+                "y": 15,
+                "size": [78, 30],
+                "font": "neon-hud",
+                "fontSize": 26,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              }
+            ],
+            "inputs": {
+              "count": ["coalesce", ["read", "formationChain"], 8]
+            },
+            "visible": [">", ["coalesce", ["read", "formationChain"], 8], 0]
+          },
+          {
+            "id": "ox-block",
+            "kind": "group",
+            "x": 0,
+            "y": ["if", [">", ["coalesce", ["read", "formationChain"], 8], 0], 217, 144],
+            "size": [410, 88],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 88
+                }
+              },
+              {
+                "id": "name",
+                "kind": "text",
+                "text": "OX Block Combo",
+                "x": 18,
+                "y": 16,
+                "size": [295, 24],
+                "font": "vectrex-menu",
+                "fontSize": 20,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "count",
+                "kind": "text",
+                "text": "{count}",
+                "x": 314,
+                "y": 14,
+                "size": [78, 30],
+                "font": "neon-hud",
+                "fontSize": 26,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "right"
+              },
+              {
+                "id": "track",
+                "kind": "rect",
+                "x": 18,
+                "y": 57,
+                "size": [374, 10],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "fill",
+                "kind": "rect",
+                "x": 18,
+                "y": 57,
+                "size": [374, 10],
+                "color": [0.38, 0.9, 0.79, 1],
+                "fill": ["coalesce", ["read", "oxWindow"], 0.64],
+                "fillDirection": "right"
+              },
+              {
+                "id": "cap",
+                "kind": "vector",
+                "x": ["+", 18, ["*", 374, ["coalesce", ["read", "oxWindow"], 0.64]]],
+                "y": 54,
+                "size": [2, 17],
+                "points": [[0, 0], [0, 15]],
+                "lineWidth": 2,
+                "color": [0.78, 1, 0.94, 1]
+              }
+            ],
+            "inputs": {
+              "count": ["coalesce", ["read", "oxCombo"], 6]
+            },
+            "visible": [">", ["coalesce", ["read", "oxCombo"], 6], 0]
+          }
+        ],
+        "pivot": [0, 0],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      },
+      {
+        "id": "progress-and-followers",
+        "kind": "group",
+        "x": 24,
+        "y": 468,
+        "size": [410, 249],
+        "children": [
+          {
+            "id": "area-progress",
+            "kind": "group",
+            "x": 0,
+            "y": 0,
+            "size": [140, 249],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 140,
+                  "height": 249
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Progress",
+                "x": 12,
+                "y": 13,
+                "size": [116, 20],
+                "font": "vectrex-menu",
+                "fontSize": 16,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "center"
+              },
+              {
+                "id": "rule",
+                "kind": "vector",
+                "x": 12,
+                "y": 42,
+                "size": [118, 2],
+                "points": [[0, 0], [116, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "phase",
+                "kind": "text",
+                "text": "{phase}",
+                "x": 12,
+                "y": 53,
+                "size": [116, 21],
+                "font": "neon-hud",
+                "fontSize": 17,
+                "lineWidth": 2.1,
+                "color": [0.96, 0.98, 1, 1],
+                "align": "center"
+              },
+              {
+                "id": "track",
+                "kind": "rect",
+                "x": 53,
+                "y": 86,
+                "size": [34, 143],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "fill",
+                "kind": "rect",
+                "x": 53,
+                "y": 86,
+                "size": [34, 143],
+                "color": [0.38, 0.9, 0.79, 1],
+                "fill": ["coalesce", ["read", "areaProgress"], 0.63],
+                "fillDirection": "up"
+              },
+              {
+                "id": "tick-0",
+                "kind": "vector",
+                "x": 44,
+                "y": 86.0,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "tick-1",
+                "kind": "vector",
+                "x": 44,
+                "y": 133.67000000000002,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "tick-2",
+                "kind": "vector",
+                "x": 44,
+                "y": 181.34,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "tick-3",
+                "kind": "vector",
+                "x": 44,
+                "y": 229.01,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "right-tick-0",
+                "kind": "vector",
+                "x": 84,
+                "y": 86.0,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "right-tick-1",
+                "kind": "vector",
+                "x": 84,
+                "y": 133.67000000000002,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "right-tick-2",
+                "kind": "vector",
+                "x": 84,
+                "y": 181.34,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "right-tick-3",
+                "kind": "vector",
+                "x": 84,
+                "y": 229.01,
+                "size": [14, 2],
+                "points": [[0, 0], [12, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              }
+            ],
+            "inputs": {
+              "phase": ["coalesce", ["read", "areaPhase"], "To Boss"]
+            }
+          },
+          {
+            "id": "followers",
+            "kind": "group",
+            "x": 152,
+            "y": 0,
+            "size": [258, 249],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 258,
+                  "height": 249
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Followers",
+                "x": 18,
+                "y": 13,
+                "size": [222, 25],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "color": [1, 0.88, 0.24, 1],
+                "align": "left"
+              },
+              {
+                "id": "rule",
+                "kind": "vector",
+                "x": 18,
+                "y": 42,
+                "size": [224, 2],
+                "points": [[0, 0], [222, 0]],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "track-0",
+                "kind": "rect",
+                "x": 18,
+                "y": 67,
+                "size": [222, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "bar-0",
+                "kind": "rect",
+                "x": 18,
+                "y": 67,
+                "size": [222, 13],
+                "color": ["coalesce", ["read", "follower1Tint"], [1, 0.39, 0.43, 1]],
+                "fill": ["coalesce", ["read", "follower1Fill"], 0.94],
+                "fillDirection": "right"
+              },
+              {
+                "id": "track-1",
+                "kind": "rect",
+                "x": 18,
+                "y": 100,
+                "size": [222, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "bar-1",
+                "kind": "rect",
+                "x": 18,
+                "y": 100,
+                "size": [222, 13],
+                "color": ["coalesce", ["read", "follower2Tint"], [1, 0.39, 0.43, 1]],
+                "fill": ["coalesce", ["read", "follower2Fill"], 0.68],
+                "fillDirection": "right"
+              },
+              {
+                "id": "track-2",
+                "kind": "rect",
+                "x": 18,
+                "y": 133,
+                "size": [222, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "bar-2",
+                "kind": "rect",
+                "x": 18,
+                "y": 133,
+                "size": [222, 13],
+                "color": ["coalesce", ["read", "follower3Tint"], [1, 0.39, 0.43, 1]],
+                "fill": ["coalesce", ["read", "follower3Fill"], 0.41],
+                "fillDirection": "right"
+              },
+              {
+                "id": "track-3",
+                "kind": "rect",
+                "x": 18,
+                "y": 166,
+                "size": [222, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "bar-3",
+                "kind": "rect",
+                "x": 18,
+                "y": 166,
+                "size": [222, 13],
+                "color": ["coalesce", ["read", "follower4Tint"], [1, 0.39, 0.43, 1]],
+                "fill": ["coalesce", ["read", "follower4Fill"], 0.22],
+                "fillDirection": "right"
+              },
+              {
+                "id": "track-4",
+                "kind": "rect",
+                "x": 18,
+                "y": 199,
+                "size": [222, 13],
+                "color": [0.22, 0.27, 0.32, 0.32],
+                "fill": 1,
+                "fillDirection": "right"
+              },
+              {
+                "id": "bar-4",
+                "kind": "rect",
+                "x": 18,
+                "y": 199,
+                "size": [222, 13],
+                "color": ["coalesce", ["read", "follower5Tint"], [0.36, 0.69, 1, 1]],
+                "fill": ["coalesce", ["read", "follower5Fill"], 0],
+                "fillDirection": "right"
+              }
+            ]
+          }
+        ],
+        "pivot": [0, 1],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      }
+    ]
+  }
+}

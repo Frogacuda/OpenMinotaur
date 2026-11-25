@@ -829,6 +829,7 @@ void theGame::newLevel() {
     restarts = 0;
     levelEnding = false;
     pickupBonusIndex = 0;
+    pickupsThisLevel = 0;
     fiveWayShots = false;
     bombsCollected = 0;
     deathPauseFrames = 0;
@@ -912,6 +913,7 @@ void theGame::newGame() {
     reset(0);
     f1198[1] = f1198[2] = f1198[3] = 0;
     bonusPickupChain = 0;
+    pickupsThisLevel = pickupHistoryCount = 0;
     deathsThisRun = 0;
     reducedPowerups = false;
     useRobot = false;

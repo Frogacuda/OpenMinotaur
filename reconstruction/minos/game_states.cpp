@@ -696,6 +696,7 @@ void PlayState::awardLanding() { // 0x74798 (wavingMinotaur::jumpIntoShip)
     if (!bonusPending)
         return;
     const int currentRating = landingBonus;
+    lastLandingRating = currentRating;
     const int grade = 5 - currentRating; // 0 best .. 4
     int voice = 0x25 - grade;
     const int points = (grade * -10 + 0x32) * currentRating * currentRating;
@@ -755,6 +756,12 @@ void PlayState::awardLanding() { // 0x74798 (wavingMinotaur::jumpIntoShip)
 }
 
 // ------------------------------------------------------------------ sequenceBonuses (state 5)
+float PlayState::missionRating() const {
+    const float q = float(missionTime - parTime) / float(parTimeBase - parTime);
+    const float current = q * 4.0f + 3.0f;
+    return current < 0.0f ? 0.0f : current;
+}
+
 void PlayState::sequenceBonuses() { // 0x5d380
     float speed = 20.0f;
     int step = 0x14;
@@ -821,10 +828,7 @@ void PlayState::sequenceBonuses() { // 0x5d380
                     if (!muted)
                         playSample(0x25, volume << 12);
                     bonusPhase = 3;
-                    const float q = float(missionTime - parTime) / float(parTimeBase - parTime);
-                    rating = q * 4.0f + 3.0f;
-                    if (rating < 0.0f)
-                        rating = 0;
+                    rating = missionRating();
                     ratingShown = rating;
                     if (double(rating) > 7.9)
                         rating = 7.9f;
@@ -955,6 +959,7 @@ void PlayState::newLevelState() { // 0x636f0, after the map part
     bgeRate = 0.3f;
     cleanRun = true;
     perfectLandingStreak = 0;
+    lastLandingRating = 0;
     cameraY = 0; // +0x320..+0x32c
     fuel = 1.0f;
     shield = 1.0f;
@@ -988,6 +993,7 @@ void PlayState::newLevelState() { // 0x636f0, after the map part
     slots[9].count = 0;
     flag203808 = false;
     minosSaved = 0;
+    cavernRescues = 0;
     int sectors = 0;
     while (sectors < cavern::kMaxZones && cv.zones[sectors] >= 0)
         sectors++;

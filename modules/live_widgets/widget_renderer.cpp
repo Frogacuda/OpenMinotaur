@@ -11,8 +11,14 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
 namespace neon::widgets {
 namespace {
+constexpr BeamAppearance headingBeam{.70f, .30f, 1.20f, .10f, .70f};
+constexpr BeamAppearance readoutBeam{.65f, .30f, 1.50f, .10f, .60f};
+constexpr BeamAppearance borderBeam{1.30f, .50f, 1.80f, .35f, .60f};
+constexpr BeamAppearance accentBeam{};
+
 void need(bool v, const std::string &s) {
     if (!v)
         throw std::runtime_error(s);
@@ -38,6 +44,19 @@ std::string resource(const ResourceReader &reader, const std::string &name) {
 }
 GLuint shader(GLenum type, const char *source) {
     GLuint s = glCreateShader(type);
+    const auto *version = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+    std::string desktopSource;
+    constexpr char esHeader[] = "#version 300 es\n";
+    if (version && !std::strstr(version, "OpenGL ES") &&
+        std::strncmp(source, esHeader, sizeof(esHeader) - 1) == 0) {
+        desktopSource = "#version 330 core\n";
+        const char *body = source + sizeof(esHeader) - 1;
+        constexpr char precision[] = "precision highp float;";
+        if (std::strncmp(body, precision, sizeof(precision) - 1) == 0)
+            body += sizeof(precision) - 1;
+        desktopSource += body;
+        source = desktopSource.c_str();
+    }
     glShaderSource(s, 1, &source, nullptr);
     glCompileShader(s);
     GLint ok;
@@ -245,6 +264,10 @@ struct Renderer::Impl {
     ResourceReader reader;
     vectors::FontRegistry fonts;
     RenderStatistics stats;
+    explicit Impl(BeamAppearance appearance, BeamProfile profile)
+        : appearance(appearance), gameplayBeams(profile == BeamProfile::Gameplay) {}
+    const BeamAppearance appearance;
+    const bool gameplayBeams;
     GLuint sprite = 0, beam = 0, vao = 0, vbo = 0;
     GLint spriteRadialFill = -1, spriteRadialTrack = -1;
     std::string beamVS = fixedBeamVS, beamPS = fixedBeamPS;
@@ -424,12 +447,16 @@ struct Renderer::Impl {
         stats.uploads += size;
     }
     void flush(float widthScale = 1) {
+        flush(appearance, widthScale);
+    }
+    void flush(const BeamAppearance &styleAppearance, float widthScale) {
         if (batch.empty())
             return;
         glUseProgram(beam);
         glUniform2f(glGetUniformLocation(beam, "viewportSize"), float(target.viewport.width),
                     float(target.viewport.height));
-        glUniform4f(glGetUniformLocation(beam, "beamStyle"), 1.25f, .25f, 3, .1f);
+        glUniform4f(glGetUniformLocation(beam, "beamStyle"), styleAppearance.brightness,
+                    styleAppearance.halo, styleAppearance.spread, styleAppearance.whiteHot);
         auto strokes = batch;
         for (auto &s : strokes)
             for (auto p : {&s.a, &s.b}) {
@@ -437,13 +464,13 @@ struct Renderer::Impl {
                 p->y *= 480.f / nativeH;
             }
         vectors::BeamStyle style;
-        style.width = 1.4f * widthScale;
-        style.intensity = 1.25f;
-        style.halo = .25f;
-        style.spread = 3;
+        style.width = 1.4f * styleAppearance.widthScale * widthScale;
+        style.intensity = styleAppearance.brightness;
+        style.halo = styleAppearance.halo;
+        style.spread = styleAppearance.spread;
         style.persistenceMs = 0;
         style.colour = 1;
-        style.whiteHot = .1f;
+        style.whiteHot = styleAppearance.whiteHot;
         auto vertices = mesh.build(strokes, 0, nativeW, nativeH, style);
         for (auto &v : vertices) {
             auto p = turn(v.x, v.y);
@@ -531,10 +558,10 @@ struct Renderer::Impl {
                       radial);
             return;
         }
-        if (!quads.empty() && (quadTexture != texture || quadEmissive != emissive ||
-                              quadClip.x != d.clip.x || quadClip.y != d.clip.y ||
-                              quadClip.width != d.clip.width || quadClip.height != d.clip.height ||
-                              quadBezel != d.bezelOnly))
+        if (!quads.empty() &&
+            (quadTexture != texture || quadEmissive != emissive || quadClip.x != d.clip.x ||
+             quadClip.y != d.clip.y || quadClip.width != d.clip.width ||
+             quadClip.height != d.clip.height || quadBezel != d.bezelOnly))
             flushQuads();
         quadTexture = texture;
         quadEmissive = emissive;
@@ -648,8 +675,8 @@ struct Renderer::Impl {
                 bottom = std::max(bottom, p[1]);
             }
         quadDraw.clip = intersection(d.clip, {std::floor(left), std::floor(top),
-                                           std::ceil(right) - std::floor(left),
-                                           std::ceil(bottom) - std::floor(top)});
+                                              std::ceil(right) - std::floor(left),
+                                              std::ceil(bottom) - std::floor(top)});
         quad(quadDraw, d.bounds, {0, 0, 1, 1}, texture, false, &d);
     }
     void addAtlasPage() {
@@ -658,8 +685,8 @@ struct Renderer::Impl {
         atlasPages.push_back(atlas);
         glBindTexture(GL_TEXTURE_2D, atlas);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlasSize, atlasSize, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlasSize, atlasSize, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -671,7 +698,8 @@ struct Renderer::Impl {
         need(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
              "Widget raster atlas framebuffer unavailable");
     }
-    RasterTile bake(const Draw &draw, const std::vector<vectors::Stroke> &strokes) {
+    RasterTile bake(const Draw &draw, const std::vector<vectors::Stroke> &strokes,
+                    const BeamAppearance &styleAppearance) {
         if (strokes.empty())
             return {};
         Draw local = draw;
@@ -686,9 +714,10 @@ struct Renderer::Impl {
                 bottom = std::max(bottom, q[1]);
             }
         }
-        const double beamWidth = 1.4 * draw.lineWidth * std::hypot(draw.transform.a, draw.transform.b) *
-                                 nativeH / 720;
-        const double padding = std::ceil(std::clamp(beamWidth * 6, 2., 64.)) + 1;
+        const double beamWidth = 1.4 * styleAppearance.widthScale * draw.lineWidth *
+                                 std::hypot(draw.transform.a, draw.transform.b) * nativeH / 720;
+        const double spread = styleAppearance.halo > 0 ? styleAppearance.spread : 1;
+        const double padding = std::ceil(std::clamp(beamWidth * spread * 2, 2., 64.)) + 1;
         left = std::floor(left - padding);
         top = std::floor(top - padding);
         const int w = int(std::ceil(right + padding) - left);
@@ -706,7 +735,8 @@ struct Renderer::Impl {
         const auto previousTarget = target;
         const auto previousW = nativeW, previousH = nativeH;
         const int y = atlasSize - atlasY - h;
-        target = {atlasFbo, atlasSize, atlasSize, {double(atlasX), double(atlasY), double(w), double(h)}};
+        target = {
+            atlasFbo, atlasSize, atlasSize, {double(atlasX), double(atlasY), double(w), double(h)}};
         nativeW = w;
         nativeH = h;
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, atlasFbo);
@@ -726,19 +756,20 @@ struct Renderer::Impl {
             stroke(local, line);
         // A tile is a crop of the final view. Its height must not make the
         // vector beam thinner than it would be on the gameplay display.
-        flush(float(previousH) / h);
+        flush(styleAppearance, float(previousH) / h);
         stats.strokes += previousStrokes;
         ++stats.rasterBakes;
         target = previousTarget;
         nativeW = previousW;
         nativeH = previousH;
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.framebuffer);
-        glViewport(int(target.viewport.x), target.height - int(target.viewport.y + target.viewport.height),
+        glViewport(int(target.viewport.x),
+                   target.height - int(target.viewport.y + target.viewport.height),
                    int(target.viewport.width), int(target.viewport.height));
-        const RasterTile tile{
-            {left, top, double(w), double(h)},
-            {double(atlasX) / atlasSize, 1 - double(atlasY) / atlasSize,
-             double(w) / atlasSize, -double(h) / atlasSize}, atlas};
+        const RasterTile tile{{left, top, double(w), double(h)},
+                              {double(atlasX) / atlasSize, 1 - double(atlasY) / atlasSize,
+                               double(w) / atlasSize, -double(h) / atlasSize},
+                              atlas};
         atlasX += w;
         atlasRowHeight = std::max(atlasRowHeight, h);
         return tile;
@@ -746,8 +777,8 @@ struct Renderer::Impl {
     std::string rasterStyle(const Draw &d) const {
         std::ostringstream key;
         key.precision(12);
-        for (double n : {d.transform.a, d.transform.b, d.transform.c, d.transform.d,
-                         d.color[0], d.color[1], d.color[2], d.color[3], d.lineWidth})
+        for (double n : {d.transform.a, d.transform.b, d.transform.c, d.transform.d, d.color[0],
+                         d.color[1], d.color[2], d.color[3], d.lineWidth})
             key << n << '/';
         return key.str();
     }
@@ -764,7 +795,16 @@ struct Renderer::Impl {
         quad(spriteDraw, tile.bounds, tile.uv, tile.texture, true);
     }
     void cachedVector(const Draw &d) {
+        const std::string_view path(d.path);
+        const auto slash = path.find_last_of('/');
+        const auto leaf = slash == path.npos ? path : path.substr(slash + 1);
+        // The shared bezelFrame template uses these four IDs for its edges.
+        const bool border =
+            gameplayBeams && d.kind == "vector" &&
+            (leaf == "top" || leaf == "right" || leaf == "bottom" || leaf == "left");
         std::string key = rasterStyle(d) + d.points.json() + (d.closed ? "closed" : "open");
+        if (border)
+            key += "/border/";
         key += std::to_string(d.bounds.width) + "/" + std::to_string(d.bounds.height);
         auto found = tiles.find(key);
         if (found == tiles.end()) {
@@ -775,9 +815,12 @@ struct Renderer::Impl {
                 const auto &b = points[n % points.size()];
                 strokes.push_back({{float(a.at(0).number()), float(a.at(1).number())},
                                    {float(b.at(0).number()), float(b.at(1).number())},
-                                   {1, 1, 1}, 1, 1});
+                                   {1, 1, 1},
+                                   1,
+                                   1});
             }
-            found = tiles.emplace(key, bake(d, strokes)).first;
+            const auto &style = !gameplayBeams ? appearance : border ? borderBeam : accentBeam;
+            found = tiles.emplace(key, bake(d, strokes, style)).first;
         }
         placeTile(found->second, d);
     }
@@ -786,6 +829,9 @@ struct Renderer::Impl {
             return;
         const auto *font = fonts.find(d.font);
         need(font, "Unknown rasterized widget font");
+        const auto &beamStyle = !gameplayBeams             ? appearance
+                                : d.font == "vectrex-menu" ? headingBeam
+                                                           : readoutBeam;
         const auto styleKey = rasterStyle(d) + d.font + "/" + std::to_string(d.fontSize) + "/";
         const auto tileFor = [&](char c) -> const RasterTile & {
             auto key = styleKey + c;
@@ -797,7 +843,7 @@ struct Renderer::Impl {
             Draw glyph = d;
             glyph.bounds = {-128, -128, 256, 256};
             const auto strokes = vectors::layoutText(*font, std::string_view(&c, 1), style).strokes;
-            return tiles.emplace(std::move(key), bake(glyph, strokes)).first->second;
+            return tiles.emplace(std::move(key), bake(glyph, strokes, beamStyle)).first->second;
         };
         if (warmedFonts.insert(styleKey).second)
             for (char c : std::string_view("0123456789,-./"))
@@ -809,8 +855,9 @@ struct Renderer::Impl {
         double width = 0;
         for (unsigned char c : d.text)
             width += advance(c);
-        double x = d.align == "right" ? d.bounds.width - width :
-                   d.align == "center" ? (d.bounds.width - width) / 2 : 0;
+        double x = d.align == "right"    ? d.bounds.width - width
+                   : d.align == "center" ? (d.bounds.width - width) / 2
+                                         : 0;
         for (unsigned char c : d.text) {
             char glyph = font->uppercase && c >= 'a' && c <= 'z' ? char(c - 'a' + 'A') : char(c);
             placeTile(tileFor(glyph), d, x);
@@ -912,7 +959,8 @@ struct Renderer::Impl {
         }
     }
 };
-Renderer::Renderer() : impl_(std::make_unique<Impl>()) {}
+Renderer::Renderer(BeamAppearance appearance, BeamProfile profile)
+    : impl_(std::make_unique<Impl>(appearance, profile)) {}
 Renderer::~Renderer() {
     impl_->release();
 }

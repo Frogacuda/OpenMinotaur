@@ -13,12 +13,24 @@ inline constexpr std::array<const char *, 80> addedJukeboxPresets = {
     "r6-c3",  "r6-c4",  "r6-c5",  "r6-c6",  "r6-c8",  "r6-c9",  "r6-c13", "r6-c14", "r7-c0",
     "r3-c12", "r6-c15", "r1-c15", "r3-c0",  "r3-c4",  "r4-c13", "r5-c1",  "r5-c10"};
 // Keep the established study IDs 100..104 outside the preset ordinal space.
-inline constexpr bool isStudy(int id) { return id >= 100 && id <= 104; }
-inline constexpr int presetOrdinal(int id) { return id >= 105 ? id - 5 : id; }
-inline constexpr int presetId(int ordinal) { return ordinal >= 100 ? ordinal + 5 : ordinal; }
-inline constexpr int addedIndex(int id) { return presetOrdinal(id) - 22; }
-inline constexpr int editIndex(int id) { return id == 1 ? 19 : presetOrdinal(id) - 2; }
-inline constexpr int modeForGroup(int group) { return group == 19 ? 1 : presetId(group + 2); }
+inline constexpr bool isStudy(int id) {
+    return id >= 100 && id <= 104;
+}
+inline constexpr int presetOrdinal(int id) {
+    return id >= 105 ? id - 5 : id;
+}
+inline constexpr int presetId(int ordinal) {
+    return ordinal >= 100 ? ordinal + 5 : ordinal;
+}
+inline constexpr int addedIndex(int id) {
+    return presetOrdinal(id) - 22;
+}
+inline constexpr int editIndex(int id) {
+    return id == 1 ? 19 : presetOrdinal(id) - 2;
+}
+inline constexpr int modeForGroup(int group) {
+    return group == 19 ? 1 : presetId(group + 2);
+}
 inline constexpr int lastJukeboxPreset = presetId(21 + int(addedJukeboxPresets.size()));
 inline bool editablePreset(int id) {
     return id >= 1 && id <= lastJukeboxPreset && id != 18 && id != 21 && !isStudy(id);

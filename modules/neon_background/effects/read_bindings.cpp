@@ -18,8 +18,12 @@ bool name(const std::string &s, size_t limit = 128) {
     return !s.empty() && s.size() <= limit &&
            std::none_of(s.begin(), s.end(), [](unsigned char c) { return c < 32; });
 }
-bool numeric(const ReadValue &v) { return v.index() < 3; }
-bool integer(const ReadValue &v) { return v.index() < 2; }
+bool numeric(const ReadValue &v) {
+    return v.index() < 3;
+}
+bool integer(const ReadValue &v) {
+    return v.index() < 2;
+}
 bool valid(const ReadValue &v) {
     return v.index() == 2 ? std::isfinite(std::get<double>(v))
                           : v.index() != 4 || name(std::get<std::string>(v));
@@ -34,7 +38,9 @@ Integer integral(const ReadValue &v) {
     int64_t i = std::get<int64_t>(v);
     return {i < 0, i < 0 ? uint64_t(-(i + 1)) + 1 : uint64_t(i)};
 }
-int order(uint64_t a, uint64_t b) { return a < b ? -1 : a > b ? 1 : 0; }
+int order(uint64_t a, uint64_t b) {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
 int compareInteger(Integer a, Integer b) {
     if (a.negative != b.negative)
         return a.negative ? -1 : 1;
@@ -109,7 +115,9 @@ bool predicate(const ReadRule &r, const ReadValue &v, bool previous) {
     bool p = r.condition == ReadCondition::CrossAbove ? c >= 0 : c <= 0;
     return p || (previous && r.hysteresis > 0 && !distanceAtLeast(v, r.value, r.hysteresis));
 }
-void valueOut(std::ostream &o, const ReadValue &v) { o << std::quoted(formatReadValue(v)); }
+void valueOut(std::ostream &o, const ReadValue &v) {
+    o << std::quoted(formatReadValue(v));
+}
 ReadValue valueIn(std::istream &in) {
     std::string s;
     need(bool(in >> std::quoted(s)), "Missing typed read value");

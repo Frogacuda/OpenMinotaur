@@ -5,6 +5,7 @@
 //            [--set key=value]... [--screenshot out.png --frames N] [--list]
 //            [--inject-touch nx,ny[@frame[+frames]]]...
 //            [--inject-pad lx,ly,buttons[@frame[+frames]]]... (isolated test input)
+//            [--inject-view frame[+frames]]... (physical View in collection tests)
 //            [--inject-motion x,y,z] (simulated gravity in g, test only)
 #include "achievements.h"
 #include "bundled_assets.h"
@@ -20,7 +21,8 @@
 #include "input.h"
 #ifdef MINO_COLLECTION_TITLE
 #include "collection_title.h"
-#include "gridrunner_widgets.h"
+#include "gameplay_widgets.h"
+#include "in_game_menu.h"
 #endif
 #ifdef MINO_LIVE_BEZELS
 #include "audio_level.h"
@@ -48,6 +50,7 @@
 #include <cstdarg>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -118,8 +121,16 @@ struct App {
     std::vector<float> mixBuf;
     Display display;
 #ifdef MINO_COLLECTION_TITLE
-    GridrunnerWidgets gridrunnerWidgets;
-    bool gridrunnerWidgetPrototype = SDL_GetHintBoolean("MINO_GRIDRUNNER_WIDGETS", false);
+    GameplayWidgets gameplayWidgets;
+    std::optional<WidgetGame> widgetGame;
+    enum class GameMenuPage { Closed, Root, Options };
+    GameMenuPage gameMenuPage = GameMenuPage::Closed;
+    InGameMenu gameMenu;
+    Display gameOptionsDisplay;
+    bool gameOptionsDisplayReady = false, viewHeld = false;
+    bool gameMenuMotion = false;
+    int gameMenuAxis = 0;
+    std::atomic_bool muteGameForMenu{false};
 #endif
 #ifdef MINO_LIVE_BEZELS
     LiveBezel bezel;
@@ -195,12 +206,12 @@ bool HostImpl::presentStartupFrame() {
     SDL_GL_SwapWindow(app->window);
 #ifdef MINO_COLLECTION_TITLE
     // Present the loading art before spending time creating its widget cache.
-    if (app->gridrunnerWidgetPrototype && app->gameId == "gridrunner") {
+    if (app->widgetGame) {
         int width = 0, height = 0;
         SDL_GetWindowSizeInPixels(app->window, &width, &height);
         const auto &game = app->display.viewport();
-        app->gridrunnerWidgets.prepare(width, height, game.x, game.y, game.w, game.h,
-                                       app->display.presentationTurns());
+        app->gameplayWidgets.prepare(*app->widgetGame, width, height, game.x, game.y, game.w,
+                                     game.h, app->display.presentationTurns());
     }
 #endif
     return true;
@@ -283,7 +294,11 @@ void SDLCALL audioCallback(void *user, SDL_AudioStream *stream, int additional, 
     }
 #endif
     app->mixBuf.assign(size_t(frames) * 2, 0.0f);
-    if (app->core && !app->paused)
+    if (app->core && !app->paused
+#ifdef MINO_COLLECTION_TITLE
+        && !app->muteGameForMenu
+#endif
+    )
         app->core->mixAudio(app->mixBuf.data(), frames);
 #ifdef MINO_LIVE_BEZELS
     app->audioLevel.submit(app->mixBuf.data(), app->mixBuf.size());
@@ -300,8 +315,7 @@ void stopAudio(App &app) {
 #endif
 }
 
-template <bool Shell = false>
-void startAudio(App &app) {
+template <bool Shell = false> void startAudio(App &app) {
     SDL_AudioSpec spec{SDL_AUDIO_F32, 2, kAudioRate};
     app.audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec,
                                           audioCallback<Shell>, &app);
@@ -523,16 +537,48 @@ void applyOrientation(App &app) {
 DisplaySettings shellDisplaySettings(DisplaySettings ds) {
     ds.aspect = AspectMode::IPad;
     ds.screenMode = ScreenMode::HiRes;
-    ds.backdrop = Backdrop::Colour;
+    ds.backdrop = Backdrop::Minorola;
+    ds.backdropColour = 0;
     ds.scale = ScaleMode::Fit;
     ds.internalScale = 0;
     ds.filter = Filter::Bilinear;
     return ds;
 }
 #endif
+#ifdef MINO_COLLECTION_TITLE
+using GameMenuPage = App::GameMenuPage;
+
+bool inGameMenu(const App &app) {
+    return app.gameMenuPage != GameMenuPage::Closed;
+}
+bool inGameOptions(const App &app) {
+    return app.gameMenuPage == GameMenuPage::Options;
+}
+
+bool configureGameOptions(App &app) {
+    if (!app.gameOptionsDisplayReady) {
+        if (!app.gameOptionsDisplay.init(app.glES))
+            return false;
+        app.gameOptionsDisplayReady = true;
+    }
+    int width = 0, height = 0;
+    SDL_GetWindowSizeInPixels(app.window, &width, &height);
+    const auto settings = shellDisplaySettings(app.settings.display("global"));
+    app.launcher.setPortrait(portraitLauncher(settings.orientation, width, height));
+    app.launcher.configureDisplay(app.gameOptionsDisplay, width, height, settings);
+    app.launcher.resize(app.gameOptionsDisplay.surface());
+    return true;
+}
+#endif
 void reconfigure(App &app, bool notify = true) {
     if (!app.core)
         return;
+#ifdef MINO_COLLECTION_TITLE
+    if (inGameOptions(app)) {
+        configureGameOptions(app);
+        return;
+    }
+#endif
     int w = 0, h = 0;
     SDL_GetWindowSizeInPixels(app.window, &w, &h);
 #ifdef MINO_STANDALONE_GAME
@@ -540,10 +586,34 @@ void reconfigure(App &app, bool notify = true) {
     const auto native = app.core->nativeFormat();
 #else
     DisplaySettings ds = app.settings.display(app.core == &app.launcher ? "global" : app.gameId);
+#ifdef MINO_COLLECTION_TITLE
+    app.widgetGame.reset();
+    if (app.settings.liveWidgetsEnabled(app.gameId)) {
+        if (app.gameId == "gridrunner")
+            app.widgetGame = WidgetGame::Gridrunner;
+        else if (app.gameId == "goatup")
+            app.widgetGame = WidgetGame::GoatUp;
+        else if (app.gameId == "superoxwars")
+            app.widgetGame = WidgetGame::SuperOxWars;
+        else if (app.gameId == "fiveaday")
+            app.widgetGame = WidgetGame::FiveADay;
+        else if (app.gameId == "minos")
+            app.widgetGame = WidgetGame::Minos;
+        else if (app.gameId == "goatup2")
+            app.widgetGame = WidgetGame::GoatUp2;
+        else if (app.gameId == "minotron")
+            app.widgetGame = WidgetGame::Minotron;
+        else if (app.gameId == "deflex")
+            app.widgetGame = WidgetGame::Deflex;
+        else if (app.gameId == "minorescue")
+            app.widgetGame = WidgetGame::MinotaurRescue;
+    }
+#endif
     if (app.core == &app.launcher || app.gameId == "title") {
         app.launcher.setPortrait(portraitLauncher(ds.orientation, w, h));
         ds = shellDisplaySettings(ds);
         if (app.gameId == "title") {
+            ds.backdrop = Backdrop::Colour;
             ds.aspect = AspectMode::Fill;
             ds.matchViewportPixels = true;
         }
@@ -555,7 +625,11 @@ void reconfigure(App &app, bool notify = true) {
         app.gameId == "title" ? app.launcher.nativeFormat() : app.core->nativeFormat();
 #endif
     const bool formatChanged = native != app.nativeFormat;
-    bool changed = app.display.configure(w, h, native, ds);
+    const bool changed =
+#ifndef MINO_STANDALONE_GAME
+        app.core == &app.launcher ? app.launcher.configureDisplay(app.display, w, h, ds) :
+#endif
+                                  app.display.configure(w, h, native, ds);
 #ifndef MINO_STANDALONE_GAME
     if (!app.display.error().empty()) {
         app.settings.set("global", "screen_mode", "sharp");
@@ -574,7 +648,72 @@ void reconfigure(App &app, bool notify = true) {
     }
 }
 
+#ifdef MINO_COLLECTION_TITLE
+void closeGameOptions(App &app) {
+    app.input.cancelTouches(&app.launcher);
+    app.mapping.cancel();
+    app.launcher.closeGameOptions();
+    app.input.enableMotion(app.gameMenuMotion);
+    app.gameMenuPage = GameMenuPage::Root;
+    app.gatePads = true;
+}
+
+void closeGameMenu(App &app) {
+    if (inGameOptions(app))
+        closeGameOptions(app);
+    app.gameMenuPage = GameMenuPage::Closed;
+    app.muteGameForMenu = false;
+    app.gatePads = true;
+}
+
+Core *gameMenuInputCore(App &app) {
+    return inGameOptions(app) ? &app.launcher : app.core;
+}
+
+void gameMenuAction(App &app, InGameMenu::Action action) {
+    using Action = InGameMenu::Action;
+    if (action == Action::Display || action == Action::Control) {
+        if (!configureGameOptions(app))
+            return;
+        app.gameMenuPage = GameMenuPage::Options;
+        app.gameMenuMotion = app.input.motionEnabled();
+        app.launcher.openGameOptions(action == Action::Control);
+        app.gatePads = true;
+    } else if (action == Action::Resume) {
+        closeGameMenu(app);
+        applyWindow(app);
+        applyOrientation(app);
+        reconfigure(app);
+    } else if (action == Action::Exit) {
+        app.returnRequested = true;
+    }
+}
+
+void toggleGameMenu(App &app) {
+    if (!app.coreReady || app.core == &app.launcher || app.gameId == "title")
+        return;
+    if (inGameMenu(app)) {
+        gameMenuAction(app, InGameMenu::Action::Resume);
+        return;
+    }
+    app.input.cancelTouches(app.core);
+    std::array<PadState, kMaxPads> neutral{};
+    for (int i = 0; i < kMaxPads; ++i)
+        neutral[size_t(i)].connected = app.input.pads()[i].connected;
+    app.core->pads(neutral.data(), kMaxPads);
+    app.gameMenu.open();
+    app.gameMenuPage = GameMenuPage::Root;
+    app.muteGameForMenu = true;
+    app.gameMenuAxis = 0;
+    app.gatePads = true;
+}
+#endif
+
 void refreshNativeFormat(App &app) {
+#ifdef MINO_COLLECTION_TITLE
+    if (inGameMenu(app))
+        return;
+#endif
     if (app.gameId == "title")
         return;
     if (app.core && app.core->nativeFormat() != app.nativeFormat) {
@@ -654,14 +793,25 @@ void setPaused(App &app, bool p) {
     if (p) {
         app.paused = true;
         app.gatePads = true;
+#ifdef MINO_COLLECTION_TITLE
+        app.input.cancelTouches(gameMenuInputCore(app));
+#else
         app.input.cancelTouches(app.core);
+#endif
         if (app.coreReady) {
-            app.core->pause(true);
+#ifdef MINO_COLLECTION_TITLE
+            if (!inGameMenu(app))
+#endif
+                app.core->pause(true);
             app.core->save();
         }
         app.host.flushAchievements();
     } else {
-        if (app.coreReady)
+        if (app.coreReady
+#ifdef MINO_COLLECTION_TITLE
+            && !inGameMenu(app)
+#endif
+        )
             app.core->pause(false);
     }
     app.paused = p;
@@ -714,7 +864,14 @@ bool synchronizeGraphics(App &app) {
 #ifdef MINO_COLLECTION_TITLE
         if (app.gameId == "title")
             static_cast<CollectionTitle *>(app.core)->abandonGraphics();
-        app.gridrunnerWidgets.abandonGraphics();
+        app.gameplayWidgets.abandonGraphics();
+        app.gameMenu.abandonGraphics();
+        if (inGameMenu(app))
+            closeGameMenu(app);
+        if (app.gameOptionsDisplayReady) {
+            app.gameOptionsDisplay.abandonGraphics();
+            app.gameOptionsDisplayReady = false;
+        }
 #endif
 #ifndef MINO_STANDALONE_GAME
         app.launchTransition.abandonGraphics();
@@ -790,8 +947,11 @@ void stopGame(App &app, bool keepShellAudio = false) {
     app.core->save();
     app.host.flushAchievements();
 #ifdef MINO_COLLECTION_TITLE
-    if (app.gameId == "gridrunner")
-        app.gridrunnerWidgets.release();
+    if (inGameMenu(app))
+        closeGameMenu(app);
+    app.display.bezelOverlay({});
+    if (app.widgetGame)
+        app.gameplayWidgets.release();
 #endif
 #ifdef MINO_LIVE_BEZELS
     app.neonTimer.reset();
@@ -805,14 +965,15 @@ void stopGame(App &app, bool keepShellAudio = false) {
 }
 
 #ifndef MINO_STANDALONE_GAME
-void showLauncher(App &app) {
+void showLauncher(App &app, bool entrance = true) {
     stopGame(app, true);
     app.core = &app.launcher;
     app.coreReady = true;
     app.gameId = "launcher";
     app.returnRequested = false;
     app.gatePads = true;
-    app.launcher.returnHome();
+    app.launcher.returnHome(entrance);
+    applyWindow(app);
     applyOrientation(app);
     reconfigure(app);
     // The surface can already have the right dimensions after a failed init.
@@ -820,6 +981,24 @@ void showLauncher(App &app) {
     SDL_SetWindowTitle(app.window, app.launcher.info().title);
     startShellAudio(app, ShellAudio::Scene::Launcher);
     app.settings.save();
+}
+
+void returnToLauncher(App &app) {
+    if (app.quit || app.paused || !synchronizeGraphics(app))
+        return;
+    bool animated = false;
+    if (app.coreReady && app.core != &app.launcher && app.gameId != "title") {
+        int width = 0, height = 0;
+        SDL_GetWindowSizeInPixels(app.window, &width, &height);
+        const auto shell = shellDisplaySettings(app.settings.display("global"));
+        app.launcher.setPortrait(portraitLauncher(shell.orientation, width, height));
+        app.launcher.returnHome(false);
+        if (app.launchTransition.prepare(app.launcher, width, height, shell, app.glES))
+            animated = app.launchTransition.playReturn(app.display, app.window, app.quit);
+        if (app.quit || app.paused || !synchronizeGraphics(app))
+            return;
+    }
+    showLauncher(app, !animated);
 }
 
 bool startGame(App &app, const std::string &requestedId, bool animate = false,
@@ -1017,6 +1196,9 @@ int main(int argc, char **argv) {
         int start = 5, frames = 1;
     };
     std::vector<InjectedPad> injectPads;
+#ifdef MINO_COLLECTION_TITLE
+    std::vector<std::pair<int, int>> injectView;
+#endif
 #ifdef SDL_PLATFORM_ANDROID
     preferES = true;
 #endif
@@ -1051,6 +1233,14 @@ int main(int argc, char **argv) {
             list = true;
         else if (a == "--window")
             SDL_sscanf(next().c_str(), "%dx%d", &winW, &winH);
+#ifdef MINO_COLLECTION_TITLE
+        else if (a == "--inject-view") {
+            int start = 0, frames = 1;
+            if (SDL_sscanf(next().c_str(), "%d+%d", &start, &frames) < 1 || start < 0 || frames < 1)
+                return 1;
+            injectView.emplace_back(start, frames);
+        }
+#endif
         else if (a == "--inject-motion") {
             const auto value = next();
             char trailing = 0;
@@ -1278,12 +1468,22 @@ int main(int argc, char **argv) {
             app.quit = true;
             break;
 #else
-            showLauncher(app);
+            returnToLauncher(app);
+            if (app.quit)
+                break;
 #endif
         }
         refreshNativeFormat(app);
         app.input.setTouchEnabled(
-            !gameInputSettings(app).disableTouch || app.input.connectedPads() == 0, app.core);
+#ifdef MINO_COLLECTION_TITLE
+            inGameMenu(app) ||
+#endif
+                !gameInputSettings(app).disableTouch || app.input.connectedPads() == 0,
+#ifdef MINO_COLLECTION_TITLE
+            gameMenuInputCore(app));
+#else
+            app.core);
+#endif
         for (size_t k = 0; k < injectTouches.size(); k++) { // synthetic fingers for --inject-touch
             const InjectedTouch &t = injectTouches[k];
             bool down = frameCount == t.start,
@@ -1340,6 +1540,13 @@ int main(int argc, char **argv) {
                 }
                 break;
             case SDL_EVENT_KEY_DOWN:
+#ifdef MINO_COLLECTION_TITLE
+                if (!app.paused && !app.returnRequested && !e.key.repeat && e.key.key == SDLK_F1 &&
+                    app.core != &app.launcher && app.gameId != "title") {
+                    toggleGameMenu(app);
+                    break;
+                }
+#endif
 #ifdef SDL_PLATFORM_WINDOWS
                 if (fullscreenShortcut(app, e.key))
                     break;
@@ -1354,6 +1561,30 @@ int main(int argc, char **argv) {
                             "Mapping cancelled. Previous controls retained.");
                         app.gatePads = true;
                     }
+                    break;
+                }
+#endif
+#ifdef MINO_COLLECTION_TITLE
+                if (inGameMenu(app)) {
+                    if (e.key.repeat)
+                        break;
+                    const auto key = e.key.key;
+                    const bool back = key == SDLK_ESCAPE || key == SDLK_AC_BACK || key == SDLK_B;
+                    const bool select = key == SDLK_RETURN || key == SDLK_SPACE || key == SDLK_A;
+                    if (inGameOptions(app))
+                        app.launcher.key(key == SDLK_LEFT    ? -1
+                                         : key == SDLK_RIGHT ? 1
+                                                             : 0,
+                                         key == SDLK_UP     ? -1
+                                         : key == SDLK_DOWN ? 1
+                                                            : 0,
+                                         select, back);
+                    else if (back)
+                        gameMenuAction(app, InGameMenu::Action::Resume);
+                    else if (select)
+                        gameMenuAction(app, app.gameMenu.selected());
+                    else if (key == SDLK_UP || key == SDLK_DOWN)
+                        app.gameMenu.move(key == SDLK_UP ? -1 : 1);
                     break;
                 }
 #endif
@@ -1381,6 +1612,29 @@ int main(int argc, char **argv) {
 #endif
                 break;
             default:
+#ifdef MINO_COLLECTION_TITLE
+                if (!app.paused && !app.returnRequested && inGameMenu(app)) {
+                    if (inGameOptions(app)) {
+                        app.input.handleEvent(e, app.window, app.gameOptionsDisplay, &app.launcher);
+                    } else {
+                        if (e.type == SDL_EVENT_FINGER_DOWN ||
+                            (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+                             e.button.button == SDL_BUTTON_LEFT &&
+                             e.button.which != SDL_TOUCH_MOUSEID)) {
+                            int w = 0, h = 0;
+                            SDL_GetWindowSize(app.window, &w, &h);
+                            if (w > 0 && h > 0) {
+                                const bool finger = e.type == SDL_EVENT_FINGER_DOWN;
+                                const double x = finger ? e.tfinger.x : e.button.x / w;
+                                const double y = finger ? e.tfinger.y : e.button.y / h;
+                                gameMenuAction(app, app.gameMenu.touch(x, y, w, h));
+                            }
+                        }
+                        app.input.handleEvent(e, app.window, app.display, nullptr);
+                    }
+                    break;
+                }
+#endif
                 if (!app.paused && !app.returnRequested)
                     app.input.handleEvent(e, app.window, app.display, app.core);
                 else if (e.type == SDL_EVENT_GAMEPAD_ADDED || e.type == SDL_EVENT_GAMEPAD_REMOVED)
@@ -1390,8 +1644,11 @@ int main(int argc, char **argv) {
         }
 
 #ifndef MINO_STANDALONE_GAME
-        if (app.returnRequested)
-            showLauncher(app);
+        if (app.returnRequested) {
+            returnToLauncher(app);
+            if (app.quit)
+                break;
+        }
 #else
         if (app.returnRequested) {
             app.quit = true;
@@ -1412,8 +1669,6 @@ int main(int argc, char **argv) {
 
         const auto inputSettings = gameInputSettings(app);
         app.input.updatePads(inputSettings.deadzone);
-        app.input.setTouchEnabled(!inputSettings.disableTouch || app.input.connectedPads() == 0,
-                                  app.core);
 #ifndef MINO_STANDALONE_GAME
         refreshOptions(app);
         if (app.mapping.active()) {
@@ -1472,12 +1727,64 @@ int main(int argc, char **argv) {
         }
         if (app.gatePads && !held)
             app.gatePads = false;
-        app.core->pads(app.gatePads || app.mapping.active() ? neutral.data() : nativePads.data(),
-                       kMaxPads);
+        const bool blockPads = app.gatePads || app.mapping.active();
+#ifdef MINO_COLLECTION_TITLE
+        bool viewDown = false;
+        if (injectView.empty()) {
+            for (int i = 0; i < kMaxPads; ++i) {
+                const auto &pad = app.input.physical(i);
+                viewDown |= pad.connected && pad.buttons[SDL_GAMEPAD_BUTTON_BACK];
+            }
+        } else {
+            for (auto [start, frames] : injectView)
+                viewDown |= frameCount >= start && frameCount - start < frames;
+        }
+        const bool toggled = viewDown && !app.viewHeld && !app.mapping.active() &&
+                             app.core != &app.launcher && app.gameId != "title";
+        app.viewHeld = viewDown;
+        const auto *menuPads = injectPads.empty() ? app.input.pads() : nativePads.data();
+        if (toggled) {
+            toggleGameMenu(app);
+            dt = 0;
+        } else if (app.gameMenuPage == GameMenuPage::Root && !blockPads) {
+            int axis = 0;
+            bool accept = false, back = false;
+            for (int i = 0; i < kMaxPads; ++i) {
+                const auto &p = menuPads[i];
+                if (!p.connected)
+                    continue;
+                if (p.buttons & PAD_UP || p.ly < -.45f)
+                    axis = -1;
+                else if (p.buttons & PAD_DOWN || p.ly > .45f)
+                    axis = 1;
+                accept |= (p.pressed & PAD_SOUTH) != 0;
+                back |= (p.pressed & (PAD_EAST | PAD_BACK)) != 0;
+            }
+            if (axis && axis != app.gameMenuAxis)
+                app.gameMenu.move(axis);
+            app.gameMenuAxis = axis;
+            if (back)
+                gameMenuAction(app, InGameMenu::Action::Resume);
+            else if (accept)
+                gameMenuAction(app, app.gameMenu.selected());
+        } else if (inGameOptions(app)) {
+            app.launcher.pads(blockPads ? neutral.data() : menuPads, kMaxPads);
+        } else if (!inGameMenu(app)) {
+            app.core->pads(blockPads ? neutral.data() : nativePads.data(), kMaxPads);
+        }
+        if (app.returnRequested)
+            continue;
+#else
+        app.core->pads(blockPads ? neutral.data() : nativePads.data(), kMaxPads);
+#endif
         refreshNativeFormat(app);
 
 #ifndef MINO_STANDALONE_GAME
-        if (app.core == &app.launcher) {
+        if (app.core == &app.launcher
+#ifdef MINO_COLLECTION_TITLE
+            || inGameOptions(app)
+#endif
+        ) {
             const auto request = app.launcher.takeRequest();
             if (request.action == Launcher::Action::Launch) {
                 startGame(app, request.gameId, true);
@@ -1487,11 +1794,17 @@ int main(int argc, char **argv) {
                 app.quit = true;
             else if (request.action == Launcher::Action::SettingsChanged) {
                 applyShellAudioMode(app);
-                app.input.cancelTouches(app.core);
-                app.gatePads = true;
-                applyWindow(app);
-                applyOrientation(app);
-                reconfigure(app);
+#ifdef MINO_COLLECTION_TITLE
+                if (!inGameOptions(app)) {
+#endif
+                    app.input.cancelTouches(app.core);
+                    app.gatePads = true;
+                    applyWindow(app);
+                    applyOrientation(app);
+                    reconfigure(app);
+#ifdef MINO_COLLECTION_TITLE
+                }
+#endif
             } else if (request.action == Launcher::Action::Remap) {
                 int player = SDL_atoi(request.gameId.c_str());
                 if (player >= 0 && player < kMaxPads && app.input.physical(player).connected)
@@ -1546,6 +1859,10 @@ int main(int argc, char **argv) {
             }
         }
 #endif
+#ifdef MINO_COLLECTION_TITLE
+        if (inGameOptions(app) && !app.launcher.gameOptionsOpen())
+            closeGameOptions(app);
+#endif
         if (app.quit)
             break;
         if (!synchronizeGraphics(app)) {
@@ -1564,47 +1881,79 @@ int main(int argc, char **argv) {
             app.host.startupPresentationFinished();
         const bool timedNeon =
             screenshot.empty() &&
+#ifdef MINO_COLLECTION_TITLE
+            !inGameMenu(app) &&
+#endif
             (app.bezel.assessingCadence() || (app.gameId == "title" && app.titleSmokeTest));
         if (timedNeon)
             app.neonTimer.begin(dt);
         else
             app.neonTimer.reset();
 #endif
-        app.display.beginFrame();
-        app.core->frame(screenshot.empty() ? dt : 1.0 / 60.0);
+        const double frameTime = screenshot.empty() ? dt : 1.0 / 60.0;
+#ifdef MINO_COLLECTION_TITLE
+        if (inGameMenu(app)) {
+            if (inGameOptions(app)) {
+                app.gameOptionsDisplay.beginFrame();
+                app.launcher.frame(frameTime);
+                app.gameOptionsDisplay.present();
+            } else {
+                app.display.present();
+                int width = 0, height = 0;
+                SDL_GetWindowSizeInPixels(app.window, &width, &height);
+                if (!app.gameMenu.draw(width, height))
+                    closeGameMenu(app);
+            }
+        } else {
+#endif
+            app.display.beginFrame();
+            app.core->frame(frameTime);
 #ifdef MINO_LIVE_BEZELS
-        if (app.display.neonSelected() &&
-            (app.display.liveBackgroundRequested() || app.bezel.available())) {
-            auto state = app.core->presentationState();
-            state.values["audio.level"] = double(app.audioLevel.value());
-            app.bezel.update(app.gameId, std::move(state), screenshot.empty() ? dt : 1. / 60.,
-                             !app.settings.neonHighQuality(app.gameId));
-            if (!app.display.liveBackgroundRequested())
-                app.bezel.discardPendingFrame();
-        } else
-            app.bezel.update("", {}, 0, false);
-        app.display.backgroundPass([&](unsigned f, int w, int h, int x, int y, int vw, int vh,
-                                       int turns) {
-            app.bezel.setGameplayTexture(app.display.gameplayTexture(), app.display.surface().width,
-                                         app.display.surface().height);
-            return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
-        });
+            if (app.display.neonSelected() &&
+                (app.display.liveBackgroundRequested() || app.bezel.available())) {
+                auto state = app.core->presentationState();
+                state.values["audio.level"] = double(app.audioLevel.value());
+                app.bezel.update(app.gameId, std::move(state), frameTime,
+                                 !app.settings.neonHighQuality(app.gameId));
+                if (!app.display.liveBackgroundRequested())
+                    app.bezel.discardPendingFrame();
+            } else
+                app.bezel.update("", {}, 0, false);
+            app.display.backgroundPass(
+                [&](unsigned f, int w, int h, int x, int y, int vw, int vh, int turns) {
+                    app.bezel.setGameplayTexture(app.display.gameplayTexture(),
+                                                 app.display.surface().width,
+                                                 app.display.surface().height);
+                    return app.bezel.draw(f, w, h, x, y, vw, vh, turns, true);
+                });
 #endif
 #ifdef MINO_COLLECTION_TITLE
-        if (app.gridrunnerWidgetPrototype && app.gameId == "gridrunner")
-            app.display.bezelOverlay([&](unsigned f, int w, int h, int x, int y, int vw, int vh,
-                                         int turns) {
-                bool refresh = true;
+            if (app.widgetGame)
+                app.display.bezelOverlay(
+                    [&](unsigned f, int w, int h, int x, int y, int vw, int vh, int turns) {
+                        bool refresh = true;
 #ifdef MINO_LIVE_BEZELS
-                if (app.display.liveBackgroundRequested() && app.bezel.available())
-                    refresh = app.bezel.refreshedFrame();
+                        if (app.display.liveBackgroundRequested() && app.bezel.available())
+                            refresh = app.bezel.refreshedFrame();
 #endif
-                return app.gridrunnerWidgets.draw(*app.core, refresh, f, w, h, x, y, vw, vh, turns);
-            });
-        else
-            app.display.bezelOverlay({});
+                        return app.gameplayWidgets.draw(*app.widgetGame, *app.core, refresh, f, w,
+                                                        h, x, y, vw, vh, turns);
+                    });
+            else
+                app.display.bezelOverlay({});
 #endif
-        app.display.present();
+            app.display.present();
+#ifdef MINO_COLLECTION_TITLE
+        }
+#endif
+#ifdef MINO_COLLECTION_TITLE
+        if (app.gameId == "title") {
+            auto &title = static_cast<CollectionTitle &>(*app.core);
+            if (title.handoffActive())
+                title.presentHandoff(app.launcher, app.display,
+                                     shellDisplaySettings(app.settings.display("global")));
+        }
+#endif
 #ifdef MINO_LIVE_BEZELS
         if (timedNeon) {
             if (auto sample = app.neonTimer.end())
@@ -1642,6 +1991,11 @@ int main(int argc, char **argv) {
     app.settings.save();
 #endif
     app.input.shutdown();
+#ifdef MINO_COLLECTION_TITLE
+    app.gameMenu.release();
+    if (app.gameOptionsDisplayReady)
+        app.gameOptionsDisplay.shutdown();
+#endif
     app.display.shutdown();
     SDL_GL_DestroyContext(app.gl);
     SDL_DestroyWindow(app.window);

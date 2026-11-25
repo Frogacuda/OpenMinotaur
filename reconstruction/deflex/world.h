@@ -11,13 +11,14 @@ struct Sound {
 };
 enum class WorldMode { Standard, Attract, Scenery };
 struct Progress {
+    static constexpr int noBestMoves = 1000;
     std::array<int, 52> bestMoves;
     std::array<int, 52> bestScores{};
     std::array<int, 52> lastScores{};
     std::array<bool, 16> achievements{};
     int volume = 8;
     Progress() {
-        bestMoves.fill(1000);
+        bestMoves.fill(noBestMoves);
     }
 };
 class World final : public LevelBirths,

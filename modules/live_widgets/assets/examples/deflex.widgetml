@@ -1,0 +1,143 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "coordinates": {"shortEdge": 720},
+  "templates": {
+    "frame-beam": {
+      "kind": "vector", "size": [2, 17], "points": [[0, 0], [0, 16]],
+      "lineWidth": 1.9, "color": [0.32, 0.65, 0.82, 1], "opacity": 0.6
+    },
+    "frame": {
+      "kind": "group",
+      "inputs": {"width": 140, "height": 60},
+      "size": [["get", "width"], ["get", "height"]],
+      "children": [
+        {"id": "shadow", "kind": "rect", "color": [0, 0, 0, 0.35]},
+        {"id": "top", "use": "frame-beam", "x": 2, "y": 2, "rotation": -90,
+         "scale": [1, ["/", ["-", ["get", "width"], 4], 16]]},
+        {"id": "right", "use": "frame-beam", "x": ["-", ["get", "width"], 2], "y": 2,
+         "scale": [1, ["/", ["-", ["get", "height"], 4], 16]]},
+        {"id": "bottom", "use": "frame-beam", "x": 2, "y": ["-", ["get", "height"], 2],
+         "rotation": -90, "scale": [1, ["/", ["-", ["get", "width"], 4], 16]]},
+        {"id": "left", "use": "frame-beam", "x": 2, "y": 2,
+         "scale": [1, ["/", ["-", ["get", "height"], 4], 16]]}
+      ]
+    },
+    "heading": {
+      "kind": "text", "font": "vectrex-menu", "text": "{title}",
+      "size": [["-", ["get", "style.width"], ["*", 2, ["get", "style.pad"]]], 25],
+      "fontSize": ["get", "style.headingSize"], "color": [1, 0.89, 0.36, 1]
+    },
+    "score-card": {
+      "kind": "group",
+      "inputs": {"title": "", "score": {}, "tint": [0.96, 0.98, 1, 1]},
+      "size": [["get", "style.width"], ["get", "style.scoreHeight"]],
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"width": ["get", "style.width"], "height": ["get", "style.scoreHeight"]}},
+        {"id": "heading", "use": "heading", "x": ["get", "style.pad"], "y": ["get", "style.headingY"]},
+        {"id": "score", "kind": "text", "font": "neon-hud", "text": "{score.text}",
+         "x": ["get", "style.pad"],
+         "y": ["/", ["-", ["+", ["get", "style.scoreHeight"], ["get", "style.scoreBodyTop"]], ["get", "score.size"]], 2],
+         "size": [["-", ["get", "style.width"], ["*", 2, ["get", "style.pad"]]], 45],
+         "fontSize": ["get", "score.size"], "color": ["get", "tint"]},
+        {"id": "decimal", "kind": "rect", "visible": ["get", "score.decimal"],
+         "x": ["+", ["get", "style.pad"], ["*", ["get", "score.decimalColumn"], ["get", "score.size"]]],
+         "y": ["+", ["/", ["+", ["get", "style.scoreHeight"], ["get", "style.scoreBodyTop"]], 2],
+               ["*", 0.34, ["get", "score.size"]]],
+         "size": [3.8, 3.8], "color": [1, 0.95, 0.7, 1]}
+      ]
+    },
+    "meter-card": {
+      "kind": "group",
+      "inputs": {"title": "", "value": "", "fill": 0, "tint": [0.48, 0.86, 1, 1]},
+      "size": [["get", "style.width"], ["get", "style.meterHeight"]],
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"width": ["get", "style.width"], "height": ["get", "style.meterHeight"]}},
+        {"id": "heading", "use": "heading", "x": ["get", "style.pad"], "y": ["get", "style.headingY"]},
+        {"id": "value", "kind": "text", "font": "neon-hud", "text": "{value}",
+         "x": ["get", "style.pad"], "y": ["get", "style.headingY"],
+         "size": [["-", ["get", "style.width"], ["*", 2, ["get", "style.pad"]]], 26],
+         "fontSize": ["get", "style.meterSize"], "align": "right", "color": ["get", "tint"]},
+        {"id": "track", "kind": "rect", "x": ["get", "style.pad"], "y": ["-", ["get", "style.meterHeight"], 24],
+         "size": [["-", ["get", "style.width"], ["*", 2, ["get", "style.pad"]]], ["get", "style.barHeight"]],
+         "color": [0.23, 0.29, 0.33, 0.45]},
+        {"id": "fill", "kind": "rect", "x": ["get", "style.pad"], "y": ["-", ["get", "style.meterHeight"], 24],
+         "size": [["*", ["-", ["get", "style.width"], ["*", 2, ["get", "style.pad"]]], ["get", "fill"]], ["get", "style.barHeight"]],
+         "color": ["get", "tint"]}
+      ]
+    },
+    "bat-count": {
+      "kind": "group",
+      "inputs": {"caption": "", "value": "", "tint": [0.96, 0.98, 1, 1]},
+      "size": [["get", "style.columnWidth"], 40],
+      "children": [
+        {"id": "label", "kind": "text", "font": "neon-hud", "text": "{caption}",
+         "size": [["get", "style.columnWidth"], 16], "align": "center", "fontSize": ["get", "style.captionSize"],
+         "color": [0.96, 0.98, 1, 1]},
+        {"id": "value", "kind": "text", "font": "neon-hud", "text": "{value}",
+         "y": ["+", ["get", "style.captionSize"], 5], "size": [["get", "style.columnWidth"], 24],
+         "align": "center", "fontSize": ["get", "style.countSize"], "color": ["get", "tint"]}
+      ]
+    },
+    "scores": {
+      "kind": "group", "scale": ["read", "railScale"],
+      "children": [
+        {"id": "level-score", "use": "score-card", "inputs": {"style": ["get", "style"], "title": "Level Score", "score": ["read", "levelScore"]}},
+        {"id": "level-best", "use": "score-card", "y": ["+", ["get", "style.scoreHeight"], ["get", "style.gap"]],
+         "inputs": {"style": ["get", "style"], "title": "Level Best", "score": ["read", "levelBest"], "tint": [0.48, 0.86, 1, 1]}}
+      ]
+    },
+    "stats": {
+      "kind": "group", "scale": ["read", "railScale"],
+      "children": [
+        {"id": "bats", "kind": "group", "inputs": {"style": ["get", "style"], "title": "Bats"},
+         "size": [["get", "style.width"], ["get", "style.batsHeight"]],
+         "children": [
+           {"id": "frame", "use": "frame", "inputs": {"width": ["get", "style.width"], "height": ["get", "style.batsHeight"]}},
+           {"id": "heading", "use": "heading", "x": ["get", "style.pad"], "y": ["get", "style.headingY"]},
+           {"id": "used", "use": "bat-count", "x": ["get", "style.pad"], "y": ["get", "style.captionY"],
+            "inputs": {"style": ["get", "style"], "caption": "Used", "value": ["read", "batsUsed"]}},
+           {"id": "fewest", "use": "bat-count", "x": ["+", ["get", "style.pad"], ["get", "style.columnWidth"]],
+            "y": ["get", "style.captionY"],
+            "inputs": {"style": ["get", "style"], "caption": "Fewest", "value": ["read", "batsFewest"], "tint": [0.48, 0.86, 1, 1]}}
+         ]},
+        {"id": "shell", "use": "meter-card", "y": ["+", ["get", "style.batsHeight"], ["get", "style.gap"]],
+         "inputs": {"style": ["get", "style"], "title": "Shell", "value": ["read", "shellText"], "fill": ["read", "shellFill"]}},
+        {"id": "chain", "use": "meter-card",
+         "y": ["+", ["+", ["get", "style.batsHeight"], ["get", "style.meterHeight"]], ["*", 2, ["get", "style.gap"]]],
+         "visible": ["read", "chainActive"],
+         "inputs": {"style": ["get", "style"], "title": "Chain", "value": ["read", "chainText"], "fill": ["read", "chainFill"], "tint": [1, 0.89, 0.36, 1]}}
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {"id": "scores", "use": "scores", "placement": {"origin": "screen-top-left"},
+         "x": 20, "y": ["+", ["read", "inset"], ["*", 26, ["read", "railScale"]]],
+         "inputs": {"style": {"width": 331, "pad": 15, "headingSize": 23, "headingY": 8,
+                    "scoreHeight": 115, "scoreBodyTop": 22, "gap": 10}}},
+        {"id": "stats", "use": "stats", "placement": {"origin": "screen-top-right"},
+         "x": ["-", 0, ["+", 20, ["*", 331, ["read", "railScale"]]]],
+         "y": ["+", ["read", "inset"], ["*", 26, ["read", "railScale"]]],
+         "inputs": {"style": {"width": 331, "pad": 15, "headingSize": 23, "headingY": 8,
+                    "meterHeight": 69, "meterSize": 22, "barHeight": 12, "gap": 10,
+                    "batsHeight": 82, "captionY": 35, "captionSize": 15, "countSize": 21, "columnWidth": 150}}}
+      ]
+    }
+  },
+  "root": {
+    "id": "deflex",
+    "kind": "group",
+    "children": [
+      {"id": "scores", "use": "scores", "placement": {"origin": "screen-top-left"},
+       "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]], "y": 18,
+       "inputs": {"style": {"width": 140, "pad": 11, "headingSize": 11, "headingY": 10,
+                  "scoreHeight": 75, "scoreBodyTop": 10, "gap": 8}}},
+      {"id": "stats", "use": "stats", "placement": {"origin": "screen-top-right"},
+       "x": ["-", 0, ["+", ["read", "inset"], ["*", 150, ["read", "railScale"]]]], "y": 18,
+       "inputs": {"style": {"width": 140, "pad": 11, "headingSize": 11, "headingY": 10,
+                  "meterHeight": 60, "meterSize": 15, "barHeight": 9, "gap": 8,
+                  "batsHeight": 77, "captionY": 35, "captionSize": 10, "countSize": 17, "columnWidth": 59}}}
+    ]
+  }
+}

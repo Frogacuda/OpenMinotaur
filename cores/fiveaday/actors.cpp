@@ -230,8 +230,7 @@ void Attacker::hitBy(Entity &e) {
             }
             if (formationMember) {
                 // bro::hitBy 0x5ebc8 rewards consecutive carriers within one wave.
-                const int bonus = world.formationBonusMultiplier * (100 << world.formationKills);
-                const int points = int(float(float(bonus) * world.scoreMultiplier));
+                const int points = world.formationKillPoints();
                 world.popupScore(position, points);
                 world.addScore(points);
                 world.noise(45, 10);
@@ -337,6 +336,8 @@ void Fruit::run() {
         state = State::Fading;
         world.noise(int((world.random.next() & 15) % 3) + 16);
         if (minotaur) {
+            if (!world.demo)
+                ++world.minotaursLost;
             world.noise(int((world.random.next() & 15) % 5));
             world.message(11, "A MINOTAUR HAS FALLEN", 200, 0xff00ff00u);
         }

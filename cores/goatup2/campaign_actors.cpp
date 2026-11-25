@@ -133,6 +133,7 @@ void DeviceActor::hitBy(StageActor *other) {
             nearest->stageDrawScale = 2.5f;
             owner().cameraSettleFrames = 10;
             owner().goat->invulnerability = 30;
+            owner().goat->teaProtection = false;
             owner().emitRadialBurst(*nearest, 100, .004f, .2f, 1.f);
             sound(owner(), 59);
             other->stagePosition = nearest->stagePosition;

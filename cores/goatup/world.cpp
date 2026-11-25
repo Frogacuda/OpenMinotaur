@@ -235,6 +235,7 @@ void World::tick(const ClimbInput &input) {
         kids.tick();
         denizens.tick();
         denizens.tickBits();
+        actors.updateSlowDownMeter();
         actors.records.highestPlatform =
             std::max(actors.records.highestPlatform, game.highestPlatform);
     }

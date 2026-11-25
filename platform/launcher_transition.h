@@ -16,6 +16,8 @@ class LauncherTransition {
                      const FrameObserver &observer = {});
     bool playRendered(Display &target, SDL_Window *window, bool &quit,
                       const FrameObserver &observer = {});
+    bool playReturn(Display &target, SDL_Window *window, bool &quit,
+                    const FrameObserver &observer = {});
     void cancel();
     void abandonGraphics() {
         framebuffer_ = texture_ = program_ = vbo_ = vao_ = 0;
@@ -28,7 +30,8 @@ class LauncherTransition {
 
   private:
     friend struct LauncherChecks;
-    bool play(Display &target, SDL_Window *window, bool &quit, const FrameObserver &observer);
+    bool play(Display &target, SDL_Window *window, bool &quit, const FrameObserver &observer,
+              bool reverse = false);
     Display source_;
     Launcher *launcher_ = nullptr;
     unsigned texture_ = 0, framebuffer_ = 0, program_ = 0, vbo_ = 0, vao_ = 0;

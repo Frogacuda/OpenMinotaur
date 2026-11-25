@@ -304,8 +304,11 @@ void Ship::didHit(Entity &other) {
         return;
     if (state == State::Flying) {
         impulse += other.velocity * .3;
-        if (!world.demo)
+        if (!world.demo) {
+            if (integrity > 0)
+                ++world.damageTaken;
             integrity = float(double(integrity) - .2);
+        }
     }
     world.flash(position, 4, other.type == 2 ? .3f : .5f);
     world.noise(20);

@@ -5,8 +5,12 @@
 namespace neon::pc {
 namespace {
 constexpr float tau = 6.2831855f, pi = 3.1415927f;
-Point add(Point a, Point b) { return {a.x + b.x, a.y + b.y, a.z + b.z}; }
-Point ring(float a, float r) { return {-std::sin(a) * r, std::cos(a) * r, 0}; }
+Point add(Point a, Point b) {
+    return {a.x + b.x, a.y + b.y, a.z + b.z};
+}
+Point ring(float a, float r) {
+    return {-std::sin(a) * r, std::cos(a) * r, 0};
+}
 Point rotate(Point p, float a) {
     float c = std::cos(a), s = std::sin(a);
     return {p.x * c - p.y * s, p.x * s + p.y * c, p.z};

@@ -533,6 +533,7 @@ struct Runtime::Impl {
     std::vector<vectors::Object> objects;
     uint64_t objectRevision = 0;
     uint64_t vectorSourceKey = ~uint64_t(0);
+    bool vectorSourceDrawn = false;
     vectors::Canvas canvas;
     vectors::BeamMesh beam;
     std::map<int, GLuint> programs, images;
@@ -753,8 +754,7 @@ struct Runtime::Impl {
           scene(playback ? RecoveredScene{} : RecoveredScene(p, "r2-c13", true, reader)),
           profiles(playback ? TunnelProfiles{}
                             : TunnelProfiles::load(p / "reference/tunnel", reader)),
-          author(pc::AuthoringModel::PlaybackOnly{}, p, reader),
-          playbackOnly(playback) {
+          author(pc::AuthoringModel::PlaybackOnly{}, p, reader), playbackOnly(playback) {
         if (playback)
             return;
         // Build the large creator model directly on the heap; conditional value
@@ -827,6 +827,7 @@ struct Runtime::Impl {
         nodeOutput.release();
         source.release();
         vectorSourceKey = ~uint64_t(0);
+        vectorSourceDrawn = false;
         for (auto &t : stacks)
             t.release();
         if (!keepShared)
@@ -886,6 +887,7 @@ struct Runtime::Impl {
         imageKeys.clear();
         externalLayers.clear();
         vectorSourceKey = ~uint64_t(0);
+        vectorSourceDrawn = false;
         gameplayWidth = gameplayHeight = 0;
         images.clear();
         uniformLocations.clear();
@@ -1484,6 +1486,7 @@ void main(){
         stats.triangles += unsigned(vertices.size() / 3);
         stats.uploadedBytes += vertices.size() * sizeof(vectors::Vertex);
         vectorSourceKey = fixedObjects ? revision : ~uint64_t(0);
+        vectorSourceDrawn = true;
         glColorMask(1, 1, 1, 1);
     }
     float response(const char *key, float baseline, float low, float high) const {
@@ -1953,6 +1956,7 @@ void main(){
             if (child.time() == 0)
                 child.frame(1. / 60, output);
             stats.drawCalls += child.statistics().drawCalls;
+            stats.layerCopies += child.statistics().layerCopies;
             stats.triangles += child.statistics().triangles;
             stats.uploadedBytes += child.statistics().uploadedBytes;
             cache.layerTime = seconds;
@@ -2621,6 +2625,7 @@ void main(){
         draw(q.data(), q.size(), GL_TRIANGLE_STRIP);
     }
     void copyStack(int stack) {
+        ++stats.layerCopies;
         unbind();
         glBindFramebuffer(GL_FRAMEBUFFER, stacks[stack].fbo);
         glClearColor(0, 0, 0, 0);
@@ -2892,6 +2897,8 @@ void main(){
             planLayerCoverage(output, inputOverrides);
         } else
             layerCoverage.fill(viewportCoverage);
+        // Only trust cleared layer textures completed earlier in this frame.
+        std::array<bool, 16> transparentLayers{};
         for (int stack = 0; stack < 16; stack++)
             if (scene.reachable[stack]) {
                 if (externalLayers.count(stack) ||
@@ -2899,10 +2906,10 @@ void main(){
                     continue;
                 screen.extentX = layerCoverage[size_t(stack)].x;
                 screen.extentY = layerCoverage[size_t(stack)].y;
-                // A non-feedback mixer can produce its layer texture directly.
-                // Retained/self inputs and spatial draws keep the scratch-and-copy path.
-                bool directStack = params.copyElision && endpoint < 0 &&
-                                   params.framing.mode != Framing::LegacyStretch;
+                const bool elideCopies = params.copyElision && endpoint < 0 &&
+                                         params.framing.mode != Framing::LegacyStretch;
+                // A mixer without feedback can write directly into its layer target.
+                bool directStack = elideCopies;
                 for (auto index : scene.preset.stacks[stack].nodes) {
                     const auto &node = scene.preset.nodes[index];
                     if (node.type == 0 || node.type == 7 || node.type == 12 || node.type == 14 ||
@@ -2921,6 +2928,17 @@ void main(){
                             inputs[sampler] == 31 + stack)
                             directStack = false;
                 }
+                // Feedback must read the previous layer while drawing into scratch.
+                // Matching color-only targets can trade places after the draw.
+                const bool swapTargets = elideCopies && !depthBuffer;
+                const auto finishStack = [&] {
+                    if (directStack)
+                        return;
+                    if (swapTargets)
+                        std::swap(scratch, stacks[stack]);
+                    else
+                        copyStack(stack);
+                };
                 unbind();
                 glBindFramebuffer(GL_FRAMEBUFFER, directStack ? stacks[stack].fbo : scratch.fbo);
                 glViewport(0, 0, scratch.width, scratch.height);
@@ -2929,8 +2947,8 @@ void main(){
                 auto &indices = scene.preset.stacks[stack].nodes;
                 auto terminal = settings[indices.back()];
                 if (control(("layer." + std::to_string(stack)).c_str(), 1) < .5f) {
-                    if (!directStack)
-                        copyStack(stack);
+                    finishStack();
+                    transparentLayers[size_t(stack)] = true;
                     renderedLayerCoverage[size_t(stack)] = layerCoverage[size_t(stack)];
                     continue;
                 }
@@ -2938,6 +2956,7 @@ void main(){
                 cameraNode.floats[4] = 400;
                 cameraNode.floats[5] = 10024;
                 bool hasCamera = false;
+                bool transparent = true;
                 int blendOverride = int(control(("blend." + std::to_string(stack)).c_str(), 0));
                 for (auto index : indices) {
                     samplerNode = int(index);
@@ -2954,6 +2973,19 @@ void main(){
                     if (node.type == 0 || node.type == 7 || node.type == 14 ||
                         scene.nonDrawingShapes.count(index))
                         continue;
+                    if (params.skipTransparentMixerPasses && blendOverride <= 1 &&
+                        (node.type == 9 || node.type == 6)) {
+                        const int shader = n.integers[2], input = resolved[0];
+                        // Bifluffinator multiplies all channels by the node opacity.
+                        // Channel swap, RGB split and Round Tunnel preserve an empty first input.
+                        if ((shader == 49 && n.integers[1] == 0) ||
+                            ((shader == 14 || shader == 61 || shader == 67) && input >= 31 &&
+                             input < 47 && transparentLayers[size_t(input - 31)])) {
+                            captureNode(index);
+                            continue;
+                        }
+                    }
+                    transparent = false;
                     if (node.type == 11) {
                         auto projection = originalPerspective(
                             -(cameraNode.floats[3] + 1) * 256 / control("camera.zoom", 1),
@@ -3059,8 +3091,8 @@ void main(){
                         throw std::runtime_error("Unported module in GLES effect");
                     captureNode(index);
                 }
-                if (!directStack)
-                    copyStack(stack);
+                finishStack();
+                transparentLayers[size_t(stack)] = transparent;
                 renderedLayerCoverage[size_t(stack)] = layerCoverage[size_t(stack)];
             }
         screen = visibleScreen;
@@ -3212,7 +3244,7 @@ void main(){
         glDisable(GL_DITHER);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glColorMask(1, 1, 1, 1);
-        stats.drawCalls = stats.triangles = 0;
+        stats.drawCalls = stats.triangles = stats.layerCopies = 0;
         stats.uploadedBytes = 0;
         stats.textureBuilds = 0;
         stats.imageUploads = 0;
@@ -3241,8 +3273,9 @@ void main(){
             evaluateEdits();
             if (params.sourceOnly || control("vector.enabled") > .5f)
                 vectors();
-            else if (source.fbo) {
+            else if (vectorSourceDrawn) {
                 vectorSourceKey = ~uint64_t(0);
+                vectorSourceDrawn = false;
                 glBindFramebuffer(GL_FRAMEBUFFER, source.fbo);
                 glClearColor(0, 0, 0, 0);
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -3372,14 +3405,11 @@ void main(){
             rotateScreenPoint(v.x, v.y, screen.turns);
         if (selected < 2 || neon::pc::isStudy(selected))
             glUniform2f(location(p, U_pixelShift), 0, 0);
-        auto paint = [&](Rect c) {
-            if (c.width <= 0 || c.height <= 0)
-                return;
-            glScissor(c.x, destination.height - c.y - c.height, c.width, c.height);
-            if (!destination.clearDestination) {
-                glClearColor(0, 0, 0, 0);
-                glClear(GL_COLOR_BUFFER_BIT);
-            }
+        const bool drawBackground = control("vector.background", 1) > .5f || params.sourceOnly;
+        const bool drawOverlay = params.layerPreview < 0 && !params.componentPreviewId &&
+                                 !params.sourceOnly && control("vector.enabled") > .5f &&
+                                 int(control("vector.placement")) != 1;
+        const auto bindBackground = [&] {
             glUseProgram(p);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, backgroundTexture);
@@ -3398,10 +3428,19 @@ void main(){
             glUniform1i(location(p, U_spatial), 0);
             glUniform1f(location(p, U_outputSign), -1);
             glUniform1f(location(p, U_hueShift), hueValue());
-            if (control("vector.background", 1) > .5f || params.sourceOnly)
+        };
+        auto paint = [&](Rect c) {
+            if (c.width <= 0 || c.height <= 0)
+                return;
+            glScissor(c.x, destination.height - c.y - c.height, c.width, c.height);
+            if (!destination.clearDestination) {
+                glClearColor(0, 0, 0, 0);
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
+            bindBackground();
+            if (drawBackground)
                 draw(q.data(), q.size(), GL_TRIANGLE_STRIP);
-            if (params.layerPreview < 0 && !params.componentPreviewId && !params.sourceOnly &&
-                control("vector.enabled") > .5f && int(control("vector.placement")) != 1) {
+            if (drawOverlay) {
                 auto overlay = shader(26);
                 glUniform1f(location(overlay, U_hueShift), hueValue());
                 glUniform1f(location(overlay, U_gain), 1);
@@ -3421,13 +3460,57 @@ void main(){
         int x = std::clamp(hole.x, r.x, r.x + r.width), y = std::clamp(hole.y, r.y, r.y + r.height),
             right = std::clamp(hole.x + hole.width, r.x, r.x + r.width),
             bottom = std::clamp(hole.y + hole.height, r.y, r.y + r.height);
-        if (hole.width <= 0 || hole.height <= 0 || right <= x || bottom <= y)
+        if (hole.width <= 0 || hole.height <= 0 || right <= x || bottom <= y) {
             paint(r);
-        else {
-            paint({r.x, r.y, r.width, y - r.y});
-            paint({r.x, bottom, r.width, r.y + r.height - bottom});
-            paint({r.x, y, x - r.x, bottom - y});
-            paint({right, y, r.x + r.width - right, bottom - y});
+            return;
+        }
+        const std::array<Rect, 4> strips{{
+            {r.x, r.y, r.width, y - r.y},
+            {r.x, bottom, r.width, r.y + r.height - bottom},
+            {r.x, y, x - r.x, bottom - y},
+            {right, y, r.x + r.width - right, bottom - y},
+        }};
+        const bool batch =
+            destination.batchBezel && destination.clearDestination && drawBackground &&
+            !drawOverlay && params.framing.mode != Framing::LegacyStretch &&
+            std::all_of(q.begin(), q.end(), [](const Vertex &v) {
+                return (v.x == 0 || v.x == 1) && (v.y == 0 || v.y == 1) && v.clipWeight == 1;
+            });
+        if (!batch) {
+            for (const auto &strip : strips)
+                paint(strip);
+            return;
+        }
+
+        // Map each strip into the original quad. This leaves the gameplay hole
+        // outside the geometry and presents all the bezel pixels in one draw.
+        std::array<Vertex, 4> corners{};
+        for (const auto &v : q)
+            corners[size_t(v.x) + 2 * size_t(v.y)] = v;
+        const auto vertex = [&](int px, int py) {
+            auto v = corners[0];
+            v.x = float(px - r.x) / r.width;
+            v.y = float(py - r.y) / r.height;
+            v.u += (corners[1].u - v.u) * v.x + (corners[2].u - v.u) * v.y;
+            v.v += (corners[1].v - v.v) * v.x + (corners[2].v - v.v) * v.y;
+            return v;
+        };
+        std::array<Vertex, 24> vertices{};
+        size_t count = 0;
+        for (const auto &strip : strips) {
+            if (strip.width <= 0 || strip.height <= 0)
+                continue;
+            const auto tl = vertex(strip.x, strip.y);
+            const auto tr = vertex(strip.x + strip.width, strip.y);
+            const auto bl = vertex(strip.x, strip.y + strip.height);
+            const auto br = vertex(strip.x + strip.width, strip.y + strip.height);
+            for (const auto &v : {tl, tr, bl, bl, tr, br})
+                vertices[count++] = v;
+        }
+        if (count) {
+            glScissor(r.x, destination.height - r.y - r.height, r.width, r.height);
+            bindBackground();
+            draw(vertices.data(), count, GL_TRIANGLES);
         }
     }
 };
@@ -3475,7 +3558,7 @@ void Runtime::frame(double elapsed, const Destination &destination) {
         throw std::runtime_error("Invalid effect frame time");
     auto &i = *impl_;
     i.accumulator += std::min(elapsed, .25);
-    unsigned steps = 0, draws = 0, triangles = 0;
+    unsigned steps = 0, draws = 0, triangles = 0, copies = 0;
     size_t uploaded = 0;
     while (i.accumulator >= 1. / 60 && steps < 4) {
         i.tickCpu();
@@ -3483,6 +3566,7 @@ void Runtime::frame(double elapsed, const Destination &destination) {
         ++steps;
         i.render(destination);
         draws += i.stats.drawCalls;
+        copies += i.stats.layerCopies;
         triangles += i.stats.triangles;
         uploaded += i.stats.uploadedBytes;
     }
@@ -3493,10 +3577,12 @@ void Runtime::frame(double elapsed, const Destination &destination) {
     if (!steps && i.scene.preset.ticks) {
         i.render(destination);
         draws = i.stats.drawCalls;
+        copies = i.stats.layerCopies;
         triangles = i.stats.triangles;
         uploaded = i.stats.uploadedBytes;
     }
     i.stats.drawCalls = draws;
+    i.stats.layerCopies = copies;
     i.stats.triangles = triangles;
     i.stats.uploadedBytes = uploaded;
     if (i.programCache) {

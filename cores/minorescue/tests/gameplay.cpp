@@ -387,13 +387,15 @@ void presentation() {
     observer.afterTick(game);
     auto state = observer.sample(&game);
     auto number = [&](const char *key) {
-        return std::visit([](const auto &x) -> double {
-            using T = std::decay_t<decltype(x)>;
-            if constexpr (std::is_same_v<T, std::string>)
-                return -1;
-            else
-                return double(x);
-        }, observer.sample(&game).values.at(key));
+        return std::visit(
+            [](const auto &x) -> double {
+                using T = std::decay_t<decltype(x)>;
+                if constexpr (std::is_same_v<T, std::string>)
+                    return -1;
+                else
+                    return double(x);
+            },
+            observer.sample(&game).values.at(key));
     };
     auto require = [](bool condition) {
         if (!condition)
@@ -457,8 +459,85 @@ void presentation() {
     observer.afterTick(game);
     require(observer.sample(&game).session == 2 && number("player2.hits") == 0);
     game.players = nullptr;
-    std::cout << "Rescue presentation: heading, boost, contacts, tank/jet hits and sessions passed\n";
+    std::cout
+        << "Rescue presentation: heading, boost, contacts, tank/jet hits and sessions passed\n";
 }
+void widgetPresentation() {
+    spaceWars game;
+    minorescue::module::PresentationObserver observer;
+    game.running = true;
+    game.demo = false;
+    game.state = 4;
+    game.sunOn = true;
+    game.lives[0] = 3;
+    game.minesHit = 1;
+    spaceCraft ship;
+    ship.game = &game;
+    ship.type = 1;
+    ship.pos = {0.25, 0};
+    game.players = &ship;
+    theSun sun;
+    sun.size = 0.1f;
+    game.sun = &sun;
+    collectible minotaur;
+    minotaur.game = &game;
+    minotaur.type = 4;
+
+    auto require = [](bool condition, const char *message) {
+        if (!condition)
+            throw std::runtime_error(message);
+    };
+    auto read = [&](const char *key) { return observer.widgets(&game).values.at(key); };
+    observer.beforeTick(game);
+    observer.afterTick(game);
+    require(std::get<double>(read("efficiencyLevel")) == -1., "No rescues have an efficiency yet");
+    require(std::abs(std::get<double>(read("sunStability")) - 0.5) < 1e-6,
+            "Sun radius should map to the remaining stability");
+    require(std::get<int64_t>(read("nextExtra")) == 10000, "First extra-life milestone");
+    require(std::get<double>(read("firepower")) == 0.3, "Firepower should use actual shot cadence");
+    require(!std::get<bool>(read("minesVisible")) && std::get<int64_t>(read("minesShot")) == 0,
+            "Original mine award sequence starts at 1");
+
+    observer.beforeTick(game);
+    minotaur.dead = true;
+    game.presentationContact(game.presentationContext, ship, minotaur);
+    game.presentationContact(game.presentationContext, minotaur, sun);
+    ++game.lives[0]; // An extra life and a death can occur in the same frame.
+    game.loseShip(0);
+    game.minesHit = 2;
+    observer.afterTick(game);
+    const double efficiency =
+        double(collectible::pointsAt(game, 0.25f)) / collectible::pointsAt(game, 0.f);
+    require(std::get<double>(read("efficiencyLevel")) == efficiency &&
+                std::get<double>(read("efficiencyGame")) == efficiency,
+            "A Solar rescue must contribute actual and reference points");
+    require(std::get<int64_t>(read("livesLost")) == 1 &&
+                std::get<int64_t>(read("minotaursLost")) == 1 && game.lives[0] == 3,
+            "Actual loss events must survive net-zero life changes");
+    require(std::get<bool>(read("minesVisible")) && std::get<int64_t>(read("minesShot")) == 1,
+            "Mine counter must reflect actual shots");
+
+    game.state = 6;
+    observer.beforeTick(game);
+    game.state = 4;
+    game.minesHit = 1;
+    observer.afterTick(game);
+    require(std::get<double>(read("efficiencyLevel")) == -1. &&
+                std::get<double>(read("efficiencyGame")) == efficiency &&
+                !std::get<bool>(read("minesVisible")),
+            "New level must clear only level-scoped widget state");
+    game.sunOn = false;
+    game.mode = 1;
+    game.survival = true;
+    require(!std::get<bool>(read("solar")) && !std::get<bool>(read("nextExtraVisible")) &&
+                std::get<int64_t>(read("highScore")) == game.hs.entry(3, 0).score,
+            "Deep Space Survival must use its own leaderboard and hide extra lives");
+    game.subMode = 1;
+    require(!observer.widgets(&game).gameplay, "Tanks should not show ship widgets");
+    game.players = nullptr;
+    game.sun = nullptr;
+}
+
 int main(int argc, char **argv) {
     try {
         if (argc != 2)
@@ -473,6 +552,7 @@ int main(int argc, char **argv) {
         gravity(argv[1]);
         sunGrowth(argv[1]);
         presentation();
+        widgetPresentation();
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n';
         return 1;

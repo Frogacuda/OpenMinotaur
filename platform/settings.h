@@ -9,7 +9,8 @@
 // aspect (original | ipad | fill), internal_scale (1-6 | native),
 // orientation (bestfit/native | landscape | portrait), screen_mode
 // (hires | smooth | sharp | scanlines | crt | crt2), backdrop (colour | image | neon | widgets |
-// plasma). The saved neon token selects LiveSynth; crt selects CRT 2, crt2 selects CRT 1. Shell
+// plasma), live_widgets (on | off). The saved neon token selects LiveSynth; crt selects CRT 2,
+// crt2 selects CRT 1. Shell
 // keys: window_mode, fullscreen_resolution, wallpaper (0-3). Input keys: deadzone, disable_touch,
 // rotate_controls, mapping1 through mapping4, tilt_neutral (sensor-native gravity vector).
 #pragma once
@@ -25,7 +26,7 @@ enum class AspectMode { Original, IPad, Fill };
 // Historical tokens: Landscape = Horizontal, BestFit/Auto = Native.
 enum class Orientation { Auto, BestFit, Landscape, Portrait, PortraitRight };
 // What fills the letterbox bars around the game.
-enum class Backdrop { Colour, Image, Neon, Widgets, Plasma };
+enum class Backdrop { Colour, Image, Neon, Widgets, Plasma, Minorola };
 enum class ScreenMode { HiRes, Smooth, Sharp, Scanlines, CRT, CRT2 };
 inline bool isCRT(ScreenMode mode) {
     return mode == ScreenMode::CRT || mode == ScreenMode::CRT2;
@@ -56,6 +57,7 @@ class Settings {
         nativeOrientationDefault_ = native;
     }
     bool neonHighQuality(const std::string &game) const;
+    bool liveWidgetsEnabled(const std::string &game) const;
     bool load(const std::string &path);
     bool save() const;
 

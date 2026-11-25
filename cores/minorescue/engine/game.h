@@ -292,7 +292,10 @@ class spaceWars : public controlBlock {
     void runStarField();
     void randomSaucer();
     void randomMinotaur();
+    static int64_t nextExtraLife(int score);
     void score(int points, int player);
+    void loseShip(int player);
+    void (*presentationShipLost)(void *, const spaceWars &) = nullptr;
     void achieveGoal(int n);
     int doStartBonus();
     void showScore(sprite *spr, vec2d size);

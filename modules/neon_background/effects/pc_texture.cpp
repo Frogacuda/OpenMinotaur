@@ -10,8 +10,12 @@ struct Random {
         state = state * 214013u + 2531011u;
         return (state >> 16) & 32767;
     }
-    float fraction() { return float(next()) * (1.f / 32768.f); }
-    int position(int extent) { return int(std::nearbyint(fraction() * extent)); }
+    float fraction() {
+        return float(next()) * (1.f / 32768.f);
+    }
+    int position(int extent) {
+        return int(std::nearbyint(fraction() * extent));
+    }
 };
 RootPixels cone(float scale) {
     RootPixels result{};

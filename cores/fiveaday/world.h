@@ -330,6 +330,7 @@ class World {
     int bonusRemaining = 0, bonusTicks = 30, bonusInterval = 30, ordinaryFruitTotal = 0,
         powerFruitTotal = 0;
     int lifetimePlanes = 0, lifetimeFruit = 0, lifetimeMinotaurs = 0;
+    int minotaursLost = 0, damageTaken = 0;
     std::vector<int> bonusFrames;
     size_t bonusCursor = 0;
     std::array<Message, 10> messages{};
@@ -354,6 +355,7 @@ class World {
     void start(int day = 0, int startingLives = 3, int startingScore = 0,
                bool demonstration = false);
     void newLevel();
+    int formationKillPoints() const;
     void beginBonus();
     void deliverFruitSet();
     void tick(const Input &);

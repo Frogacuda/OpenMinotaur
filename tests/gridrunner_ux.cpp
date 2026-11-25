@@ -36,14 +36,18 @@ struct GridrunnerUxChecks {
             bytes.assign(std::istreambuf_iterator<char>(file), {});
             return true;
         }
-        std::string saveDir() const override { return saves.generic_string() + "/"; }
+        std::string saveDir() const override {
+            return saves.generic_string() + "/";
+        }
         void log(const char *, ...) override {}
         std::string adaptShader(const std::string &text, int stage) const override {
             return display->adaptShader(text, stage);
         }
         void lockAudio() override {}
         void unlockAudio() override {}
-        void requestQuit() override { quit = true; }
+        void requestQuit() override {
+            quit = true;
+        }
         bool presentStartupFrame() override {
             display->present();
             return true;
@@ -226,10 +230,35 @@ struct GridrunnerUxChecks {
             auto before = core.presentationState();
             expect(before.gameplay, "Gridrunner presentation active");
             auto widgets = core.widgetPresentationState();
-            expect(widgets.gameplay && std::get<int64_t>(widgets.values.at("widgets.nextCheckpoint")) == 5 &&
-                   !widgets.values.count("widgets.checkpointScore"),
+            expect(widgets.gameplay &&
+                       std::get<int64_t>(widgets.values.at("widgets.nextCheckpoint")) == 5 &&
+                       !widgets.values.count("widgets.checkpointScore"),
                    "Next checkpoint does not borrow the previous checkpoint score");
             auto &ac = core.native_->ac;
+            const auto originalAchievements = core.achievementRecord_;
+            core.achievementRecord_.unlocked = 0;
+            ac.swarmerKills = 49;
+            ac.deflectionCount = 500;
+            auto progress = core.widgetPresentationState();
+            expect(std::get<int64_t>(progress.values.at("widgets.swarmers")) == 49 &&
+                       std::get<int64_t>(progress.values.at("widgets.deflections")) == 500 &&
+                       !std::get<bool>(progress.values.at("widgets.swarmers.completed")) &&
+                       !std::get<bool>(progress.values.at("widgets.deflections.completed")),
+                   "Unfinished achievement widgets show live progress");
+            core.achievementRecord_.record(9);
+            core.achievementRecord_.record(2);
+            ac.swarmerKills = 0;
+            ac.deflectionCount = 123456;
+            ac.gridsWithoutDeath = 7;
+            progress = core.widgetPresentationState();
+            expect(std::get<int64_t>(progress.values.at("widgets.swarmers")) == 50 &&
+                       std::get<int64_t>(progress.values.at("widgets.deflections")) == 501 &&
+                       std::get<bool>(progress.values.at("widgets.swarmers.completed")) &&
+                       std::get<bool>(progress.values.at("widgets.deflections.completed")) &&
+                       std::get<int64_t>(progress.values.at("widgets.deathless")) == 7,
+                   "Lifetime unlocks pin their progress and preserve the current streak");
+            core.achievementRecord_ = originalAchievements;
+            ac.deflectionCount = ac.gridsWithoutDeath = 0;
             ac.powers[6] = 40;
             ac.powers[1] = 40;
             ac.powers[4] = 40;
@@ -255,8 +284,8 @@ struct GridrunnerUxChecks {
             }
             const auto collected = core.widgetPresentationState();
             const auto &log = collected.collections.at("widgets.pickups");
-            expect(log.size() == 5 && log[0].value == 7 && log[3].value == 6 &&
-                       log[4].value == 6 && log[3].id != log[4].id,
+            expect(log.size() == 5 && log[0].value == 7 && log[3].value == 6 && log[4].value == 6 &&
+                       log[3].id != log[4].id,
                    "Pickup log retains the latest five individual collections");
             ship->state = Ship::State::Departing;
             ship->arrival = 0;
@@ -264,7 +293,8 @@ struct GridrunnerUxChecks {
             frame();
             ac.lives = lives; // Mimic a later life gain without resetting the run.
             frame();
-            expect(std::get<int64_t>(core.widgetPresentationState().values.at("widgets.shipsLost")) == 1,
+            expect(std::get<int64_t>(
+                       core.widgetPresentationState().values.at("widgets.shipsLost")) == 1,
                    "Ships Lost counts life decreases and survives a later life gain");
             ac.powers[6] = ac.powers[1] = ac.powers[4] = 0;
         }

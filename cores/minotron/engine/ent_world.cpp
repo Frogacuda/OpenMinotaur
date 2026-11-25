@@ -379,6 +379,12 @@ void powerup::hitBy(entity *by) {
         return;
     theGame *g = game;
     dead = true;
+    for (int i = theGame::pickupHistorySize - 1; i > 0; --i)
+        g->pickupHistory[i] = g->pickupHistory[i - 1];
+    g->pickupHistory[0] = kind;
+    if (g->pickupHistoryCount < theGame::pickupHistorySize)
+        ++g->pickupHistoryCount;
+    ++g->pickupsThisLevel;
     if (g->beastLoveFrames < 1)
         g->beastAttractionFrames += g->extraLove;
     else

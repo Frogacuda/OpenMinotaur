@@ -812,6 +812,7 @@ void WavingMinotaur::run() { // 0x76b68
                 G.byte398 = true;
             }
             G.minosSaved++;
+            G.cavernRescues++;
             if (0x18 < G.minosSaved && !G.muted && G.awardEligibilityGate < 2 &&
                 !(G.goalBits & 0x40))
                 G.achieve(0x40, 10, "'MINO MASTER'");

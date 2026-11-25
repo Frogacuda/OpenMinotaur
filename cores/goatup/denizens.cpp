@@ -29,6 +29,38 @@ void DenizenContext::award(int goal) {
     play(13, 13);
     required(achievement)(goal);
 }
+void DenizenContext::activateEffect(WidgetEffect effect) {
+    effectOrder[size_t(effect)] = ++effectSequence;
+}
+
+void DenizenContext::grantProtection(int ticks) {
+    if (hazardGrace < ticks) {
+        hazardGrace = hazardDuration = ticks;
+        activateEffect(WidgetEffect::Protection);
+    }
+}
+
+constexpr int SlowDownNoticeTicks = 240;
+
+double DenizenContext::slowDownMeter() const {
+    // Every pickup stays visible for the native notice window, even if the
+    // halved speed is still above the current target or the climb has ended.
+    return std::max(double(slowDownRemaining), double(slowDownNoticeTicks) / SlowDownNoticeTicks);
+}
+
+void DenizenContext::updateSlowDownMeter() {
+    if (slowDownNoticeTicks > 0)
+        --slowDownNoticeTicks;
+    if (slowDownRemaining == 0)
+        return;
+    if (game.returning || game.summitVisited || game.diveRequested ||
+        game.climbSpeed >= game.targetClimbSpeed) {
+        slowDownRemaining = 0;
+        return;
+    }
+    slowDownRemaining =
+        std::min(slowDownRemaining, (game.targetClimbSpeed - game.climbSpeed) / slowDownDeficit);
+}
 void DenizenContext::showScore(int points, Vec2 p, float vx, float vy, float radius) {
     if (!game.gameOver)
         required(popup)(points, p, vx, vy, radius);
@@ -660,6 +692,8 @@ struct Denizens::Actor {
         if (hitKind != 1)
             return;
         dead = true;
+        if (!c.game.pregnant)
+            c.activateEffect(WidgetEffect::Gestation);
         c.game.pregnant = true;
         if (!c.game.demo) {
             c.play(15);
@@ -813,8 +847,7 @@ struct Denizens::Actor {
         state = 1;
         floating = true;
         c.hazardFlash = 0;
-        if (c.hazardGrace < 350)
-            c.hazardGrace = 350;
+        c.grantProtection(350);
         c.hazardWarning = 262;
         if (!c.game.demo)
             c.play(24);
@@ -825,6 +858,7 @@ struct Denizens::Actor {
         if (draw.frame == 83) {
             c.game.flightFlash = 0;
             c.game.flightTicks = 1200;
+            c.activateEffect(WidgetEffect::Flight);
             c.game.flightWarning = 900;
             const auto noise = c.random.next();
             if (!c.game.demo)
@@ -835,14 +869,18 @@ struct Denizens::Actor {
                 c.play(44);
             c.poison = 1;
             c.hazardFlash = 0;
-            if (c.hazardGrace < 500)
-                c.hazardGrace = 500;
+            c.grantProtection(500);
+            c.activateEffect(WidgetEffect::Mushroom);
             c.hazardWarning = 375;
             required(c.status)(2, 500);
         } else if (draw.frame == 82) {
             c.game.climbSpeed = float(c.game.climbSpeed * .5f);
+            c.slowDownDeficit = c.game.targetClimbSpeed - c.game.climbSpeed;
+            c.slowDownRemaining = c.slowDownDeficit > 0 ? 1.f : 0.f;
+            c.slowDownNoticeTicks = SlowDownNoticeTicks;
+            c.activateEffect(WidgetEffect::SlowDown);
             c.game.pickupSpeedThreshold = float(double(c.game.pickupSpeedThreshold) + .0003);
-            required(c.status)(0, 240);
+            required(c.status)(0, SlowDownNoticeTicks);
             const auto noise = c.random.next();
             if (!c.game.demo)
                 c.play(int((noise & 1023) % 6) + 6, 13);
@@ -950,8 +988,7 @@ struct Denizens::Actor {
             break;
         case PlatformBirth::Kind::Egg:
             c.hazardFlash = 0;
-            if (c.hazardGrace < 200)
-                c.hazardGrace = 200;
+            c.grantProtection(200);
             c.hazardWarning = 150;
             reward(p, normal * 100, 0xff8080ffu, 0x80080fffu, .004);
             if (!c.game.demo)
@@ -965,8 +1002,7 @@ struct Denizens::Actor {
         knocked = true;
     }
     void hitCat() {
-        if (c.hazardGrace < 440)
-            c.hazardGrace = 440;
+        c.grantProtection(440);
         c.hazardWarning = 330;
         c.hazardFlash = 0;
         PlatformBirth flying{PlatformBirth::Kind::FlyingCat, nullptr, 0, 181};

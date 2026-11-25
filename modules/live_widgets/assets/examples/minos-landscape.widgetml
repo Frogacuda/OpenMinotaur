@@ -1,0 +1,2328 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "templates": {
+    "frameBeam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [
+        [0, 0],
+        [0, 16]
+      ],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "bezelFrame": {
+      "kind": "group",
+      "inputs": {
+        "width": 304,
+        "height": 88
+      },
+      "size": [
+        [
+          "get",
+          "width"
+        ],
+        [
+          "get",
+          "height"
+        ]
+      ],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "width"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frameBeam",
+          "x": [
+            "-",
+            [
+              "get",
+              "width"
+            ],
+            2
+          ],
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "height"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frameBeam",
+          "x": 2,
+          "y": [
+            "-",
+            [
+              "get",
+              "height"
+            ],
+            2
+          ],
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "width"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                [
+                  "get",
+                  "height"
+                ],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0,
+          "lineWidth": 2.4,
+          "color": [0.37, 0.88, 1, 0.76]
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "portrait-top",
+          "kind": "group",
+          "size": [956, 200],
+          "x": [
+            "/",
+            [
+              "-",
+              1000,
+              [
+                "*",
+                956,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ],
+            2
+          ],
+          "y": [
+            "+",
+            [
+              "coalesce",
+              [
+                "read",
+                "portraitInset"
+              ],
+              0
+            ],
+            [
+              "*",
+              10,
+              [
+                "coalesce",
+                [
+                  "read",
+                  "railScale"
+                ],
+                1
+              ]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-top-left"
+          },
+          "scale": [
+            "coalesce",
+            [
+              "read",
+              "railScale"
+            ],
+            1
+          ],
+          "children": [
+            {
+              "id": "high-score",
+              "kind": "group",
+              "y": 0,
+              "size": [470, 78],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 78
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "High Score",
+                  "x": 16,
+                  "y": 8,
+                  "size": [438, 28],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "score",
+                  "kind": "text",
+                  "text": "{score}",
+                  "x": 16,
+                  "y": 34,
+                  "size": [438, 38],
+                  "font": "neon-hud",
+                  "fontSize": 33,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "score": [
+                  "coalesce",
+                  [
+                    "read",
+                    "highScore"
+                  ],
+                  "742,880"
+                ]
+              },
+              "x": 0
+            },
+            {
+              "id": "cavern-best",
+              "kind": "group",
+              "y": 88,
+              "size": [470, 112],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 112
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Cavern Best",
+                  "x": 16,
+                  "y": 8,
+                  "size": [438, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 22,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "rule-43",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 36,
+                  "size": [440, 2],
+                  "points": [
+                    [0, 0],
+                    [438, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "score-label",
+                  "kind": "text",
+                  "text": "Score",
+                  "x": 16,
+                  "y": 48,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "score-value",
+                  "kind": "text",
+                  "text": "{score}",
+                  "x": 229,
+                  "y": 46,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "lives-label",
+                  "kind": "text",
+                  "text": "Lives",
+                  "x": 16,
+                  "y": 77,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "lives-value",
+                  "kind": "text",
+                  "text": "{lives}",
+                  "x": 229,
+                  "y": 75,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "score": [
+                  "coalesce",
+                  [
+                    "read",
+                    "cavernBest"
+                  ],
+                  "183,450"
+                ],
+                "lives": [
+                  "coalesce",
+                  [
+                    "read",
+                    "cavernBestLives"
+                  ],
+                  3
+                ]
+              },
+              "x": 0
+            },
+            {
+              "id": "multiplier",
+              "kind": "group",
+              "y": 0,
+              "size": [474, 105],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 474,
+                    "height": 105
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Score Multiplier",
+                  "x": 16,
+                  "y": 8,
+                  "size": [442, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 22,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "total-pane",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 32,
+                  "size": [64, 64],
+                  "points": [
+                    [0, 0],
+                    [63, 0],
+                    [63, 63],
+                    [0, 63]
+                  ],
+                  "closed": true,
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "total",
+                  "kind": "text",
+                  "text": "{total}",
+                  "x": 16,
+                  "y": 48,
+                  "size": [63, 35],
+                  "font": "neon-hud",
+                  "fontSize": [
+                    "if",
+                    [
+                      "<",
+                      [
+                        "coalesce",
+                        [
+                          "read",
+                          "multiplierSize"
+                        ],
+                        30
+                      ],
+                      30
+                    ],
+                    23,
+                    27
+                  ],
+                  "lineWidth": 2.1,
+                  "align": "center",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "rescue-label",
+                  "kind": "text",
+                  "text": "Rescues",
+                  "x": 98,
+                  "y": 40,
+                  "size": [244, 25],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "rescue-value",
+                  "kind": "text",
+                  "text": "{rescues}",
+                  "x": 349,
+                  "y": 38,
+                  "size": [109, 28],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "ship-label",
+                  "kind": "text",
+                  "text": "{shipName}",
+                  "x": 98,
+                  "y": 69,
+                  "size": [244, 25],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "ship-value",
+                  "kind": "text",
+                  "text": "{ship}",
+                  "x": 349,
+                  "y": 67,
+                  "size": [109, 28],
+                  "font": "neon-hud",
+                  "fontSize": 23,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "total": [
+                  "coalesce",
+                  [
+                    "read",
+                    "multiplier"
+                  ],
+                  "4x"
+                ],
+                "rescues": [
+                  "coalesce",
+                  [
+                    "read",
+                    "minoBonus"
+                  ],
+                  3
+                ],
+                "shipName": [
+                  "coalesce",
+                  [
+                    "read",
+                    "shipName"
+                  ],
+                  "Novice"
+                ],
+                "ship": [
+                  "coalesce",
+                  [
+                    "read",
+                    "shipBonus"
+                  ],
+                  1
+                ]
+              },
+              "x": 482
+            },
+            {
+              "id": "rescues",
+              "kind": "group",
+              "y": 111,
+              "size": [474, 89],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 474,
+                    "height": 89
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Rescues",
+                  "x": 16,
+                  "y": 6,
+                  "size": [442, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "rule-43",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 30,
+                  "size": [444, 2],
+                  "points": [
+                    [0, 0],
+                    [442, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "cavern-label",
+                  "kind": "text",
+                  "text": "Cavern",
+                  "x": 16,
+                  "y": 39,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "cavern-value",
+                  "kind": "text",
+                  "text": "{cavern}",
+                  "x": 233,
+                  "y": 37,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "game-label",
+                  "kind": "text",
+                  "text": "Game",
+                  "x": 16,
+                  "y": 65,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "game-value",
+                  "kind": "text",
+                  "text": "{game}",
+                  "x": 233,
+                  "y": 63,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "cavern": [
+                  "coalesce",
+                  [
+                    "read",
+                    "cavernRescues"
+                  ],
+                  "3 / 10"
+                ],
+                "game": [
+                  "coalesce",
+                  [
+                    "read",
+                    "gameRescues"
+                  ],
+                  18
+                ]
+              },
+              "x": 482
+            }
+          ]
+        },
+        {
+          "id": "portrait-bottom",
+          "kind": "group",
+          "size": [956, 208],
+          "x": [
+            "/",
+            [
+              "-",
+              1000,
+              [
+                "*",
+                956,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ],
+            2
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "coalesce",
+                [
+                  "read",
+                  "portraitInset"
+                ],
+                0
+              ],
+              [
+                "*",
+                215,
+                [
+                  "coalesce",
+                  [
+                    "read",
+                    "railScale"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-bottom-left"
+          },
+          "scale": [
+            "coalesce",
+            [
+              "read",
+              "railScale"
+            ],
+            1
+          ],
+          "children": [
+            {
+              "id": "clean-run",
+              "kind": "group",
+              "y": 0,
+              "size": [470, 43],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 43
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Clean Run",
+                  "x": 16,
+                  "y": 9,
+                  "size": [438, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "check",
+                  "kind": "vector",
+                  "x": 423,
+                  "y": 9,
+                  "size": [30, 25],
+                  "points": [
+                    [0, 11],
+                    [8, 20],
+                    [26, 1]
+                  ],
+                  "lineWidth": 2.7,
+                  "color": [0.54, 0.91, 0.63, 1]
+                }
+              ],
+              "visible": [
+                "coalesce",
+                [
+                  "read",
+                  "cleanRun"
+                ],
+                true
+              ],
+              "x": 0
+            },
+            {
+              "id": "level-bonus",
+              "kind": "group",
+              "y": 53,
+              "size": [470, 155],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 470,
+                    "height": 155
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Level Bonus",
+                  "x": 16,
+                  "y": 7,
+                  "size": [438, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 22,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "total",
+                  "kind": "text",
+                  "text": "{total}",
+                  "x": 16,
+                  "y": 31,
+                  "size": [438, 31],
+                  "font": "neon-hud",
+                  "fontSize": 26,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "rule-76",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 60,
+                  "size": [440, 2],
+                  "points": [
+                    [0, 0],
+                    [438, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "rescue-label",
+                  "kind": "text",
+                  "text": "Rescue",
+                  "x": 16,
+                  "y": 70,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "rescue-value",
+                  "kind": "text",
+                  "text": "{rescue}",
+                  "x": 229,
+                  "y": 68,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "fuel-label",
+                  "kind": "text",
+                  "text": "Fuel",
+                  "x": 16,
+                  "y": 97,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "fuel-value",
+                  "kind": "text",
+                  "text": "{fuel}",
+                  "x": 229,
+                  "y": 95,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "pace-label",
+                  "kind": "text",
+                  "text": "Time",
+                  "x": 16,
+                  "y": 124,
+                  "size": [205, 24],
+                  "font": "neon-hud",
+                  "fontSize": 19,
+                  "lineWidth": 2.1,
+                  "align": "left",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "pace-value",
+                  "kind": "text",
+                  "text": "{pace}",
+                  "x": 229,
+                  "y": 122,
+                  "size": [225, 26],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "total": [
+                  "coalesce",
+                  [
+                    "read",
+                    "levelBonus"
+                  ],
+                  "36,733"
+                ],
+                "rescue": [
+                  "coalesce",
+                  [
+                    "read",
+                    "rescueBonus"
+                  ],
+                  "4,200"
+                ],
+                "fuel": [
+                  "coalesce",
+                  [
+                    "read",
+                    "fuelBonus"
+                  ],
+                  "16,400"
+                ],
+                "pace": [
+                  "coalesce",
+                  [
+                    "read",
+                    "timeBonus"
+                  ],
+                  "16,133"
+                ]
+              },
+              "x": 0
+            },
+            {
+              "id": "landing",
+              "kind": "group",
+              "y": 0,
+              "size": [474, 91],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 474,
+                    "height": 91
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Landing",
+                  "x": 16,
+                  "y": 6,
+                  "size": [442, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "rule-43",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 31,
+                  "size": [444, 2],
+                  "points": [
+                    [0, 0],
+                    [442, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "pane-divider",
+                  "kind": "vector",
+                  "x": 237,
+                  "y": 39,
+                  "size": [2, 41],
+                  "points": [
+                    [0, 0],
+                    [0, 39]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "grade",
+                  "kind": "text",
+                  "text": "{grade}",
+                  "x": 16,
+                  "y": 37,
+                  "size": [211, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "align": "center",
+                  "color": [0.38, 0.9, 0.96, 1]
+                },
+                {
+                  "id": "streak",
+                  "kind": "text",
+                  "text": "{streak}",
+                  "x": 247,
+                  "y": 37,
+                  "size": [211, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "align": "center",
+                  "color": [0.38, 0.9, 0.96, 1]
+                },
+                {
+                  "id": "grade-label",
+                  "kind": "text",
+                  "text": "Last Grade",
+                  "x": 16,
+                  "y": 67,
+                  "size": [211, 22],
+                  "font": "neon-hud",
+                  "fontSize": 17,
+                  "lineWidth": 2.1,
+                  "align": "center",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "streak-label",
+                  "kind": "text",
+                  "text": "S-Streak",
+                  "x": 247,
+                  "y": 67,
+                  "size": [211, 22],
+                  "font": "neon-hud",
+                  "fontSize": 17,
+                  "lineWidth": 2.1,
+                  "align": "center",
+                  "color": [0.96, 0.98, 1, 1]
+                }
+              ],
+              "inputs": {
+                "grade": [
+                  "coalesce",
+                  [
+                    "read",
+                    "landingGrade"
+                  ],
+                  "S"
+                ],
+                "streak": [
+                  "coalesce",
+                  [
+                    "read",
+                    "landingStreak"
+                  ],
+                  2
+                ]
+              },
+              "x": 482
+            },
+            {
+              "id": "mission",
+              "kind": "group",
+              "y": 101,
+              "size": [474, 107],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 474,
+                    "height": 107
+                  }
+                },
+                {
+                  "id": "heading",
+                  "kind": "text",
+                  "text": "Mission Time",
+                  "x": 16,
+                  "y": 10,
+                  "size": [235, 26],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [1, 0.88, 0.24, 1]
+                },
+                {
+                  "id": "clock",
+                  "kind": "text",
+                  "text": "{clock}",
+                  "x": 270,
+                  "y": 7,
+                  "size": [188, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [0.96, 0.98, 1, 1]
+                },
+                {
+                  "id": "rule-78",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 43,
+                  "size": [444, 2],
+                  "points": [
+                    [0, 0],
+                    [442, 0]
+                  ],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "par-label",
+                  "kind": "text",
+                  "text": "Par Time",
+                  "x": 16,
+                  "y": 53,
+                  "size": [235, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 20,
+                  "lineWidth": 2.55,
+                  "align": "left",
+                  "color": [
+                    "if",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "pastPar"
+                      ],
+                      false
+                    ],
+                    [1, 0.37, 0.42, 1],
+                    [1, 0.88, 0.24, 1]
+                  ]
+                },
+                {
+                  "id": "par",
+                  "kind": "text",
+                  "text": "{par}",
+                  "x": 270,
+                  "y": 49,
+                  "size": [188, 30],
+                  "font": "neon-hud",
+                  "fontSize": 25,
+                  "lineWidth": 2.1,
+                  "align": "right",
+                  "color": [
+                    "if",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "pastPar"
+                      ],
+                      false
+                    ],
+                    [1, 0.37, 0.42, 1],
+                    [0.96, 0.98, 1, 1]
+                  ]
+                },
+                {
+                  "id": "par-track",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 83,
+                  "size": [442, 10],
+                  "color": [
+                    "if",
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "pastPar"
+                      ],
+                      false
+                    ],
+                    [0.85, 0.16, 0.21, 0.48],
+                    [0.3, 0.4, 0.49, 0.45]
+                  ],
+                  "fill": 1
+                },
+                {
+                  "id": "par-fill",
+                  "kind": "rect",
+                  "x": 16,
+                  "y": 83,
+                  "size": [442, 10],
+                  "color": [0.55, 0.81, 1, 1],
+                  "fill": [
+                    "coalesce",
+                    [
+                      "read",
+                      "parRemaining"
+                    ],
+                    0.25333333333333335
+                  ]
+                }
+              ],
+              "inputs": {
+                "clock": [
+                  "coalesce",
+                  [
+                    "read",
+                    "missionTime"
+                  ],
+                  "0:56"
+                ],
+                "par": [
+                  "coalesce",
+                  [
+                    "read",
+                    "parTime"
+                  ],
+                  "1:15"
+                ]
+              },
+              "x": 482
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "minos-landscape",
+    "kind": "group",
+    "children": [
+      {
+        "id": "records",
+        "kind": "group",
+        "size": [410, 237],
+        "x": -24,
+        "y": -468,
+        "pivot": [1, 0],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "high-score",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 96],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 96
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "High Score",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "score",
+                "kind": "text",
+                "text": "{score}",
+                "x": 18,
+                "y": 44,
+                "size": [374, 42],
+                "font": "neon-hud",
+                "fontSize": 37,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "score": [
+                "coalesce",
+                [
+                  "read",
+                  "highScore"
+                ],
+                "742,880"
+              ]
+            }
+          },
+          {
+            "id": "cavern-best",
+            "kind": "group",
+            "y": 108,
+            "size": [410, 129],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 129
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Cavern Best",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "rule-43",
+                "kind": "vector",
+                "x": 18,
+                "y": 43,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "score-label",
+                "kind": "text",
+                "text": "Score",
+                "x": 18,
+                "y": 54,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "score-value",
+                "kind": "text",
+                "text": "{score}",
+                "x": 221,
+                "y": 53,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "lives-label",
+                "kind": "text",
+                "text": "Lives",
+                "x": 18,
+                "y": 88,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "lives-value",
+                "kind": "text",
+                "text": "{lives}",
+                "x": 221,
+                "y": 87,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "score": [
+                "coalesce",
+                [
+                  "read",
+                  "cavernBest"
+                ],
+                "183,450"
+              ],
+              "lives": [
+                "coalesce",
+                [
+                  "read",
+                  "cavernBestLives"
+                ],
+                3
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "scoring",
+        "kind": "group",
+        "size": [410, 393],
+        "x": 24,
+        "y": -468,
+        "pivot": [0, 0],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "multiplier",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 132],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 132
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Score Multiplier",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "total-pane",
+                "kind": "vector",
+                "x": 18,
+                "y": 42,
+                "size": [79, 79],
+                "points": [
+                  [0, 0],
+                  [78, 0],
+                  [78, 78],
+                  [0, 78]
+                ],
+                "closed": true,
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "total",
+                "kind": "text",
+                "text": "{total}",
+                "x": 18,
+                "y": 65,
+                "size": [78, 35],
+                "font": "neon-hud",
+                "fontSize": [
+                  "coalesce",
+                  [
+                    "read",
+                    "multiplierSize"
+                  ],
+                  30
+                ],
+                "lineWidth": 2.1,
+                "align": "center",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "rescue-label",
+                "kind": "text",
+                "text": "Rescues",
+                "x": 116,
+                "y": 50,
+                "size": [200, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "rescue-value",
+                "kind": "text",
+                "text": "{rescues}",
+                "x": 318,
+                "y": 48,
+                "size": [74, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "ship-label",
+                "kind": "text",
+                "text": "{shipName}",
+                "x": 116,
+                "y": 90,
+                "size": [200, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "ship-value",
+                "kind": "text",
+                "text": "{ship}",
+                "x": 318,
+                "y": 88,
+                "size": [74, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "total": [
+                "coalesce",
+                [
+                  "read",
+                  "multiplier"
+                ],
+                "4x"
+              ],
+              "rescues": [
+                "coalesce",
+                [
+                  "read",
+                  "minoBonus"
+                ],
+                3
+              ],
+              "shipName": [
+                "coalesce",
+                [
+                  "read",
+                  "shipName"
+                ],
+                "Novice"
+              ],
+              "ship": [
+                "coalesce",
+                [
+                  "read",
+                  "shipBonus"
+                ],
+                1
+              ]
+            }
+          },
+          {
+            "id": "rescues",
+            "kind": "group",
+            "y": 144,
+            "size": [410, 123],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 123
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Rescues",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "rule-43",
+                "kind": "vector",
+                "x": 18,
+                "y": 43,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "cavern-label",
+                "kind": "text",
+                "text": "Cavern",
+                "x": 18,
+                "y": 54,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "cavern-value",
+                "kind": "text",
+                "text": "{cavern}",
+                "x": 221,
+                "y": 53,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "game-label",
+                "kind": "text",
+                "text": "Game",
+                "x": 18,
+                "y": 84,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "game-value",
+                "kind": "text",
+                "text": "{game}",
+                "x": 221,
+                "y": 83,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "cavern": [
+                "coalesce",
+                [
+                  "read",
+                  "cavernRescues"
+                ],
+                "3 / 10"
+              ],
+              "game": [
+                "coalesce",
+                [
+                  "read",
+                  "gameRescues"
+                ],
+                18
+              ]
+            }
+          },
+          {
+            "id": "landing",
+            "kind": "group",
+            "y": 279,
+            "size": [410, 114],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 114
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Landing",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "rule-43",
+                "kind": "vector",
+                "x": 18,
+                "y": 43,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "pane-divider",
+                "kind": "vector",
+                "x": 205,
+                "y": 53,
+                "size": [2, 46],
+                "points": [
+                  [0, 0],
+                  [0, 44]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "grade",
+                "kind": "text",
+                "text": "{grade}",
+                "x": 18,
+                "y": 50,
+                "size": [177, 32],
+                "font": "neon-hud",
+                "fontSize": 27,
+                "lineWidth": 2.1,
+                "align": "center",
+                "color": [0.38, 0.9, 0.96, 1]
+              },
+              {
+                "id": "streak",
+                "kind": "text",
+                "text": "{streak}",
+                "x": 215,
+                "y": 50,
+                "size": [177, 32],
+                "font": "neon-hud",
+                "fontSize": 27,
+                "lineWidth": 2.1,
+                "align": "center",
+                "color": [0.38, 0.9, 0.96, 1]
+              },
+              {
+                "id": "grade-label",
+                "kind": "text",
+                "text": "Last Grade",
+                "x": 18,
+                "y": 84,
+                "size": [177, 22],
+                "font": "neon-hud",
+                "fontSize": 17,
+                "lineWidth": 2.1,
+                "align": "center",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "streak-label",
+                "kind": "text",
+                "text": "S-Streak",
+                "x": 215,
+                "y": 84,
+                "size": [177, 22],
+                "font": "neon-hud",
+                "fontSize": 17,
+                "lineWidth": 2.1,
+                "align": "center",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "grade": [
+                "coalesce",
+                [
+                  "read",
+                  "landingGrade"
+                ],
+                "S"
+              ],
+              "streak": [
+                "coalesce",
+                [
+                  "read",
+                  "landingStreak"
+                ],
+                2
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "bonuses",
+        "kind": "group",
+        "size": [410, 267],
+        "x": -24,
+        "y": 468,
+        "pivot": [1, 1],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "clean-run",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 51],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 51
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Clean Run",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "check",
+                "kind": "vector",
+                "x": 361,
+                "y": 14,
+                "size": [30, 25],
+                "points": [
+                  [0, 11],
+                  [8, 20],
+                  [26, 1]
+                ],
+                "lineWidth": 2.7,
+                "color": [0.54, 0.91, 0.63, 1]
+              }
+            ],
+            "visible": [
+              "coalesce",
+              [
+                "read",
+                "cleanRun"
+              ],
+              true
+            ]
+          },
+          {
+            "id": "level-bonus",
+            "kind": "group",
+            "y": 63,
+            "size": [410, 204],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 204
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Level Bonus",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "total",
+                "kind": "text",
+                "text": "{total}",
+                "x": 18,
+                "y": 39,
+                "size": [374, 34],
+                "font": "neon-hud",
+                "fontSize": 29,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "rule-76",
+                "kind": "vector",
+                "x": 18,
+                "y": 76,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "rescue-label",
+                "kind": "text",
+                "text": "Rescue",
+                "x": 18,
+                "y": 90,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "rescue-value",
+                "kind": "text",
+                "text": "{rescue}",
+                "x": 221,
+                "y": 89,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "fuel-label",
+                "kind": "text",
+                "text": "Fuel",
+                "x": 18,
+                "y": 124,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "fuel-value",
+                "kind": "text",
+                "text": "{fuel}",
+                "x": 221,
+                "y": 123,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "pace-label",
+                "kind": "text",
+                "text": "Time",
+                "x": 18,
+                "y": 158,
+                "size": [251, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "left",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "pace-value",
+                "kind": "text",
+                "text": "{pace}",
+                "x": 221,
+                "y": 157,
+                "size": [171, 28],
+                "font": "neon-hud",
+                "fontSize": 23,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              }
+            ],
+            "inputs": {
+              "total": [
+                "coalesce",
+                [
+                  "read",
+                  "levelBonus"
+                ],
+                "36,733"
+              ],
+              "rescue": [
+                "coalesce",
+                [
+                  "read",
+                  "rescueBonus"
+                ],
+                "4,200"
+              ],
+              "fuel": [
+                "coalesce",
+                [
+                  "read",
+                  "fuelBonus"
+                ],
+                "16,400"
+              ],
+              "pace": [
+                "coalesce",
+                [
+                  "read",
+                  "timeBonus"
+                ],
+                "16,133"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "mission-progress",
+        "kind": "group",
+        "size": [410, 258],
+        "x": 24,
+        "y": 468,
+        "pivot": [0, 1],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "scale": [
+          "coalesce",
+          [
+            "read",
+            "railScale"
+          ],
+          1
+        ],
+        "children": [
+          {
+            "id": "cavern-progress",
+            "kind": "group",
+            "y": 0,
+            "size": [410, 83],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 83
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Cavern Progress",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "leg",
+                "kind": "text",
+                "text": "{leg}",
+                "x": 260,
+                "y": 47,
+                "size": [132, 24],
+                "font": "neon-hud",
+                "fontSize": 19,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.55, 0.81, 1, 1]
+              },
+              {
+                "id": "depth-track",
+                "kind": "rect",
+                "x": 18,
+                "y": 56,
+                "size": [226, 7],
+                "color": [0.3, 0.4, 0.49, 0.45],
+                "fill": 1
+              },
+              {
+                "id": "depth-marker",
+                "kind": "rect",
+                "x": [
+                  "+",
+                  18,
+                  [
+                    "*",
+                    214,
+                    [
+                      "coalesce",
+                      [
+                        "read",
+                        "cavernDepth"
+                      ],
+                      0.61
+                    ]
+                  ]
+                ],
+                "y": 48,
+                "size": [12, 23],
+                "color": [0.55, 0.81, 1, 1],
+                "fill": 1
+              }
+            ],
+            "inputs": {
+              "leg": [
+                "coalesce",
+                [
+                  "read",
+                  "missionLeg"
+                ],
+                "Return"
+              ]
+            }
+          },
+          {
+            "id": "mission",
+            "kind": "group",
+            "y": 95,
+            "size": [410, 163],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 410,
+                  "height": 163
+                }
+              },
+              {
+                "id": "heading",
+                "kind": "text",
+                "text": "Mission Time",
+                "x": 18,
+                "y": 12,
+                "size": [374, 26],
+                "font": "vectrex-menu",
+                "fontSize": 21,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [1, 0.88, 0.24, 1]
+              },
+              {
+                "id": "clock",
+                "kind": "text",
+                "text": "{clock}",
+                "x": 18,
+                "y": 42,
+                "size": [374, 30],
+                "font": "neon-hud",
+                "fontSize": 25,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [0.96, 0.98, 1, 1]
+              },
+              {
+                "id": "rule-78",
+                "kind": "vector",
+                "x": 18,
+                "y": 78,
+                "size": [376, 2],
+                "points": [
+                  [0, 0],
+                  [374, 0]
+                ],
+                "lineWidth": 1.6,
+                "color": [0.42, 0.72, 0.82, 0.62]
+              },
+              {
+                "id": "par-label",
+                "kind": "text",
+                "text": "Par Time",
+                "x": 18,
+                "y": 92,
+                "size": [236, 25],
+                "font": "vectrex-menu",
+                "fontSize": 20,
+                "lineWidth": 2.55,
+                "align": "left",
+                "color": [
+                  "if",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "pastPar"
+                    ],
+                    false
+                  ],
+                  [1, 0.37, 0.42, 1],
+                  [1, 0.88, 0.24, 1]
+                ]
+              },
+              {
+                "id": "par",
+                "kind": "text",
+                "text": "{par}",
+                "x": 264,
+                "y": 89,
+                "size": [128, 30],
+                "font": "neon-hud",
+                "fontSize": 25,
+                "lineWidth": 2.1,
+                "align": "right",
+                "color": [
+                  "if",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "pastPar"
+                    ],
+                    false
+                  ],
+                  [1, 0.37, 0.42, 1],
+                  [0.96, 0.98, 1, 1]
+                ]
+              },
+              {
+                "id": "par-track",
+                "kind": "rect",
+                "x": 18,
+                "y": 134,
+                "size": [374, 10],
+                "color": [
+                  "if",
+                  [
+                    "coalesce",
+                    [
+                      "read",
+                      "pastPar"
+                    ],
+                    false
+                  ],
+                  [0.85, 0.16, 0.21, 0.48],
+                  [0.3, 0.4, 0.49, 0.45]
+                ],
+                "fill": 1
+              },
+              {
+                "id": "par-fill",
+                "kind": "rect",
+                "x": 18,
+                "y": 134,
+                "size": [374, 10],
+                "color": [0.55, 0.81, 1, 1],
+                "fill": [
+                  "coalesce",
+                  [
+                    "read",
+                    "parRemaining"
+                  ],
+                  0.25333333333333335
+                ]
+              }
+            ],
+            "inputs": {
+              "clock": [
+                "coalesce",
+                [
+                  "read",
+                  "missionTime"
+                ],
+                "0:56"
+              ],
+              "par": [
+                "coalesce",
+                [
+                  "read",
+                  "parTime"
+                ],
+                "1:15"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

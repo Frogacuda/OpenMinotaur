@@ -360,14 +360,17 @@ void StageFrontend::prepareDraws(StageRuntime &w) {
     }
     for (const auto &b : buttons_) {
         auto colour = neon::colour{1, 1, 1, b.alpha};
-        if (padUsed_ && (page != Page::Playing || paused) && navigation_.sel == b.action) {
+        const bool focused =
+            padUsed_ && (page != Page::Playing || paused) && navigation_.sel == b.action;
+        const bool activeReset = b.action == Reset && paused && w.lives > 0;
+        if (activeReset)
+            colour = (ticks_ & 16) ? neon::colour{1, 0, 112. / 255, b.alpha}
+                                   : neon::colour{1, 1, 0, b.alpha};
+        else if (focused) {
             colour = w.terrainPalette[0];
             colour.a = b.alpha;
         }
         float angle = 0;
-        if (b.action == Reset && paused && w.lives > 0)
-            colour = (ticks_ & 16) ? neon::colour{1, 0, 112. / 255, b.alpha}
-                                   : neon::colour{1, 1, 0, b.alpha};
         if (b.action == Reset && resetTicks_ > 0) {
             angle =
                 float(w.random.range(-.2617993878, .2617993878) * double(std::sin(float(ticks_))));
@@ -387,6 +390,21 @@ void StageFrontend::prepareDraws(StageRuntime &w) {
             continue;
         }
         if (b.alpha > .1) {
+            if (activeReset && focused) {
+                // Keep focus separate from Reset's two alternating sprite colors.
+                auto tint = w.terrainPalette[0];
+                tint.a = 1;
+                const double x = b.position.x, y = b.position.y;
+                const double halfWidth = std::abs(b.scale.x * b.radius) + .012;
+                const double halfHeight = std::abs(b.scale.y * b.radius) + .010;
+                constexpr double stroke = .004;
+                for (double side : {-1., 1.}) {
+                    foreground_.push_back(
+                        {{x, y + side * halfHeight}, {2 * halfWidth + stroke, stroke}, tint, 0, 2});
+                    foreground_.push_back(
+                        {{x + side * halfWidth, y}, {stroke, 2 * halfHeight}, tint, 0, 2});
+                }
+            }
             sprite(w, b.sprite, b.position, b.radius, colour, b.scale, double(angle));
             if (page == Page::Playing || b.action == Play || b.action == Previous ||
                 b.action == Next) {

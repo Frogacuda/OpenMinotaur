@@ -33,6 +33,52 @@ int main() {
     assert(!portraitLauncher(Orientation::Landscape, 720, 1280));
     for (auto orientation : {Orientation::Portrait, Orientation::PortraitRight})
         assert(portraitLauncher(orientation, 1280, 720));
+
+    DisplaySettings shell;
+    shell.orientation = Orientation::Auto;
+    shell.backdrop = Backdrop::Minorola;
+    shell.internalScale = 0;
+    const NativeFormat shellWide{640, 480, 4.f / 3, 4.f / 3};
+    const NativeFormat shellTall{480, 640, 3.f / 4, 3.f / 4};
+    for (auto [w, h] : {std::pair{1440, 1080}, std::pair{1080, 1440}}) {
+        const auto l = displayLayout(w, h, w > h ? shellWide : shellTall, shell);
+        assert(l.minorolaFrame.w == 0 && l.view.x == 0 && l.view.y == 0 && l.view.w == w &&
+               l.view.h == h);
+        const auto flightFrame = minorolaAround(l.view);
+        assert(flightFrame.x < 0 && flightFrame.y < 0 && flightFrame.w > w && flightFrame.h > h);
+    }
+    auto withoutBezel = shell;
+    withoutBezel.backdrop = Backdrop::Colour;
+    for (auto [w, h] : {std::pair{1441, 1080}, std::pair{1440, 960}, std::pair{1600, 1000},
+                        std::pair{1137, 743}, std::pair{1000, 1600}, std::pair{743, 1137}}) {
+        const auto format = w > h ? shellWide : shellTall;
+        const auto plain = displayLayout(w, h, format, withoutBezel);
+        const auto cropped = displayLayout(w, h, format, shell);
+        assert(cropped.view.x == plain.view.x && cropped.view.y == plain.view.y &&
+               cropped.view.w == plain.view.w && cropped.view.h == plain.view.h &&
+               cropped.width == plain.width && cropped.height == plain.height);
+        assert(cropped.minorolaFrame.w > w && cropped.minorolaFrame.h > h);
+        assert(cropped.minorolaTurns == (w > h ? 0 : 1));
+    }
+    const auto wideShell = displayLayout(1920, 1080, shellWide, shell);
+    assert(wideShell.minorolaFrame.w == 1920 && wideShell.minorolaFrame.h == 1080 &&
+           wideShell.minorolaTurns == 0 && wideShell.view.x == 280 && wideShell.view.y == 30 &&
+           wideShell.view.w == 1360 && wideShell.view.h == 1020);
+    const auto ultrawideShell = displayLayout(2560, 1080, shellWide, shell);
+    assert(ultrawideShell.minorolaFrame.x == 320 && ultrawideShell.minorolaFrame.w == 1920 &&
+           ultrawideShell.view.x == 600 && ultrawideShell.view.y == 30);
+    const auto tallShell = displayLayout(1080, 1920, shellTall, shell);
+    assert(tallShell.minorolaTurns == 1 && tallShell.view.x == 30 && tallShell.view.y == 280 &&
+           tallShell.view.w == 1020 && tallShell.view.h == 1360);
+    shell.orientation = Orientation::Portrait;
+    const auto cabinetShell = displayLayout(1920, 1080, shellTall, shell);
+    assert(cabinetShell.turns == 1 && cabinetShell.minorolaTurns == 2);
+    float sx, sy;
+    cabinetShell.windowToSurface(1640, 30, &sx, &sy);
+    assert(near(sx, 0) && near(sy, 0));
+    cabinetShell.windowToSurface(1760, 540, &sx, &sy);
+    assert(sy < 0);
+
     for (auto mode : {Orientation::Portrait, Orientation::PortraitRight}) {
         s.orientation = mode;
         auto gr = displayLayout(960, 720, portrait, s), mt = displayLayout(960, 720, landscape, s);

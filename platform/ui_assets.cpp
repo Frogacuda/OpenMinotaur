@@ -3,6 +3,9 @@
 #include <cstring>
 namespace mino::ui {
 namespace {
+const unsigned char kMinorolaBezel[] = {
+#include "baked_assets/platform/ui_assets/minorola_bezel.inc"
+};
 const unsigned char kFontPng[] = {
 #include "baked_assets/platform/ui_assets/kFontPng.inc"
 };
@@ -253,6 +256,9 @@ Image gameIcon(const char *id) {
 }
 Image fontAtlas() {
     return {kFontPng, sizeof kFontPng};
+}
+Image minorolaBezel() {
+    return {kMinorolaBezel, sizeof kMinorolaBezel};
 }
 const FontFace &fontFace(bool bold) {
     return bold ? kBold : kRegular;

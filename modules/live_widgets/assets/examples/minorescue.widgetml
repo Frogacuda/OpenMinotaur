@@ -1,0 +1,690 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "coordinates": {"shortEdge": 720},
+  "templates": {
+    "beam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [[0, 0], [0, 16]],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "frame": {
+      "kind": "group",
+      "inputs": {"w": 140, "h": 60},
+      "size": [["get", "w"], ["get", "h"]],
+      "children": [
+        {"id": "shadow", "kind": "rect", "color": [0, 0, 0, 0.35]},
+        {"id": "top", "use": "beam", "x": 2, "y": 2, "rotation": -90, "scale": [1, ["/", ["-", ["get", "w"], 4], 16]]},
+        {
+          "id": "right",
+          "use": "beam",
+          "x": ["-", ["get", "w"], 2],
+          "y": 2,
+          "rotation": 0,
+          "scale": [1, ["/", ["-", ["get", "h"], 4], 16]]
+        },
+        {
+          "id": "bottom",
+          "use": "beam",
+          "x": 2,
+          "y": ["-", ["get", "h"], 2],
+          "rotation": -90,
+          "scale": [1, ["/", ["-", ["get", "w"], 4], 16]]
+        },
+        {"id": "left", "use": "beam", "x": 2, "y": 2, "rotation": 0, "scale": [1, ["/", ["-", ["get", "h"], 4], 16]]}
+      ]
+    },
+    "score": {
+      "kind": "group",
+      "size": [["get", "w"], ["get", "h"]],
+      "inputs": {
+        "w": 140,
+        "h": 74,
+        "pad": 11,
+        "title": "",
+        "title2": "",
+        "headingSize": 11,
+        "headingY": 10,
+        "headingStep": 14,
+        "headingColor": [1, 0.89, 0.36, 1],
+        "score": {},
+        "tint": [0.96, 0.98, 1, 1],
+        "bodyTop": 12
+      },
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"w": ["get", "w"], "h": ["get", "h"]}},
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{title}",
+          "x": ["get", "pad"],
+          "y": ["get", "headingY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu"
+        },
+        {
+          "id": "subheading",
+          "kind": "text",
+          "text": "{title2}",
+          "x": ["get", "pad"],
+          "y": ["+", ["get", "headingY"], ["get", "headingStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu",
+          "visible": ["!=", ["get", "title2"], ""]
+        },
+        {
+          "id": "value",
+          "kind": "text",
+          "text": "{score.text}",
+          "x": ["get", "pad"],
+          "y": ["/", ["-", ["+", ["get", "h"], ["get", "bodyTop"]], ["get", "score.size"]], 2],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "score.size"],
+          "color": ["get", "tint"],
+          "align": "left",
+          "font": "neon-hud"
+        },
+        {
+          "id": "decimal",
+          "kind": "rect",
+          "visible": ["get", "score.decimal"],
+          "x": ["+", ["get", "pad"], ["*", ["get", "score.decimalColumn"], ["get", "score.size"]]],
+          "y": ["+", ["/", ["+", ["get", "h"], ["get", "bodyTop"]], 2], ["*", 0.34, ["get", "score.size"]]],
+          "size": [3.8, 3.8],
+          "color": [1, 0.95, 0.7, 1]
+        }
+      ]
+    },
+    "meter": {
+      "kind": "group",
+      "size": [["get", "w"], ["get", "h"]],
+      "inputs": {
+        "w": 140,
+        "h": 74,
+        "pad": 11,
+        "title": "",
+        "title2": "",
+        "headingSize": 11,
+        "headingY": 10,
+        "headingStep": 14,
+        "headingColor": [1, 0.89, 0.36, 1],
+        "fill": 0,
+        "tint": [0.48, 0.86, 1, 1],
+        "barY": 39,
+        "barHeight": 9,
+        "value": "",
+        "valueSize": 12,
+        "valueY": 10
+      },
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"w": ["get", "w"], "h": ["get", "h"]}},
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{title}",
+          "x": ["get", "pad"],
+          "y": ["get", "headingY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu"
+        },
+        {
+          "id": "subheading",
+          "kind": "text",
+          "text": "{title2}",
+          "x": ["get", "pad"],
+          "y": ["+", ["get", "headingY"], ["get", "headingStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu",
+          "visible": ["!=", ["get", "title2"], ""]
+        },
+        {
+          "id": "track",
+          "kind": "rect",
+          "x": ["get", "pad"],
+          "y": ["get", "barY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], ["get", "barHeight"]],
+          "color": [0.23, 0.29, 0.33, 0.45]
+        },
+        {
+          "id": "fill",
+          "kind": "rect",
+          "x": ["get", "pad"],
+          "y": ["get", "barY"],
+          "size": [["*", ["-", ["get", "w"], ["*", 2, ["get", "pad"]]], ["get", "fill"]], ["get", "barHeight"]],
+          "color": ["get", "tint"]
+        },
+        {
+          "id": "percent",
+          "kind": "text",
+          "text": "{value}",
+          "x": ["get", "pad"],
+          "y": ["get", "valueY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "valueSize"],
+          "color": ["get", "tint"],
+          "align": "right",
+          "font": "neon-hud",
+          "visible": ["!=", ["get", "value"], ""]
+        }
+      ]
+    },
+    "counter": {
+      "kind": "group",
+      "size": [["get", "w"], ["get", "h"]],
+      "inputs": {
+        "w": 140,
+        "h": 74,
+        "pad": 11,
+        "title": "",
+        "title2": "",
+        "headingSize": 11,
+        "headingY": 10,
+        "headingStep": 14,
+        "headingColor": [1, 0.89, 0.36, 1],
+        "value": "",
+        "valueSize": 20,
+        "valueY": 32
+      },
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"w": ["get", "w"], "h": ["get", "h"]}},
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{title}",
+          "x": ["get", "pad"],
+          "y": ["get", "headingY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu"
+        },
+        {
+          "id": "subheading",
+          "kind": "text",
+          "text": "{title2}",
+          "x": ["get", "pad"],
+          "y": ["+", ["get", "headingY"], ["get", "headingStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu",
+          "visible": ["!=", ["get", "title2"], ""]
+        },
+        {
+          "id": "count",
+          "kind": "text",
+          "text": "{value}",
+          "x": ["get", "pad"],
+          "y": ["get", "valueY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "valueSize"],
+          "color": [0.48, 0.86, 1, 1],
+          "align": "right",
+          "font": "neon-hud"
+        }
+      ]
+    },
+    "stats": {
+      "kind": "group",
+      "size": [["get", "w"], ["get", "h"]],
+      "inputs": {
+        "w": 140,
+        "h": 74,
+        "pad": 11,
+        "title": "",
+        "title2": "",
+        "headingSize": 11,
+        "headingY": 10,
+        "headingStep": 14,
+        "headingColor": [1, 0.89, 0.36, 1],
+        "level": "",
+        "game": "",
+        "rowY": 31,
+        "rowStep": 25,
+        "labelSize": 12,
+        "valueSize": 15
+      },
+      "children": [
+        {"id": "frame", "use": "frame", "inputs": {"w": ["get", "w"], "h": ["get", "h"]}},
+        {
+          "id": "heading",
+          "kind": "text",
+          "text": "{title}",
+          "x": ["get", "pad"],
+          "y": ["get", "headingY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu"
+        },
+        {
+          "id": "subheading",
+          "kind": "text",
+          "text": "{title2}",
+          "x": ["get", "pad"],
+          "y": ["+", ["get", "headingY"], ["get", "headingStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "headingSize"],
+          "color": ["get", "headingColor"],
+          "align": "left",
+          "font": "vectrex-menu",
+          "visible": ["!=", ["get", "title2"], ""]
+        },
+        {
+          "id": "level-label",
+          "kind": "text",
+          "text": "Level",
+          "x": ["get", "pad"],
+          "y": ["get", "rowY"],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "labelSize"],
+          "color": [0.96, 0.98, 1, 1],
+          "align": "left",
+          "font": "neon-hud"
+        },
+        {
+          "id": "level",
+          "kind": "text",
+          "text": "{level}",
+          "x": ["get", "pad"],
+          "y": ["-", ["get", "rowY"], 1],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "valueSize"],
+          "color": [0.48, 0.86, 1, 1],
+          "align": "right",
+          "font": "neon-hud"
+        },
+        {
+          "id": "game-label",
+          "kind": "text",
+          "text": "Game",
+          "x": ["get", "pad"],
+          "y": ["+", ["get", "rowY"], ["get", "rowStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "labelSize"],
+          "color": [0.96, 0.98, 1, 1],
+          "align": "left",
+          "font": "neon-hud"
+        },
+        {
+          "id": "game",
+          "kind": "text",
+          "text": "{game}",
+          "x": ["get", "pad"],
+          "y": ["+", ["-", ["get", "rowY"], 1], ["get", "rowStep"]],
+          "size": [["-", ["get", "w"], ["*", 2, ["get", "pad"]]], 24],
+          "fontSize": ["get", "valueSize"],
+          "color": [0.48, 0.86, 1, 1],
+          "align": "right",
+          "font": "neon-hud"
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "high-score",
+          "use": "score",
+          "placement": {"origin": "screen-top-left"},
+          "scale": ["read", "railScale"],
+          "x": 20,
+          "y": ["+", ["read", "inset"], ["*", 30, ["read", "railScale"]]],
+          "inputs": {
+            "w": 331,
+            "h": 94,
+            "pad": 16,
+            "headingSize": 21,
+            "headingY": 12,
+            "title": "High Score",
+            "score": ["read", "highScore"],
+            "tint": [0.96, 0.98, 1, 1],
+            "bodyTop": 36
+          }
+        },
+        {
+          "id": "next-extra",
+          "use": "score",
+          "placement": {"origin": "screen-top-left"},
+          "scale": ["read", "railScale"],
+          "x": 20,
+          "y": ["+", ["read", "inset"], ["*", 135, ["read", "railScale"]]],
+          "inputs": {
+            "w": 331,
+            "h": 94,
+            "pad": 16,
+            "headingSize": 21,
+            "headingY": 12,
+            "title": "Next Extra",
+            "score": ["read", "nextExtra"],
+            "tint": [0.48, 0.86, 1, 1],
+            "bodyTop": 36
+          },
+          "visible": ["read", "nextExtraVisible"]
+        },
+        {
+          "id": "firepower",
+          "use": "meter",
+          "placement": {"origin": "screen-top-right"},
+          "scale": ["read", "railScale"],
+          "x": ["-", 0, ["+", 20, ["*", 331, ["read", "railScale"]]]],
+          "y": ["+", ["read", "inset"], ["*", 30, ["read", "railScale"]]],
+          "inputs": {
+            "w": 331,
+            "pad": 16,
+            "h": 94,
+            "title": "Firepower",
+            "headingSize": 21,
+            "headingY": 12,
+            "barY": 68,
+            "barHeight": 12,
+            "fill": ["read", "firepower"]
+          }
+        },
+        {
+          "id": "sun-stability",
+          "use": "meter",
+          "placement": {"origin": "screen-top-right"},
+          "scale": ["read", "railScale"],
+          "x": ["-", 0, ["+", 20, ["*", 331, ["read", "railScale"]]]],
+          "y": ["+", ["read", "inset"], ["*", 135, ["read", "railScale"]]],
+          "inputs": {
+            "w": 331,
+            "pad": 16,
+            "h": 94,
+            "title": ["if", ["read", "blackHole"], "Black Hole", "Sun Stability"],
+            "title2": "",
+            "headingSize": 16,
+            "headingY": 15,
+            "headingColor": ["if", ["read", "blackHole"], [1, 0.28, 0.24, 1], [1, 0.89, 0.36, 1]],
+            "barY": 68,
+            "barHeight": 12,
+            "fill": ["read", "sunStability"],
+            "tint": ["if", ["read", "blackHole"], [1, 0.28, 0.24, 1], [1, 0.7, 0.32, 1]],
+            "value": ["if", ["read", "blackHole"], "", ["read", "sunText"]],
+            "valueY": 13,
+            "valueSize": 17
+          },
+          "visible": ["read", "solar"]
+        },
+        {
+          "id": "mines-shot",
+          "use": "counter",
+          "placement": {"origin": "screen-bottom-left"},
+          "scale": ["read", "railScale"],
+          "x": ["+", 360, ["*", ["-", ["read", "minesX"], 360], ["read", "railScale"]]],
+          "y": ["-", 0, ["+", ["read", "inset"], ["*", 136, ["read", "railScale"]]]],
+          "inputs": {
+            "w": ["read", "minesWidth"],
+            "h": 112,
+            "pad": 11,
+            "headingY": 11,
+            "headingStep": 17,
+            "title": ["if", ["read", "solar"], "Mines", "Mines Shot"],
+            "title2": ["if", ["read", "solar"], "Shot", ""],
+            "headingSize": ["if", ["read", "solar"], 13, 15],
+            "value": ["read", "minesShot"],
+            "valueSize": 25,
+            "valueY": ["if", ["read", "solar"], 64, 55]
+          },
+          "visible": ["read", "minesVisible"]
+        },
+        {
+          "id": "rescues",
+          "use": "stats",
+          "placement": {"origin": "screen-bottom-left"},
+          "scale": ["read", "railScale"],
+          "x": ["+", 360, ["*", ["-", ["read", "rescuesX"], 360], ["read", "railScale"]]],
+          "y": ["-", 0, ["+", ["read", "inset"], ["*", 136, ["read", "railScale"]]]],
+          "inputs": {
+            "w": ["read", "rescuesWidth"],
+            "h": 112,
+            "pad": 11,
+            "headingY": 11,
+            "headingStep": 17,
+            "title": "Rescues",
+            "headingSize": ["if", ["read", "solar"], 13, 15],
+            "level": ["read", "rescuesLevel"],
+            "game": ["read", "rescuesGame"],
+            "rowY": 52,
+            "rowStep": 29,
+            "labelSize": ["if", ["read", "solar"], 12, 17],
+            "valueSize": ["if", ["read", "solar"], 16, 20]
+          }
+        },
+        {
+          "id": "efficiency",
+          "use": "stats",
+          "placement": {"origin": "screen-bottom-left"},
+          "scale": ["read", "railScale"],
+          "x": ["+", 360, ["*", ["-", ["read", "efficiencyX"], 360], ["read", "railScale"]]],
+          "y": ["-", 0, ["+", ["read", "inset"], ["*", 136, ["read", "railScale"]]]],
+          "inputs": {
+            "w": ["read", "efficiencyWidth"],
+            "h": 112,
+            "pad": 11,
+            "headingY": 11,
+            "headingStep": 17,
+            "title": "Rescue",
+            "title2": "Efficiency",
+            "headingSize": 12,
+            "level": ["read", "efficiencyLevel"],
+            "game": ["read", "efficiencyGame"],
+            "rowY": 52,
+            "rowStep": 29,
+            "labelSize": 12,
+            "valueSize": 16
+          },
+          "visible": ["read", "solar"]
+        },
+        {
+          "id": "lives-lost",
+          "use": "counter",
+          "placement": {"origin": "screen-bottom-left"},
+          "scale": ["read", "railScale"],
+          "x": ["+", 360, ["*", ["-", ["read", "livesX"], 360], ["read", "railScale"]]],
+          "y": ["-", 0, ["+", ["read", "inset"], ["*", 136, ["read", "railScale"]]]],
+          "inputs": {
+            "w": ["read", "livesWidth"],
+            "h": 112,
+            "pad": 11,
+            "headingY": 11,
+            "headingStep": 17,
+            "title": ["if", ["read", "solar"], "Lives", "Lives Lost"],
+            "title2": ["if", ["read", "solar"], "Lost", ""],
+            "headingSize": ["if", ["read", "solar"], 13, 15],
+            "value": ["read", "livesLost"],
+            "valueSize": 25,
+            "valueY": ["if", ["read", "solar"], 64, 55]
+          }
+        },
+        {
+          "id": "minotaurs-lost",
+          "use": "counter",
+          "placement": {"origin": "screen-bottom-left"},
+          "scale": ["read", "railScale"],
+          "x": ["+", 360, ["*", ["-", ["read", "lostX"], 360], ["read", "railScale"]]],
+          "y": ["-", 0, ["+", ["read", "inset"], ["*", 136, ["read", "railScale"]]]],
+          "inputs": {
+            "w": ["read", "lostWidth"],
+            "h": 112,
+            "pad": 11,
+            "headingY": 11,
+            "headingStep": 17,
+            "title": "Minotaurs",
+            "title2": "Lost",
+            "headingSize": 11.5,
+            "value": ["read", "minotaursLost"],
+            "valueSize": 25,
+            "valueY": 64
+          },
+          "visible": ["read", "solar"]
+        }
+      ]
+    }
+  },
+  "root": {
+    "id": "minorescue",
+    "kind": "group",
+    "children": [
+      {
+        "id": "high-score",
+        "use": "score",
+        "placement": {"origin": "screen-top-left"},
+        "scale": ["read", "railScale"],
+        "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]],
+        "y": 18,
+        "inputs": {
+          "w": 140,
+          "h": 74,
+          "pad": 11,
+          "headingSize": 11,
+          "headingY": 10,
+          "title": "High Score",
+          "score": ["read", "highScore"],
+          "tint": [0.96, 0.98, 1, 1],
+          "bodyTop": 16
+        }
+      },
+      {
+        "id": "next-extra",
+        "use": "score",
+        "placement": {"origin": "screen-top-left"},
+        "scale": ["read", "railScale"],
+        "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]],
+        "y": 100,
+        "inputs": {
+          "w": 140,
+          "h": 74,
+          "pad": 11,
+          "headingSize": 11,
+          "headingY": 10,
+          "title": "Next Extra",
+          "score": ["read", "nextExtra"],
+          "tint": [0.48, 0.86, 1, 1],
+          "bodyTop": 16
+        },
+        "visible": ["read", "nextExtraVisible"]
+      },
+      {
+        "id": "firepower",
+        "use": "meter",
+        "placement": {"origin": "screen-top-right"},
+        "scale": ["read", "railScale"],
+        "x": ["-", 0, ["+", ["read", "inset"], ["*", 150, ["read", "railScale"]]]],
+        "y": 18,
+        "inputs": {
+          "w": 140,
+          "pad": 11,
+          "h": 59,
+          "title": "Firepower",
+          "headingSize": 11,
+          "headingY": 10,
+          "barY": 39,
+          "barHeight": 9,
+          "fill": ["read", "firepower"]
+        }
+      },
+      {
+        "id": "sun-stability",
+        "use": "meter",
+        "placement": {"origin": "screen-top-right"},
+        "scale": ["read", "railScale"],
+        "x": ["-", 0, ["+", ["read", "inset"], ["*", 150, ["read", "railScale"]]]],
+        "y": 85,
+        "inputs": {
+          "w": 140,
+          "pad": 11,
+          "h": 74,
+          "title": ["if", ["read", "blackHole"], "Black", "Sun"],
+          "title2": ["if", ["read", "blackHole"], "Hole", "Stability"],
+          "headingSize": 11,
+          "headingY": 10,
+          "headingColor": ["if", ["read", "blackHole"], [1, 0.28, 0.24, 1], [1, 0.89, 0.36, 1]],
+          "barY": 54,
+          "barHeight": 9,
+          "fill": ["read", "sunStability"],
+          "tint": ["if", ["read", "blackHole"], [1, 0.28, 0.24, 1], [1, 0.7, 0.32, 1]],
+          "value": ["if", ["read", "blackHole"], "", ["read", "sunText"]],
+          "valueY": 10,
+          "valueSize": 12
+        },
+        "visible": ["read", "solar"]
+      },
+      {
+        "id": "mines-shot",
+        "use": "counter",
+        "placement": {"origin": "screen-bottom-left"},
+        "scale": ["read", "railScale"],
+        "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]],
+        "y": ["-", 0, ["*", ["if", ["read", "solar"], 274, 173], ["read", "railScale"]]],
+        "inputs": {"w": 140, "title": "Mines Shot", "h": 63, "value": ["read", "minesShot"]},
+        "visible": ["read", "minesVisible"]
+      },
+      {
+        "id": "rescues",
+        "use": "stats",
+        "placement": {"origin": "screen-bottom-left"},
+        "scale": ["read", "railScale"],
+        "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]],
+        "y": ["-", 0, ["*", ["if", ["read", "solar"], 203, 102], ["read", "railScale"]]],
+        "inputs": {"w": 140, "title": "Rescues", "h": 84, "level": ["read", "rescuesLevel"], "game": ["read", "rescuesGame"]}
+      },
+      {
+        "id": "efficiency",
+        "use": "stats",
+        "placement": {"origin": "screen-bottom-left"},
+        "scale": ["read", "railScale"],
+        "x": ["+", ["read", "inset"], ["*", 10, ["read", "railScale"]]],
+        "y": ["-", 0, ["*", 111, ["read", "railScale"]]],
+        "inputs": {
+          "w": 140,
+          "title": "Rescue",
+          "title2": "Efficiency",
+          "h": 93,
+          "rowY": 44,
+          "level": ["read", "efficiencyLevel"],
+          "game": ["read", "efficiencyGame"]
+        },
+        "visible": ["read", "solar"]
+      },
+      {
+        "id": "lives-lost",
+        "use": "counter",
+        "placement": {"origin": "screen-bottom-right"},
+        "scale": ["read", "railScale"],
+        "x": ["-", 0, ["+", ["read", "inset"], ["*", 150, ["read", "railScale"]]]],
+        "y": ["-", 0, ["*", ["if", ["read", "solar"], 166, 81], ["read", "railScale"]]],
+        "inputs": {"w": 140, "title": "Lives Lost", "h": 63, "value": ["read", "livesLost"]}
+      },
+      {
+        "id": "minotaurs-lost",
+        "use": "counter",
+        "placement": {"origin": "screen-bottom-right"},
+        "scale": ["read", "railScale"],
+        "x": ["-", 0, ["+", ["read", "inset"], ["*", 150, ["read", "railScale"]]]],
+        "y": ["-", 0, ["*", 95, ["read", "railScale"]]],
+        "inputs": {"w": 140, "title": "Minotaurs", "title2": "Lost", "h": 77, "valueY": 46, "value": ["read", "minotaursLost"]},
+        "visible": ["read", "solar"]
+      }
+    ]
+  }
+}

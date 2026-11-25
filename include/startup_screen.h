@@ -57,7 +57,9 @@ class StartupScreen {
     }
 
   public:
-    ~StartupScreen() { release(); }
+    ~StartupScreen() {
+        release();
+    }
     bool begin(Host &host, const SurfaceInfo &surface) {
         release();
         surface_ = surface;

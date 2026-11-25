@@ -125,6 +125,8 @@ class tankTrail : public entity {
 
 class spaceCraftGun : public gun {
   public:
+    static int minimumInterval(const spaceWars &game);
+    static int shotInterval(const spaceCraft &ship, float distance);
     void run() override;
     void shoot() override;
 };
@@ -195,6 +197,7 @@ class mine : public entity {
 // A free-floating minotaur (to be rescued).
 class collectible : public entity {
   public:
+    static int pointsAt(const spaceWars &game, float distance);
     int draw(sprite *spr, vec2d size) override;
     void run() override;
     void hitBy(entity *by) override;
@@ -235,6 +238,7 @@ class thePlanet : public entity {
 
 class theSun : public entity {
   public:
+    static constexpr double collapseRadius = 0.18;
     int draw(sprite *spr, vec2d size) override;
     void run() override;
     void hitBy(entity *by) override;

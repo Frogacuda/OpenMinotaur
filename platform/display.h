@@ -23,7 +23,9 @@ class Display {
 
     // Recompute surface size and letterbox for the current window and settings.
     // Returns true if the surface or input geometry changed; notify resize().
-    bool configure(int windowW, int windowH, NativeFormat native, const DisplaySettings &s);
+    // The launcher owns the optional Minorola texture and shares it with the launch transition.
+    bool configure(int windowW, int windowH, NativeFormat native, const DisplaySettings &s,
+                   unsigned minorolaTexture = 0);
 
     const SurfaceInfo &surface() const {
         return surface_;
@@ -39,6 +41,12 @@ class Display {
     }
     int presentationTurns() const {
         return layout_.turns;
+    }
+    const DisplayLayout &presentationLayout() const {
+        return layout_;
+    }
+    unsigned minorolaTexture() const {
+        return minorolaTexture_;
     }
 
     // Bind the surface FBO and its viewport, ready for the core to draw.
@@ -100,6 +108,7 @@ class Display {
     int backdropTurns_ = 0;
     bool bezelTiled_ = true;
     unsigned bezelTex_ = 0;
+    unsigned minorolaTexture_ = 0;
     int bezelW_ = 1, bezelH_ = 1;
     std::string bezelKey_;
     Filter filter_ = Filter::SharpBilinear;

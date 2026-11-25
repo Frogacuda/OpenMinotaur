@@ -80,8 +80,8 @@ android {
             appIcon: standaloneGame ? '@drawable/standalone_icon' : '@drawable/ic_launcher']
         minSdk 24
         targetSdk 35
-        versionCode providers.gradleProperty('appVersionCode').getOrElse('187').toInteger()
-        versionName providers.gradleProperty('appVersionName').getOrElse('0.9.6')
+        versionCode providers.gradleProperty('appVersionCode').getOrElse('216').toInteger()
+        versionName providers.gradleProperty('appVersionName').getOrElse('0.9.8')
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_STL=c++_static", "-DMINO_STANDALONE_GAME=${standaloneGame}",

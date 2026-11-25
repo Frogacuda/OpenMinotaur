@@ -2,6 +2,7 @@
 #include "backend.h"
 #include "records.h"
 #include "fiveaday_presentation.h"
+#include "fiveaday_widgets.h"
 #include "original_tables.h"
 #include "highscores.h"
 #include <filesystem>
@@ -428,7 +429,7 @@ class FiveADayCore final : public Core {
                 world_->paused = false;
                 fingers_ = {};
             }
-        } else if (edges & (PAD_START | PAD_B | PAD_BACK)) {
+        } else if (edges & (PAD_START | PAD_BACK)) {
             world_->paused = true;
             selection_ = 0;
             fingers_ = {};
@@ -578,6 +579,12 @@ class FiveADayCore final : public Core {
                  {"levels.completed", presentation_.completed()},
                  {"minotaurs.rescued", presentation_.rescued()},
                  {"fruit.trail", int64_t(presentation_.trail())}}};
+    }
+    PresentationState widgetPresentationState() const override {
+        if (!world_ || screen_ != Screen::Playing)
+            return {};
+        return fiveaday::widgetSnapshot(*world_, records_, backend_.resources(),
+                                        presentationSession_, world_->paused || suspended_.load());
     }
     const CoreInfo &info() const override {
         return Info;
@@ -857,7 +864,7 @@ class FiveADayCore final : public Core {
             return true;
         if (!world_)
             return false;
-        commands(PAD_B);
+        commands(PAD_BACK);
         return true;
     }
     void save() override {

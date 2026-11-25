@@ -98,6 +98,28 @@ class GoatStageCore final : public Core {
                                                                          : -1});
         return result;
     }
+    PresentationState widgetPresentationState() const override {
+        if (!world_ || !world_->goat || frontend_.page != UI::Page::Playing ||
+            session_.phase() != goatup2::StageSession::Phase::Playing)
+            return {};
+        const auto &goat = *world_->goat;
+        PresentationState result;
+        result.gameplay = true;
+        result.paused = frontend_.paused;
+        result.values = {
+            {"objectsFound", int64_t(world_->foundObjects)},
+            {"objectsTotal", int64_t(world_->levelObjects)},
+            {"minotaursFound", int64_t(world_->foundMinotaurs)},
+            {"minotaursTotal", int64_t(world_->levelMinotaurs)},
+            {"tailSize", int64_t(goat.followingCount)},
+            {"fartDisabled", world_->headbuttDisabled},
+            {"invincibleTicks",
+             int64_t(goat.state == 0 && goat.teaProtection ? goat.invulnerability : 0)},
+            {"invincibleDuration", int64_t(goatup2::teaProtectionTicks)},
+            {"unlimitedTicks", int64_t(world_->sharedGrace)},
+            {"unlimitedDuration", int64_t(goatup2::vindalooTicks)}};
+        return result;
+    }
     const CoreInfo &info() const override {
         return Info;
     }

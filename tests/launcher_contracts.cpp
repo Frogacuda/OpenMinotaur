@@ -59,9 +59,8 @@ struct LauncherChecks {
             }
             if (sec == 0) {
                 REQUIRE(reference == actual);
-                REQUIRE(std::all_of(reference.begin(), reference.end(), [](float v) {
-                    return v == 0.f;
-                }));
+                REQUIRE(std::all_of(reference.begin(), reference.end(),
+                                    [](float v) { return v == 0.f; }));
             }
         }
         if (allGamesBundled())
@@ -281,6 +280,15 @@ struct LauncherChecks {
                     readFrame(l.surface_.framebuffer, l.surface_.width, l.surface_.height));
             l.back();
             REQUIRE(l.page() == Screen::Home && l.focus() == index);
+            REQUIRE(l.appLaunch_.active() && l.appLaunch_.returning() &&
+                    l.appLaunch_.poseProgress() == 1);
+            const auto outgoing = readFrame(l.appFramebuffer_, l.surface_.width, l.surface_.height);
+            l.key(0, 0, true, false);
+            l.frame(0);
+            sameRGB(outgoing,
+                    readFrame(l.surface_.framebuffer, l.surface_.width, l.surface_.height));
+            settle(l);
+            REQUIRE(!l.inputBlocked() && l.focus() == index && l.navigation_.depth() == 0);
         }
         l.returnHome();
     }
@@ -359,6 +367,24 @@ struct LauncherChecks {
         DisplaySettings fill = normal;
         fill.aspect = AspectMode::Fill;
         run("goatup2", fill);
+        l.returnHome(false);
+        LauncherTransition returning;
+        REQUIRE(returning.prepare(l, width, height, shell, false));
+        bool began = false, finished = false, quit = false;
+        REQUIRE(returning.playReturn(target, window, quit, [&](float time) {
+            if (time == 0) {
+                sameRGB(readFrame(0, width, height),
+                        readFrame(returning.framebuffer_, width, height));
+                began = true;
+            } else if (time == 1) {
+                const auto final = readFrame(0, width, height);
+                returning.source_.present();
+                sameRGB(final, readFrame(0, width, height));
+                finished = true;
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }));
+        REQUIRE(began && finished && !quit && !returning.pending());
         target.shutdown();
         l.resize(original);
         display.beginFrame();
@@ -663,6 +689,31 @@ struct LauncherChecks {
         REQUIRE(l.page() == Screen::Options);
         click(l, iox::options::screenTab);
         capture("options");
+#ifdef MINO_LIVE_WIDGETS_OPTION
+        {
+            const auto rows = l.optionRows();
+            const auto widgets = std::find_if(rows.begin(), rows.end(), [](const auto &row) {
+                return row.key == "live_widgets";
+            });
+            REQUIRE(widgets != rows.end() && widgets->label == "LiveWidgets" && widgets->enabled);
+            REQUIRE(
+                widgets->tip ==
+                "Display live gameplay stats and info in the letterboxed regions of your screen.");
+            REQUIRE(widgets->value == "On");
+            const int previousFocus = l.focus();
+            const int slot = iox::options::firstRow + int(widgets - rows.begin());
+            l.focus() = slot;
+            capture("livewidgets-on");
+            click(l, slot);
+            REQUIRE(l.takeRequest().action == Launcher::Action::SettingsChanged);
+            REQUIRE(!settings.liveWidgetsEnabled("gridrunner"));
+            capture("livewidgets-off");
+            click(l, slot);
+            REQUIRE(l.takeRequest().action == Launcher::Action::SettingsChanged);
+            REQUIRE(settings.liveWidgetsEnabled("gridrunner"));
+            l.focus() = previousFocus;
+        }
+#endif
         {
             const auto saved = settings.get("global", "screen_mode", "hires");
             const int focus = l.focus();
@@ -846,6 +897,7 @@ struct LauncherChecks {
         REQUIRE(l.page() == Screen::Options && l.focus() == remap);
         l.back();
         REQUIRE(l.page() == Screen::Home && l.focus() == iox::home::options);
+        settle(l);
 
         click(l, iox::home::about);
         REQUIRE(l.page() == Screen::About);
@@ -876,6 +928,7 @@ struct LauncherChecks {
         REQUIRE(l.page() == Screen::About && l.focus() == iox::about::donate);
         l.back();
         REQUIRE(l.page() == Screen::Home && l.focus() == iox::home::about);
+        settle(l);
 
         l.selectGame("gridrunner");
         select(l);
@@ -887,6 +940,7 @@ struct LauncherChecks {
         l.back();
         REQUIRE(l.page() == Screen::Gridrunner && l.focus() == 1);
         l.back();
+        settle(l);
         l.icons_[0].playable = false;
         l.icons_[0].installed = false;
         l.selectGame(kGameCatalog[0].id);

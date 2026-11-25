@@ -330,6 +330,10 @@ ImageAssets ImageAssets::read(std::istream &in, const std::filesystem::path &bas
         a.pixels();
     return result;
 }
-void ImageAssets::setFileBase(const std::filesystem::path &path) { sceneBase = path; }
-const std::filesystem::path &ImageAssets::fileBase() { return sceneBase; }
+void ImageAssets::setFileBase(const std::filesystem::path &path) {
+    sceneBase = path;
+}
+const std::filesystem::path &ImageAssets::fileBase() {
+    return sceneBase;
+}
 } // namespace neon::effects

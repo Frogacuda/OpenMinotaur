@@ -10,6 +10,12 @@
 #include <sstream>
 
 namespace mino {
+namespace {
+constexpr float kShadowOpacity = .55f;
+constexpr float kShadowOffsetX = 1.f;
+constexpr float kShadowOffsetY = 5.f;
+} // namespace
+
 void Launcher::quad(const MenuRect &r, float u0, float v0, float u1, float v1, Colour t, Colour b) {
     const auto transformed = drawTransform_.apply(r);
     Vertex a{transformed.x, transformed.y, u0, v0, t.r, t.g, t.b, t.a},
@@ -23,12 +29,13 @@ void Launcher::draw(unsigned texture, bool rounded, float gloss, bool gray, floa
     if (vertices_.empty())
         return;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1f(uRounded_, mode == ImageMode::Capture  ? 5.f
-                           : mode == ImageMode::Halo   ? 4.f
-                           : mode == ImageMode::Shadow ? 3.f
-                           : circle                    ? 2.f
-                           : rounded                   ? 1.f
-                                                       : 0.f);
+    glUniform1f(uRounded_, mode == ImageMode::TextShadow ? 6.f
+                           : mode == ImageMode::Capture  ? 5.f
+                           : mode == ImageMode::Halo     ? 4.f
+                           : mode == ImageMode::Shadow   ? 3.f
+                           : circle                      ? 2.f
+                           : rounded                     ? 1.f
+                                                         : 0.f);
     glUniform1f(uGloss_, gloss);
     glUniform1f(uGray_, gray ? 1.0f : 0.0f);
     glUniform1f(uSdfWidth_, sdfWidth);
@@ -69,29 +76,40 @@ float Launcher::textWidth(const std::string &value, float size, bool bold) const
     return width * size / ui::kFontEm;
 }
 void Launcher::text(const std::string &value, float x, float y, float size, Colour colour,
-                    bool centered, bool bold) {
+                    bool centered, bool bold, TextEffect effect) {
     const auto &face = (notesWriting_ ? ui::notesFontFace() : ui::fontFace(bold));
     const float scale = size / ui::kFontEm;
     if (centered)
         x -= textWidth(value, size, bold) * 0.5f;
-    float baseline = y + face.ascent * scale;
-    for (unsigned char c : value) {
-        if (c < 32 || c > 126)
-            c = '?';
-        const auto &g = face.glyphs[size_t(c - 32)];
-        if (g.w && g.h) {
-            quad({x + g.xOffset * scale, baseline + g.yOffset * scale, g.w * scale, g.h * scale},
-                 float(g.x) / ui::kFontAtlasWidth, float(g.y) / ui::kFontAtlasHeight,
-                 float(g.x + g.w) / ui::kFontAtlasWidth, float(g.y + g.h) / ui::kFontAtlasHeight,
-                 colour, colour);
+    const float baseline = y + face.ascent * scale;
+    const unsigned atlas = notesWriting_ ? notesFont_ : font_;
+    auto queueGlyphs = [&](float dx, float dy, Colour tint) {
+        float pen = x + dx;
+        for (unsigned char c : value) {
+            if (c < 32 || c > 126)
+                c = '?';
+            const auto &g = face.glyphs[size_t(c - 32)];
+            if (g.w && g.h) {
+                quad({pen + g.xOffset * scale, baseline + dy + g.yOffset * scale, g.w * scale,
+                      g.h * scale},
+                     float(g.x) / ui::kFontAtlasWidth, float(g.y) / ui::kFontAtlasHeight,
+                     float(g.x + g.w) / ui::kFontAtlasWidth,
+                     float(g.y + g.h) / ui::kFontAtlasHeight, tint, tint);
+            }
+            pen += g.advance * scale;
         }
-        x += g.advance * scale;
+    };
+    if (effect == TextEffect::SoftShadow) {
+        const float relativeSize = size / 76.f;
+        queueGlyphs(kShadowOffsetX * relativeSize, kShadowOffsetY * relativeSize,
+                    {0, 0, 0, kShadowOpacity * colour.a});
+        draw(atlas, false, 0, false, 0, false, ImageMode::TextShadow);
     }
+    queueGlyphs(0, 0, colour);
     float pixelScale = float(surface_.height) / layout_.height * drawTransform_.scale;
     // One physical pixel of antialiasing, independent of window size/DPI.
     float smoothing = ui::kFontEm / (4 * ui::kFontSpread * size * std::max(pixelScale, 0.01f));
-    draw(notesWriting_ ? notesFont_ : font_, false, false, false,
-         std::clamp(smoothing, 0.002f, 0.25f));
+    draw(atlas, false, 0, false, std::clamp(smoothing, 0.002f, 0.25f));
 }
 void Launcher::paragraph(const std::string &message, float y, float size) {
     const float maxWidth = layout_.width - 90;
@@ -119,8 +137,10 @@ void Launcher::paragraph(const std::string &message, float y, float size) {
 void Launcher::icon(const MenuRect &r, unsigned texture, const char *fallback, bool selected,
                     Colour top, Colour bottom, bool gray) {
     const float padding = r.w * .13f;
-    quad({r.x - padding + 1, r.y - padding + 5, r.w + 2 * padding, r.h + 2 * padding}, 0, 0, 1, 1,
-         {0, 0, 0, .55f}, {0, 0, 0, .55f});
+    const Colour shadow{0, 0, 0, kShadowOpacity};
+    quad({r.x - padding + kShadowOffsetX, r.y - padding + kShadowOffsetY, r.w + 2 * padding,
+          r.h + 2 * padding},
+         0, 0, 1, 1, shadow, shadow);
     draw(white_, false, false, false, 0, false, ImageMode::Shadow);
     if (selected) {
         const float pulse = .5f + .5f * std::sin(float(selectionTime_) * 6.28318530718f / 1.8f);

@@ -9,7 +9,8 @@ class TitlePresenter {
   public:
     using Background = std::function<void(const RenderTarget &)>;
     void assets(const TitleSequence &title, ResourceReader reader);
-    void render(const TitleSequence &, const RenderTarget &, const Background &);
+    void render(const TitleSequence &, const RenderTarget &, const Background &,
+                double exitBackgroundOpacity = -1);
     void release() {
         renderer_.release();
     }
@@ -18,6 +19,6 @@ class TitlePresenter {
     }
 
   private:
-    Renderer renderer_;
+    Renderer renderer_{{1.25f, .25f, 3.f, .10f, 1.f}};
 };
 } // namespace neon::widgets

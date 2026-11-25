@@ -1,0 +1,1678 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "assets": {
+    "goat": "goat.png"
+  },
+  "templates": {
+    "frameBeam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [[0, 0], [0, 16]],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "bezelFrame": {
+      "kind": "group",
+      "inputs": {
+        "width": 304,
+        "height": 88
+      },
+      "size": [["get", "width"], ["get", "height"]],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "width"], 4], 16]],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frameBeam",
+          "x": ["-", ["get", "width"], 2],
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "height"], 4], 16]],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frameBeam",
+          "x": 2,
+          "y": ["-", ["get", "height"], 2],
+          "scale": [1, ["/", ["-", ["get", "width"], 4], 16]],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [1, ["/", ["-", ["get", "height"], 4], 16]],
+          "rotation": 0,
+          "lineWidth": 2.4,
+          "color": [0.37, 0.88, 1, 0.76]
+        }
+      ]
+    },
+    "radialFace": {
+      "kind": "group",
+      "inputs": {
+        "remaining": 0,
+        "duration": 1,
+        "timeText": "",
+        "accent": [0.39, 0.86, 0.96, 1],
+        "timeFont": "neon-hud"
+      },
+      "size": [132, 132],
+      "children": [
+        {
+          "id": "fraction",
+          "kind": "logic",
+          "value": ["normalize", ["get", "remaining"], 0, ["get", "duration"]]
+        },
+        {
+          "id": "meterColor",
+          "kind": "logic",
+          "value": ["get", "accent"]
+        },
+        {
+          "id": "ring",
+          "kind": "radial",
+          "size": [132, 132],
+          "segments": 16,
+          "fill": ["get", "fraction"],
+          "color": ["get", "meterColor"],
+          "trackColor": [0.14, 0.21, 0.28, 1]
+        },
+        {
+          "id": "ring-time",
+          "kind": "text",
+          "x": 20,
+          "y": 55.5,
+          "size": [92, 28],
+          "align": "center",
+          "fontSize": 21,
+          "lineWidth": 2,
+          "color": [0.94, 0.98, 1, 1],
+          "text": "{timeText}",
+          "font": ["get", "timeFont"]
+        }
+      ]
+    },
+    "cooldownCard": {
+      "kind": "group",
+      "size": [["get", "width"], ["get", "height"]],
+      "inputs": {
+        "rowLabel": "",
+        "remaining": 0,
+        "duration": 1,
+        "timeText": "",
+        "tint": [0.39, 0.86, 0.96, 1],
+        "labelFont": "neon-hud",
+        "width": 304,
+        "height": 88,
+        "ringInset": 17,
+        "labelInset": 92
+      },
+      "children": [
+        {
+          "id": "frame",
+          "use": "bezelFrame",
+          "inputs": {
+            "width": ["get", "width"],
+            "height": ["get", "height"]
+          }
+        },
+        {
+          "id": "ring",
+          "use": "radialFace",
+          "x": ["get", "ringInset"],
+          "y": ["/", ["-", ["get", "cardHeight"], 71.28], 2],
+          "scale": 0.54,
+          "inputs": {
+            "remaining": ["get", "remaining"],
+            "duration": ["get", "duration"],
+            "timeText": ["get", "timeText"],
+            "accent": ["get", "tint"],
+            "cardHeight": ["get", "height"]
+          }
+        },
+        {
+          "id": "name",
+          "kind": "text",
+          "text": "{rowLabel}",
+          "fontSize": 13.5,
+          "lineWidth": 1.35,
+          "color": [0.97, 0.99, 1, 1],
+          "x": ["get", "labelInset"],
+          "y": ["/", ["-", ["get", "height"], 13.5], 2],
+          "font": ["get", "labelFont"]
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "portrait-top",
+          "kind": "group",
+          "size": [956, 188],
+          "x": ["/", ["-", 1000, ["*", 956, ["coalesce", ["read", "railScale"], 1]]], 2],
+          "y": ["+", ["coalesce", ["read", "portraitInset"], 0], ["*", 17, ["coalesce", ["read", "railScale"], 1]]],
+          "placement": {
+            "portrait": "screen-top-left"
+          },
+          "scale": ["coalesce", ["read", "railScale"], 1],
+          "children": [
+            {
+              "id": "records",
+              "kind": "group",
+              "x": 0,
+              "y": 0,
+              "size": [556, 188],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 556,
+                    "height": 188
+                  }
+                },
+                {
+                  "id": "title",
+                  "kind": "text",
+                  "text": "High Score",
+                  "x": 16,
+                  "y": 10,
+                  "size": [524, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 1.8,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "high-score",
+                  "kind": "text",
+                  "text": "{recordScore}",
+                  "x": 16,
+                  "y": 37,
+                  "size": [524, 37],
+                  "font": "neon-hud",
+                  "fontSize": 33,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 84,
+                  "size": [526, 2],
+                  "points": [[0, 0], [524, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "name-0",
+                  "kind": "text",
+                  "text": "Highest Platform",
+                  "x": 16,
+                  "y": 93,
+                  "size": [524, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-0",
+                  "kind": "text",
+                  "text": "{recordPlatform}",
+                  "x": 402,
+                  "y": 92,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "name-1",
+                  "kind": "text",
+                  "text": "Total Kisses",
+                  "x": 16,
+                  "y": 122,
+                  "size": [524, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-1",
+                  "kind": "text",
+                  "text": "{totalKisses}",
+                  "x": 402,
+                  "y": 121,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "name-2",
+                  "kind": "text",
+                  "text": "Total Unique Items",
+                  "x": 16,
+                  "y": 151,
+                  "size": [524, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-2",
+                  "kind": "text",
+                  "text": "{totalItems}",
+                  "x": 402,
+                  "y": 150,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "recordScore": ["coalesce", ["read", "recordScore"], "12,338,600"],
+                "recordPlatform": ["coalesce", ["read", "recordPlatform"], 384],
+                "totalKisses": ["coalesce", ["read", "totalKisses"], 18742],
+                "totalItems": ["coalesce", ["read", "totalItems"], 215]
+              }
+            },
+            {
+              "id": "this-run",
+              "kind": "group",
+              "x": 570,
+              "y": 0,
+              "size": [386, 188],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 386,
+                    "height": 188
+                  }
+                },
+                {
+                  "id": "title",
+                  "kind": "text",
+                  "text": "Run Stats",
+                  "x": 16,
+                  "y": 10,
+                  "size": [354, 27],
+                  "font": "vectrex-menu",
+                  "fontSize": 23,
+                  "lineWidth": 1.8,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 48,
+                  "size": [356, 2],
+                  "points": [[0, 0], [354, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "name-0",
+                  "kind": "text",
+                  "text": "Kids",
+                  "x": 16,
+                  "y": 57,
+                  "size": [354, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-0",
+                  "kind": "text",
+                  "text": "{kids}",
+                  "x": 232,
+                  "y": 56,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "name-1",
+                  "kind": "text",
+                  "text": "Most Kids",
+                  "x": 16,
+                  "y": 86,
+                  "size": [354, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-1",
+                  "kind": "text",
+                  "text": "{mostKids}",
+                  "x": 232,
+                  "y": 85,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "name-2",
+                  "kind": "text",
+                  "text": "Kisses",
+                  "x": 16,
+                  "y": 115,
+                  "size": [354, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-2",
+                  "kind": "text",
+                  "text": "{kisses}",
+                  "x": 232,
+                  "y": 114,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "name-3",
+                  "kind": "text",
+                  "text": "Unique Items",
+                  "x": 16,
+                  "y": 144,
+                  "size": [354, 23.5],
+                  "font": "neon-hud",
+                  "fontSize": 19.5,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "value-3",
+                  "kind": "text",
+                  "text": "{uniqueItems}",
+                  "x": 232,
+                  "y": 143,
+                  "size": [138, 25],
+                  "font": "neon-hud",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                }
+              ],
+              "inputs": {
+                "kids": ["coalesce", ["read", "kids"], 8],
+                "mostKids": ["coalesce", ["read", "mostKids"], 11],
+                "kisses": ["coalesce", ["read", "kisses"], 5],
+                "uniqueItems": ["coalesce", ["read", "uniqueItems"], 34]
+              }
+            }
+          ]
+        },
+        {
+          "id": "portrait-bottom",
+          "kind": "group",
+          "size": [956, 190],
+          "x": ["/", ["-", 1000, ["*", 956, ["coalesce", ["read", "railScale"], 1]]], 2],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              ["coalesce", ["read", "portraitInset"], 0],
+              ["*", 210, ["coalesce", ["read", "railScale"], 1]]
+            ]
+          ],
+          "placement": {
+            "portrait": "screen-bottom-left"
+          },
+          "scale": ["coalesce", ["read", "railScale"], 1],
+          "children": [
+            {
+              "id": "progress",
+              "kind": "group",
+              "x": 0,
+              "y": 0,
+              "size": [956, 86],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 956,
+                    "height": 86
+                  }
+                },
+                {
+                  "id": "title",
+                  "kind": "text",
+                  "text": "Progress",
+                  "x": 16,
+                  "y": 7,
+                  "size": [924, 25],
+                  "font": "vectrex-menu",
+                  "fontSize": 21,
+                  "lineWidth": 1.8,
+                  "color": [1, 0.88, 0.24, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "rule",
+                  "kind": "vector",
+                  "x": 16,
+                  "y": 32,
+                  "size": [926, 2],
+                  "points": [[0, 0], [924, 0]],
+                  "lineWidth": 1.6,
+                  "color": [0.42, 0.72, 0.82, 0.62]
+                },
+                {
+                  "id": "home",
+                  "kind": "text",
+                  "text": "Home",
+                  "x": 16,
+                  "y": 49,
+                  "size": [85, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "left"
+                },
+                {
+                  "id": "peak",
+                  "kind": "text",
+                  "text": "Peak",
+                  "x": 855,
+                  "y": 49,
+                  "size": [85, 24],
+                  "font": "neon-hud",
+                  "fontSize": 20,
+                  "lineWidth": 1.8,
+                  "color": [0.96, 0.98, 1, 1],
+                  "align": "right"
+                },
+                {
+                  "id": "track",
+                  "kind": "rect",
+                  "x": 112,
+                  "y": 61,
+                  "size": [732, 5],
+                  "color": [0.29, 0.47, 0.53, 0.79],
+                  "fill": 1
+                },
+                {
+                  "id": "visited",
+                  "kind": "rect",
+                  "x": 112,
+                  "y": 61,
+                  "size": [732, 5],
+                  "color": [0.46, 0.87, 0.64, 0.87],
+                  "fill": ["coalesce", ["read", "progress"], 0.57]
+                },
+                {
+                  "id": "zone-0",
+                  "kind": "vector",
+                  "x": 112.0,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-1",
+                  "kind": "vector",
+                  "x": 203.5,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-2",
+                  "kind": "vector",
+                  "x": 295.0,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-3",
+                  "kind": "vector",
+                  "x": 386.5,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-4",
+                  "kind": "vector",
+                  "x": 478.0,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-5",
+                  "kind": "vector",
+                  "x": 569.5,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-6",
+                  "kind": "vector",
+                  "x": 661.0,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-7",
+                  "kind": "vector",
+                  "x": 752.5,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "zone-8",
+                  "kind": "vector",
+                  "x": 844.0,
+                  "y": 55,
+                  "size": [2, 19],
+                  "points": [[0, 0], [0, 17]],
+                  "lineWidth": 1.5,
+                  "color": [0.66, 0.83, 0.89, 0.67]
+                },
+                {
+                  "id": "marker-tick",
+                  "kind": "vector",
+                  "x": ["+", 112, ["*", 732, ["coalesce", ["read", "progress"], 0.57]]],
+                  "y": 56,
+                  "size": [2, 18],
+                  "points": [[0, 0], [0, 16]],
+                  "lineWidth": 2.3,
+                  "color": [0.99, 0.98, 0.88, 1]
+                },
+                {
+                  "id": "goat",
+                  "kind": "sprite",
+                  "asset": "goat",
+                  "x": ["+", 112, ["*", 732, ["coalesce", ["read", "progress"], 0.57]]],
+                  "y": 36,
+                  "size": [40, 26],
+                  "pivot": [0.5, 0],
+                  "frame": [0, 21, 29, 20],
+                  "scale": [["if", ["coalesce", ["read", "returning"], false], 1, -1], 1]
+                }
+              ]
+            },
+            {
+              "id": "active-effects",
+              "kind": "group",
+              "x": 0,
+              "y": 102,
+              "size": [956, 88],
+              "children": [
+                {
+                  "id": "flight",
+                  "use": "cooldownCard",
+                  "y": 0,
+                  "inputs": {
+                    "rowLabel": "Flight",
+                    "remaining": ["coalesce", ["read", "flightTicks"], 768],
+                    "duration": 1200,
+                    "timeText": ["coalesce", ["read", "flightTime"], "13s"],
+                    "tint": [0.98, 0.82, 0.35, 1],
+                    "width": 230,
+                    "ringInset": 12,
+                    "labelInset": 84
+                  },
+                  "visible": [
+                    "coalesce",
+                    ["read", "flightVisible"],
+                    [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                  ],
+                  "x": 0
+                },
+                {
+                  "id": "mushroom",
+                  "use": "cooldownCard",
+                  "y": 0,
+                  "inputs": {
+                    "rowLabel": "Mushroom",
+                    "remaining": ["coalesce", ["read", "mushroomTicks"], 246],
+                    "duration": 500,
+                    "timeText": ["coalesce", ["read", "mushroomTime"], "5s"],
+                    "tint": [0.54, 1, 0.65, 1],
+                    "width": 230,
+                    "ringInset": 12,
+                    "labelInset": 84
+                  },
+                  "visible": [
+                    "coalesce",
+                    ["read", "mushroomVisible"],
+                    [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                  ],
+                  "x": [
+                    "+",
+                    0,
+                    [
+                      "if",
+                      [
+                        "coalesce",
+                        ["read", "flightVisible"],
+                        [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                      ],
+                      242,
+                      0
+                    ]
+                  ]
+                },
+                {
+                  "id": "protection",
+                  "use": "cooldownCard",
+                  "y": 0,
+                  "inputs": {
+                    "rowLabel": "Protection",
+                    "remaining": ["coalesce", ["read", "protectionTicks"], 204],
+                    "duration": ["coalesce", ["read", "protectionDuration"], 350],
+                    "timeText": ["coalesce", ["read", "protectionTime"], "4s"],
+                    "tint": [0.42, 0.83, 0.94, 1],
+                    "width": 230,
+                    "ringInset": 12,
+                    "labelInset": 84
+                  },
+                  "visible": [
+                    "coalesce",
+                    ["read", "protectionVisible"],
+                    [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+                  ],
+                  "x": [
+                    "+",
+                    [
+                      "+",
+                      0,
+                      [
+                        "if",
+                        [
+                          "coalesce",
+                          ["read", "flightVisible"],
+                          [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                        ],
+                        242,
+                        0
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "coalesce",
+                        ["read", "mushroomVisible"],
+                        [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                      ],
+                      242,
+                      0
+                    ]
+                  ]
+                },
+                {
+                  "id": "gestation",
+                  "y": 0,
+                  "visible": ["coalesce", ["read", "gestationVisible"], ["coalesce", ["read", "gestationActive"], true]],
+                  "x": [
+                    "+",
+                    [
+                      "+",
+                      [
+                        "+",
+                        0,
+                        [
+                          "if",
+                          [
+                            "coalesce",
+                            ["read", "flightVisible"],
+                            [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                          ],
+                          242,
+                          0
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "coalesce",
+                          ["read", "mushroomVisible"],
+                          [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                        ],
+                        242,
+                        0
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "coalesce",
+                        ["read", "protectionVisible"],
+                        [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+                      ],
+                      242,
+                      0
+                    ]
+                  ],
+                  "use": "barCard",
+                  "inputs": {
+                    "width": 230,
+                    "labelInset": 14,
+                    "labelFontSize": 14,
+                    "percentageFontSize": 18
+                  }
+                },
+                {
+                  "id": "slowDown",
+                  "use": "barCard",
+                  "inputs": {
+                    "width": 230,
+                    "labelInset": 14,
+                    "labelFontSize": 14,
+                    "percentageFontSize": 18,
+                    "label": "Slow Down",
+                    "readout": ["coalesce", ["read", "slowDownText"], "64%"],
+                    "amount": ["coalesce", ["read", "slowDown"], 0],
+                    "barTint": [0.76, 0.7, 1, 1],
+                    "trackTint": [0.19, 0.16, 0.28, 0.9],
+                    "capTint": [0.9, 0.85, 1, 0.9]
+                  },
+                  "visible": ["coalesce", ["read", "slowDownVisible"], [">", ["coalesce", ["read", "slowDown"], 0], 0]],
+                  "x": [
+                    "+",
+                    [
+                      "+",
+                      [
+                        "+",
+                        [
+                          "+",
+                          0,
+                          [
+                            "if",
+                            [
+                              "coalesce",
+                              ["read", "flightVisible"],
+                              [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                            ],
+                            242,
+                            0
+                          ]
+                        ],
+                        [
+                          "if",
+                          [
+                            "coalesce",
+                            ["read", "mushroomVisible"],
+                            [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                          ],
+                          242,
+                          0
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "coalesce",
+                          ["read", "protectionVisible"],
+                          [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+                        ],
+                        242,
+                        0
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "coalesce",
+                        ["read", "gestationVisible"],
+                        ["coalesce", ["read", "gestationActive"], true]
+                      ],
+                      242,
+                      0
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "barCard": {
+      "kind": "group",
+      "size": [["get", "width"], 88],
+      "children": [
+        {
+          "id": "frame",
+          "use": "bezelFrame",
+          "inputs": {
+            "width": ["get", "width"],
+            "height": 88
+          }
+        },
+        {
+          "id": "label",
+          "kind": "text",
+          "text": "{label}",
+          "x": ["get", "labelInset"],
+          "y": 23,
+          "font": "neon-hud",
+          "fontSize": ["get", "labelFontSize"],
+          "lineWidth": 1.65,
+          "color": [0.96, 0.98, 1, 1]
+        },
+        {
+          "id": "readout",
+          "kind": "text",
+          "text": "{readout}",
+          "x": ["-", ["-", ["get", "width"], ["get", "labelInset"]], 78],
+          "y": 21,
+          "font": "neon-hud",
+          "fontSize": ["get", "percentageFontSize"],
+          "lineWidth": 1.65,
+          "color": ["get", "barTint"],
+          "size": [78, 24],
+          "align": "right"
+        },
+        {
+          "id": "track",
+          "kind": "rect",
+          "x": 18,
+          "y": 57,
+          "size": [["-", ["get", "width"], 36], 10],
+          "color": ["get", "trackTint"]
+        },
+        {
+          "id": "fill",
+          "kind": "rect",
+          "x": 18,
+          "y": 57,
+          "size": [["-", ["get", "width"], 36], 10],
+          "fill": ["get", "amount"],
+          "color": ["get", "barTint"]
+        },
+        {
+          "id": "cap",
+          "kind": "vector",
+          "x": ["+", 18, ["*", ["-", ["get", "width"], 36], ["get", "amount"]]],
+          "y": 54,
+          "size": [2, 17],
+          "points": [[0, 0], [0, 16]],
+          "color": ["get", "capTint"],
+          "lineWidth": 2.2
+        }
+      ],
+      "inputs": {
+        "width": 304,
+        "labelInset": 18,
+        "labelFontSize": 16,
+        "percentageFontSize": 20,
+        "label": "Gestation",
+        "readout": ["coalesce", ["read", "gestationText"], "64%"],
+        "amount": ["coalesce", ["read", "gestation"], 0.64],
+        "barTint": [1, 0.5, 0.72, 1],
+        "trackTint": [0.23, 0.15, 0.23, 0.9],
+        "capTint": [1, 0.82, 0.91, 0.9]
+      }
+    }
+  },
+  "root": {
+    "id": "goatup-landscape",
+    "kind": "group",
+    "children": [
+      {
+        "id": "records",
+        "kind": "group",
+        "size": [410, 200],
+        "x": -24,
+        "y": -468,
+        "pivot": [1, 0],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "children": [
+          {
+            "id": "frame",
+            "use": "bezelFrame",
+            "inputs": {
+              "width": 410,
+              "height": 200
+            }
+          },
+          {
+            "id": "title",
+            "kind": "text",
+            "text": "High Score",
+            "x": 18,
+            "y": 13.5,
+            "font": "vectrex-menu",
+            "fontSize": 19,
+            "lineWidth": 1.65,
+            "color": [1, 0.88, 0.24, 1],
+            "size": [374, 23]
+          },
+          {
+            "id": "high-score",
+            "kind": "text",
+            "text": "{recordScore}",
+            "x": 18,
+            "y": 43.75,
+            "font": "neon-hud",
+            "fontSize": 31,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [374, 35],
+            "align": "right"
+          },
+          {
+            "id": "rule",
+            "kind": "vector",
+            "x": 18,
+            "y": 86,
+            "size": [375, 2],
+            "points": [[0, 0], [374, 0]],
+            "color": [0.42, 0.72, 0.82, 0.62],
+            "lineWidth": 1.6
+          },
+          {
+            "id": "name-0",
+            "kind": "text",
+            "text": "Highest Platform",
+            "x": 18,
+            "y": 104.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-0",
+            "kind": "text",
+            "text": "{recordPlatform}",
+            "x": 285,
+            "y": 101.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          },
+          {
+            "id": "name-1",
+            "kind": "text",
+            "text": "Total Kisses",
+            "x": 18,
+            "y": 134.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-1",
+            "kind": "text",
+            "text": "{totalKisses}",
+            "x": 285,
+            "y": 131.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          },
+          {
+            "id": "name-2",
+            "kind": "text",
+            "text": "Total Unique Items",
+            "x": 18,
+            "y": 164.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-2",
+            "kind": "text",
+            "text": "{totalItems}",
+            "x": 285,
+            "y": 161.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          }
+        ],
+        "scale": ["coalesce", ["read", "railScale"], 1],
+        "inputs": {
+          "recordScore": ["coalesce", ["read", "recordScore"], "2,338,600"],
+          "recordPlatform": ["coalesce", ["read", "recordPlatform"], 384],
+          "totalKisses": ["coalesce", ["read", "totalKisses"], 76],
+          "totalItems": ["coalesce", ["read", "totalItems"], 215]
+        }
+      },
+      {
+        "id": "this-run",
+        "kind": "group",
+        "size": [410, 196],
+        "x": -24,
+        "y": 468,
+        "pivot": [1, 1],
+        "placement": {
+          "landscape": "gameplay-left"
+        },
+        "children": [
+          {
+            "id": "frame",
+            "use": "bezelFrame",
+            "inputs": {
+              "width": 410,
+              "height": 196
+            }
+          },
+          {
+            "id": "title",
+            "kind": "text",
+            "text": "Run Stats",
+            "x": 18,
+            "y": 13.5,
+            "font": "vectrex-menu",
+            "fontSize": 19,
+            "lineWidth": 1.65,
+            "color": [1, 0.88, 0.24, 1],
+            "size": [374, 23]
+          },
+          {
+            "id": "divider",
+            "use": "frameBeam",
+            "x": 18,
+            "y": 44,
+            "scale": [1, ["/", 374, 16]],
+            "rotation": -90,
+            "lineWidth": 1.35,
+            "color": [0.39, 0.57, 0.68, 0.42]
+          },
+          {
+            "id": "name-0",
+            "kind": "text",
+            "text": "Kids",
+            "x": 18,
+            "y": 63.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-0",
+            "kind": "text",
+            "text": "{kids}",
+            "x": 285,
+            "y": 60.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          },
+          {
+            "id": "name-1",
+            "kind": "text",
+            "text": "Most Kids",
+            "x": 18,
+            "y": 95.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-1",
+            "kind": "text",
+            "text": "{mostKids}",
+            "x": 285,
+            "y": 92.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          },
+          {
+            "id": "name-2",
+            "kind": "text",
+            "text": "Kisses",
+            "x": 18,
+            "y": 127.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-2",
+            "kind": "text",
+            "text": "{kisses}",
+            "x": 285,
+            "y": 124.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          },
+          {
+            "id": "name-3",
+            "kind": "text",
+            "text": "Unique Items",
+            "x": 18,
+            "y": 159.0,
+            "font": "neon-hud",
+            "fontSize": 16,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1]
+          },
+          {
+            "id": "number-3",
+            "kind": "text",
+            "text": "{uniqueItems}",
+            "x": 285,
+            "y": 156.5,
+            "font": "neon-hud",
+            "fontSize": 21,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [107, 25],
+            "align": "right"
+          }
+        ],
+        "scale": ["coalesce", ["read", "railScale"], 1],
+        "inputs": {
+          "kids": ["coalesce", ["read", "kids"], 8],
+          "mostKids": ["coalesce", ["read", "mostKids"], 11],
+          "kisses": ["coalesce", ["read", "kisses"], 5],
+          "uniqueItems": ["coalesce", ["read", "uniqueItems"], 34]
+        }
+      },
+      {
+        "id": "active-effects",
+        "kind": "group",
+        "size": [304, 382],
+        "x": 24,
+        "y": -468,
+        "pivot": [0, 0],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "children": [
+          {
+            "id": "flight",
+            "use": "cooldownCard",
+            "y": 0,
+            "inputs": {
+              "rowLabel": "Flight",
+              "remaining": ["coalesce", ["read", "flightTicks"], 768],
+              "duration": 1200,
+              "timeText": ["coalesce", ["read", "flightTime"], "13s"],
+              "tint": [0.98, 0.82, 0.35, 1]
+            },
+            "visible": ["coalesce", ["read", "flightVisible"], [">", ["coalesce", ["read", "flightTicks"], 768], 0]]
+          },
+          {
+            "id": "mushroom",
+            "use": "cooldownCard",
+            "y": [
+              "+",
+              0,
+              [
+                "if",
+                ["coalesce", ["read", "flightVisible"], [">", ["coalesce", ["read", "flightTicks"], 768], 0]],
+                98,
+                0
+              ]
+            ],
+            "inputs": {
+              "rowLabel": "Mushroom",
+              "remaining": ["coalesce", ["read", "mushroomTicks"], 246],
+              "duration": 500,
+              "timeText": ["coalesce", ["read", "mushroomTime"], "5s"],
+              "tint": [0.54, 1, 0.65, 1]
+            },
+            "visible": ["coalesce", ["read", "mushroomVisible"], [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]]
+          },
+          {
+            "id": "protection",
+            "use": "cooldownCard",
+            "y": [
+              "+",
+              [
+                "+",
+                0,
+                [
+                  "if",
+                  [
+                    "coalesce",
+                    ["read", "flightVisible"],
+                    [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                  ],
+                  98,
+                  0
+                ]
+              ],
+              [
+                "if",
+                [
+                  "coalesce",
+                  ["read", "mushroomVisible"],
+                  [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                ],
+                98,
+                0
+              ]
+            ],
+            "inputs": {
+              "rowLabel": "Protection",
+              "remaining": ["coalesce", ["read", "protectionTicks"], 204],
+              "duration": ["coalesce", ["read", "protectionDuration"], 350],
+              "timeText": ["coalesce", ["read", "protectionTime"], "4s"],
+              "tint": [0.42, 0.83, 0.94, 1]
+            },
+            "visible": [
+              "coalesce",
+              ["read", "protectionVisible"],
+              [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+            ]
+          },
+          {
+            "id": "gestation",
+            "y": [
+              "+",
+              [
+                "+",
+                [
+                  "+",
+                  0,
+                  [
+                    "if",
+                    [
+                      "coalesce",
+                      ["read", "flightVisible"],
+                      [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                    ],
+                    98,
+                    0
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "coalesce",
+                    ["read", "mushroomVisible"],
+                    [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                  ],
+                  98,
+                  0
+                ]
+              ],
+              [
+                "if",
+                [
+                  "coalesce",
+                  ["read", "protectionVisible"],
+                  [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+                ],
+                98,
+                0
+              ]
+            ],
+            "visible": ["coalesce", ["read", "gestationVisible"], ["coalesce", ["read", "gestationActive"], true]],
+            "use": "barCard"
+          },
+          {
+            "id": "slowDown",
+            "use": "barCard",
+            "inputs": {
+              "label": "Slow Down",
+              "readout": ["coalesce", ["read", "slowDownText"], "64%"],
+              "amount": ["coalesce", ["read", "slowDown"], 0],
+              "barTint": [0.76, 0.7, 1, 1],
+              "trackTint": [0.19, 0.16, 0.28, 0.9],
+              "capTint": [0.9, 0.85, 1, 0.9]
+            },
+            "visible": ["coalesce", ["read", "slowDownVisible"], [">", ["coalesce", ["read", "slowDown"], 0], 0]],
+            "y": [
+              "+",
+              [
+                "+",
+                [
+                  "+",
+                  [
+                    "+",
+                    0,
+                    [
+                      "if",
+                      [
+                        "coalesce",
+                        ["read", "flightVisible"],
+                        [">", ["coalesce", ["read", "flightTicks"], 768], 0]
+                      ],
+                      98,
+                      0
+                    ]
+                  ],
+                  [
+                    "if",
+                    [
+                      "coalesce",
+                      ["read", "mushroomVisible"],
+                      [">", ["coalesce", ["read", "mushroomTicks"], 246], 0]
+                    ],
+                    98,
+                    0
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "coalesce",
+                    ["read", "protectionVisible"],
+                    [">", ["coalesce", ["read", "protectionTicks"], 204], 0]
+                  ],
+                  98,
+                  0
+                ]
+              ],
+              [
+                "if",
+                ["coalesce", ["read", "gestationVisible"], ["coalesce", ["read", "gestationActive"], true]],
+                98,
+                0
+              ]
+            ]
+          }
+        ],
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      },
+      {
+        "id": "progress",
+        "kind": "group",
+        "size": [185, 488],
+        "x": 24,
+        "y": 468,
+        "pivot": [0, 1],
+        "placement": {
+          "landscape": "gameplay-right"
+        },
+        "children": [
+          {
+            "id": "frame",
+            "use": "bezelFrame",
+            "inputs": {
+              "width": 185,
+              "height": 488
+            }
+          },
+          {
+            "id": "title",
+            "kind": "text",
+            "text": "Progress",
+            "x": 18,
+            "y": 13.5,
+            "font": "vectrex-menu",
+            "fontSize": 19,
+            "lineWidth": 1.65,
+            "color": [1, 0.88, 0.24, 1],
+            "size": [149, 23]
+          },
+          {
+            "id": "divider",
+            "use": "frameBeam",
+            "x": 18,
+            "y": 44,
+            "scale": [1, ["/", 149, 16]],
+            "rotation": -90,
+            "lineWidth": 1.35,
+            "color": [0.39, 0.57, 0.68, 0.42]
+          },
+          {
+            "id": "peak",
+            "kind": "text",
+            "text": "Peak",
+            "x": 0,
+            "y": 62,
+            "font": "neon-hud",
+            "fontSize": 15,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [185, 19],
+            "align": "center"
+          },
+          {
+            "id": "home",
+            "kind": "text",
+            "text": "Home",
+            "x": 0,
+            "y": 453,
+            "font": "neon-hud",
+            "fontSize": 15,
+            "lineWidth": 1.65,
+            "color": [0.96, 0.98, 1, 1],
+            "size": [185, 19],
+            "align": "center"
+          },
+          {
+            "id": "track",
+            "kind": "vector",
+            "x": 92.5,
+            "y": 89,
+            "size": [2, 353],
+            "points": [[0, 0], [0, 352]],
+            "color": [0.48, 0.73, 0.82, 0.66],
+            "lineWidth": 2.5
+          },
+          {
+            "id": "visited",
+            "kind": "rect",
+            "x": 91,
+            "y": 89,
+            "size": [3, 352],
+            "fill": ["coalesce", ["read", "progress"], 0.57],
+            "fillDirection": "up",
+            "color": [0.46, 0.87, 0.64, 0.87]
+          },
+          {
+            "id": "zone-0",
+            "kind": "vector",
+            "x": 70.5,
+            "y": 89.0,
+            "size": [45, 2],
+            "points": [[0, 0], [44, 0]],
+            "color": [0.61, 0.84, 0.92, 0.72],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-1",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 133.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-2",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 177.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-3",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 221.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-4",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 265.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-5",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 309.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-6",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 353.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-7",
+            "kind": "vector",
+            "x": 76.5,
+            "y": 397.0,
+            "size": [33, 2],
+            "points": [[0, 0], [32, 0]],
+            "color": [0.66, 0.83, 0.89, 0.48],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "zone-8",
+            "kind": "vector",
+            "x": 70.5,
+            "y": 441.0,
+            "size": [45, 2],
+            "points": [[0, 0], [44, 0]],
+            "color": [0.61, 0.84, 0.92, 0.72],
+            "lineWidth": 1.4
+          },
+          {
+            "id": "marker-tick",
+            "kind": "vector",
+            "x": 53.5,
+            "y": ["-", 441, ["*", 352, ["coalesce", ["read", "progress"], 0.57]]],
+            "size": [32, 2],
+            "points": [[0, 0], [31, 0]],
+            "color": [0.99, 0.98, 0.88, 1],
+            "lineWidth": 2.2
+          },
+          {
+            "id": "goat",
+            "kind": "sprite",
+            "asset": "goat",
+            "x": 105.5,
+            "y": ["-", ["-", 441, ["*", 352, ["coalesce", ["read", "progress"], 0.57]]], 14.5],
+            "size": [44, 29],
+            "frame": [0, 21, 29, 20]
+          }
+        ],
+        "scale": ["coalesce", ["read", "railScale"], 1]
+      }
+    ]
+  }
+}

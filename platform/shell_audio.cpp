@@ -138,18 +138,18 @@ struct ShellAudio::State {
 
     void install(Tone type, int midi, float gain, float pan, float attack, float decay,
                  float delay = 0) {
-        auto slot = std::find_if(cues.begin(), cues.end(), [](const CueVoice &voice) {
-            return voice.length == 0;
-        });
+        auto slot = std::find_if(cues.begin(), cues.end(),
+                                 [](const CueVoice &voice) { return voice.length == 0; });
         if (slot == cues.end())
-            slot = std::min_element(cues.begin(), cues.end(),
-                                    [](const CueVoice &a, const CueVoice &b) {
-                                        return a.gain < b.gain;
-                                    });
+            slot = std::min_element(
+                cues.begin(), cues.end(),
+                [](const CueVoice &a, const CueVoice &b) { return a.gain < b.gain; });
         const int frames = int(6.f * decay * kAudioRate);
-        *slot = {type, type == Tone::Kick ? 62.0 : frequency(midi), 0,
-                 -int(delay * kAudioRate), frames, attack, gain,
-                 float(std::exp(-kStep / decay)), pan};
+        *slot = {type,   type == Tone::Kick ? 62.0 : frequency(midi),
+                 0,      -int(delay * kAudioRate),
+                 frames, attack,
+                 gain,   float(std::exp(-kStep / decay)),
+                 pan};
     }
 
     void updatePad() {
@@ -171,9 +171,9 @@ struct ShellAudio::State {
             voice.drift = wave(sine, seconds * (.043 + .003 * (i % 11)) + voice.phase);
         }
         const float low = 335.f * std::exp2(.32f * wave(sine, .063 * seconds + .16) +
-                                           .14f * wave(sine, .110 * seconds + .68));
+                                            .14f * wave(sine, .110 * seconds + .68));
         const float high = 790.f * std::exp2(.39f * wave(sine, .051 * seconds + .55) +
-                                            .12f * wave(sine, .097 * seconds + .16));
+                                             .12f * wave(sine, .097 * seconds + .16));
         lowBand.set(low, .91f);
         highBand.set(high, 1.12f);
     }
@@ -191,16 +191,17 @@ struct ShellAudio::State {
                 continue;
             const double phase = voice.hz * seconds + voice.phase;
             const float weight = voice.gain * (.87f + .13f * voice.drift);
-            const float support = voice.support *
-                                  (.015f * wave(sine, phase * .9991 + .18) +
-                                   .009f * wave(sine, phase * 1.0011 + .62));
+            const float support = voice.support * (.015f * wave(sine, phase * .9991 + .18) +
+                                                   .009f * wave(sine, phase * 1.0011 + .62));
             const float body = .013f * weight * wave(mist, phase + .027 * voice.drift);
             const double leftPhase = phase * .99782 + .16;
             const double rightPhase = phase * 1.00216 + .57;
-            l += support + body + weight * (.011f * wave(mist, leftPhase) +
-                                             .0044f * wave(shimmer, rightPhase + .12));
-            r += support + body + weight * (.011f * wave(mist, rightPhase) +
-                                             .0044f * wave(shimmer, leftPhase + .23));
+            l +=
+                support + body +
+                weight * (.011f * wave(mist, leftPhase) + .0044f * wave(shimmer, rightPhase + .12));
+            r +=
+                support + body +
+                weight * (.011f * wave(mist, rightPhase) + .0044f * wave(shimmer, leftPhase + .23));
         }
         const size_t mask = reflections[0].size() - 1;
         const float earlyL = reflections[1][(reflectionHead - 2737) & mask];
@@ -245,9 +246,8 @@ struct ShellAudio::State {
                 sample = wave(sine, voice.phase) + .38f * wave(sine, 2 * voice.phase);
                 break;
             }
-            const double hz = voice.type == Tone::Kick
-                                  ? voice.hz + 77.0 * std::exp(-time / .022)
-                                  : voice.hz;
+            const double hz =
+                voice.type == Tone::Kick ? voice.hz + 77.0 * std::exp(-time / .022) : voice.hz;
             voice.phase += hz * kStep;
             const float scaled = sample * voice.gain * smooth(time / voice.attack);
             voice.gain *= voice.decayStep;

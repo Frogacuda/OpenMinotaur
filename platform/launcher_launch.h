@@ -6,9 +6,10 @@ namespace mino::iox {
 class AppLaunch {
   public:
     static constexpr double seconds = .25;
-    void start() {
+    void start(bool returning = false) {
         elapsed_ = 0;
         active_ = true;
+        returning_ = returning;
     }
     void cancel() {
         active_ = false;
@@ -18,6 +19,12 @@ class AppLaunch {
     }
     float progress() const {
         return float(std::clamp(elapsed_ / seconds, 0.0, 1.0));
+    }
+    bool returning() const {
+        return returning_;
+    }
+    float poseProgress() const {
+        return returning_ ? 1 - progress() : progress();
     }
     static float imageProgress(float progress) {
         return progress * progress;
@@ -40,5 +47,6 @@ class AppLaunch {
   private:
     double elapsed_ = 0;
     bool active_ = false;
+    bool returning_ = false;
 };
 } // namespace mino::iox

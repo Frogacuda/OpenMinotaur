@@ -171,14 +171,15 @@ int main(int argc, char **argv) {
         ship.deathTimer = 1;
         g.lives = 2;
         g.minosSaved = 5;
+        g.cavernRescues = 5;
         g.minosSavedTotal = 105;
         g.rescueBonus = 10000;
         g.respawnPos = {9.5, 100};
         ship.doControls();
         check(g.lives == 1 && !ship.dying && g.minosSaved == 0 && g.rescueBonus == 0,
               "respawn clears actual cavern rescue count and bonus");
-        check(g.minosSavedTotal == 105 && g.respawnedThisCavern,
-              "run rescue total retained; fuel bonus marked ineligible");
+        check(g.minosSavedTotal == 105 && g.cavernRescues == 5 && g.respawnedThisCavern,
+              "rescue tallies retained; fuel bonus marked ineligible");
         g.shipList = nullptr;
     }
     std::cout << "local records, goal gates, presentation, explosion binding and respawn rescue "

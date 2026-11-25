@@ -16,7 +16,9 @@ bool text(const std::string &s, size_t max) {
     return !s.empty() && s.size() <= max &&
            std::none_of(s.begin(), s.end(), [](unsigned char c) { return c < 32; });
 }
-bool range(float x, float a, float b) { return std::isfinite(x) && x >= a && x <= b; }
+bool range(float x, float a, float b) {
+    return std::isfinite(x) && x >= a && x <= b;
+}
 float curve(float t, ResponseCurve c) {
     t = std::clamp(t, 0.f, 1.f);
     switch (c) {

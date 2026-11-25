@@ -23,8 +23,12 @@ class Canvas {
               float width = 1);
     void text(Point, std::string_view, const TextStyle &, const FontRegistry & = defaultFonts());
     void object(const Object &);
-    const std::vector<Stroke> &strokes() const { return strokes_; }
-    std::size_t dropped() const { return dropped_; }
+    const std::vector<Stroke> &strokes() const {
+        return strokes_;
+    }
+    std::size_t dropped() const {
+        return dropped_;
+    }
 
   private:
     std::size_t capacity_, dropped_ = 0;
@@ -52,7 +56,9 @@ class BeamMesh {
     // Logical object coordinates span 640x480. Stroke widths stay screen relative.
     const std::vector<Vertex> &build(const std::vector<Stroke> &, double seconds, int width,
                                      int height, const BeamStyle &);
-    const MeshStats &stats() const { return stats_; }
+    const MeshStats &stats() const {
+        return stats_;
+    }
 
   private:
     struct Frame {

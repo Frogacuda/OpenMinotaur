@@ -34,6 +34,81 @@ struct GoatUpTouchChecks {
         check(bounced.values.at("screen.elevation") == observed.values.at("screen.elevation") &&
                   core.world_->random.state() == random,
               "Read-only presentation must ignore goat bounce and preserve RNG");
+        auto &world = *core.world_;
+        // Reproduce a Speed Down pickup at a zone boundary after its target drops.
+        // The native pickup applies even when the new speed remains above that target.
+        goatup::Platform pickupPlatform;
+        pickupPlatform.level = 64;
+        pickupPlatform.earlyLayout(false);
+        pickupPlatform.y = .2f;
+        world.actors.spriteSize = [](int) { return goatup::Vec2{1, 1}; };
+        world.actors.sound = [](int, int) {};
+        world.game.climbSpeed = .008f;
+        world.game.targetClimbSpeed = .003f;
+        world.denizens.create({goatup::PlatformBirth::Kind::Pickup, &pickupPlatform, 0, 82});
+        world.denizens.tick();
+        std::vector<goatup::ActorDraw> pickupDraws;
+        world.denizens.prepareDraw(pickupDraws);
+        world.denizens.prepareDraw(pickupDraws);
+        world.goat.position = world.denizens.contacts().front().position;
+        world.game.contacts();
+        check(world.game.climbSpeed == .004f && world.kidState.statusTicks == 240 &&
+                  std::get<double>(core.widgetPresentationState().values.at("slowDown")) == 1.,
+              "A real pickup contact publishes a full bar even above the target speed");
+        world.denizens.reset();
+        for (int tick = 0; tick < 120; ++tick)
+            world.actors.updateSlowDownMeter();
+        check(std::get<double>(core.widgetPresentationState().values.at("slowDown")) == .5,
+              "Slow Down drains when there is no speed deficit");
+        for (int tick = 0; tick < 120; ++tick)
+            world.actors.updateSlowDownMeter();
+        check(std::get<double>(core.widgetPresentationState().values.at("slowDown")) == 0.,
+              "The pickup notice expires at the end of its four-second window");
+        world.game.climbSpeed = world.game.targetClimbSpeed = .003f;
+        world.kidState.statusTicks = 0;
+        random = world.random.state();
+        world.tower.scroll = 102.3f;
+        world.game.flightTicks = 301;
+        world.game.pregnant = true;
+        world.goat.pregnancy = 2;
+        world.actors.poison = .5f;
+        world.actors.grantProtection(350);
+        world.actors.hazardGrace = 100;
+        world.actors.grantProtection(80);
+        auto widgets = core.widgetPresentationState();
+        check(widgets.gameplay &&
+                  std::abs(std::get<double>(widgets.values.at("progress")) - .5) < 1e-6 &&
+                  std::get<int64_t>(widgets.values.at("kids")) == 3 &&
+                  std::get<int64_t>(widgets.values.at("kisses")) == 2 &&
+                  !std::get<bool>(widgets.values.at("returning")) &&
+                  std::get<bool>(widgets.values.at("gestationActive")) &&
+                  std::get<double>(widgets.values.at("gestation")) == .5 &&
+                  std::get<int64_t>(widgets.values.at("flightTicks")) == 301 &&
+                  std::get<int64_t>(widgets.values.at("mushroomTicks")) == 250 &&
+                  std::get<int64_t>(widgets.values.at("protectionTicks")) == 100 &&
+                  std::get<int64_t>(widgets.values.at("protectionDuration")) == 350,
+              "Widget snapshot reads concurrent effects and distinct run stats");
+        world.game.summitVisited = true;
+        check(std::get<double>(core.widgetPresentationState().values.at("progress")) == 1,
+              "The summit reaches the peak marker");
+        world.game.diveRequested = true;
+        check(std::get<bool>(core.widgetPresentationState().values.at("returning")),
+              "The progress marker turns when the summit dive starts");
+        world.game.diveRequested = false;
+        world.game.summitVisited = false;
+        world.game.returning = true;
+        world.tower.scroll = -.2f;
+        check(std::get<double>(core.widgetPresentationState().values.at("progress")) == 0 &&
+                  std::get<bool>(core.widgetPresentationState().values.at("returning")) &&
+                  world.random.state() == random,
+              "Returning home lowers the progress meter without changing gameplay RNG");
+        world.game.demo = true;
+        check(!core.widgetPresentationState().gameplay, "Widgets stay hidden during the demo");
+        world.game.demo = false;
+        world.game.returning = world.game.pregnant = false;
+        world.game.flightTicks = 0;
+        world.goat.pregnancy = world.actors.poison = 0;
+        world.actors.hazardGrace = world.actors.hazardDuration = 0;
         core.world_->goat.position = originalPosition;
         core.world_->goat.kids = 0;
         core.world_->actors.runBillyGoats = 0;
@@ -111,6 +186,7 @@ struct GoatUpTouchChecks {
         check(core.input().method == Method::DirectAxis && core.input().jump,
               "Native controller input remains independent");
         core.world_->game.gameOver = true;
+        check(!core.widgetPresentationState().gameplay, "Widgets stay hidden at game over");
         core.world_->game.ticks = 120;
         core.gameOverArmed_ = true;
         core.commands(PAD_A);

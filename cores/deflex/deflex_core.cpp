@@ -64,6 +64,31 @@ class DeflexCore final : public Core {
         state.collections["ball.turns"] = turns_;
         return state;
     }
+    PresentationState widgetPresentationState() const override {
+        using Page = deflex::Frontend::Page;
+        if (!frontend_ || startup_.blocking() ||
+            (frontend_->page != Page::Game && frontend_->page != Page::Paused))
+            return {};
+        auto &world = frontend_->world();
+        const auto &context = world.context;
+        const auto chainDuration = int64_t(world.level.definition.integer(0xe10)) + 1;
+        const bool chainActive = context.multiplier > 1;
+        const int fewest = world.bestMoves();
+        const double chainFill =
+            chainActive && chainDuration > 0
+                ? std::clamp(1. - double(context.framesSinceTarget) / chainDuration, 0., 1.)
+                : 0.;
+        return {true,
+                suspended_ || frontend_->paused(),
+                uint64_t(context.levelIndex) + 1,
+                {{"levelScore", int64_t(context.score)},
+                 {"levelBest", int64_t(context.bestScore)},
+                 {"shell", remainingShell_},
+                 {"chain", int64_t(context.multiplier)},
+                 {"chainFill", chainFill},
+                 {"batsUsed", int64_t(world.level.deflectorsCreated)},
+                 {"batsFewest", int64_t(fewest == deflex::Progress::noBestMoves ? -1 : fewest)}}};
+    }
     bool init(Host &host, const SurfaceInfo &surface) override {
         if (!startup_.begin(host, surface))
             return false;

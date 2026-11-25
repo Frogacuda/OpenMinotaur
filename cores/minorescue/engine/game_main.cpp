@@ -457,33 +457,29 @@ void spaceWars::randomSaucer() {
 
 // ============================================================== scoring ====
 
+int64_t spaceWars::nextExtraLife(int score) {
+    for (int threshold : {10000, 50000, 100000, 500000})
+        if (score < threshold)
+            return threshold;
+    return (int64_t(score) / 1000000 + 1) * 1000000;
+}
+
+void spaceWars::loseShip(int player) {
+    if (demo)
+        return;
+    --lives[player];
+    if (presentationShipLost)
+        presentationShipLost(presentationContext, *this);
+}
+
 void spaceWars::score(int points, int player) {
-    static const int kExtraLife[4] = {10000, 50000, 100000, 500000};
     int old = scores[player];
     int now = old + points;
     scores[player] = now;
     if (now > 999999 && !(goalsDone & 0x40))
         achieveGoal(6);
-    if (survival)
+    if (survival || now < nextExtraLife(old))
         return;
-    bool extra = false;
-    for (int t : kExtraLife) {
-        if (now < t)
-            return;
-        if (old < t) {
-            extra = true;
-            break;
-        }
-    }
-    if (!extra) {
-        for (int t = 1000000; t <= now; t += 1000000)
-            if (old < t) {
-                extra = true;
-                break;
-            }
-        if (!extra)
-            return;
-    }
     int l = lives[player];
     if (l >= 10)
         return;

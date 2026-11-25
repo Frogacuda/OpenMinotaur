@@ -4,6 +4,10 @@ namespace mino {
 float Launcher::focusPulse() const {
     return .30f + .24f * (.5f + .5f * std::sin(float(selectionTime_) * 6.2831853f / 1.8f));
 }
+void Launcher::drawTabFill(const MenuRect &r, bool selected, bool gloss) {
+    rect(r, selected ? Colour{.29f, .43f, .62f} : Colour{.57f, .67f, .79f},
+         selected ? Colour{.20f, .35f, .55f} : Colour{.43f, .55f, .70f}, true, gloss, 4);
+}
 void Launcher::recessedButton(const MenuRect &back, const std::string &label, bool selected,
                               bool arrow, bool brown) {
     selected = selected && menuFocusVisible();

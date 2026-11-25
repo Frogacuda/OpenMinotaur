@@ -13,11 +13,19 @@ struct RenderStatistics {
     size_t draws = 0, triangles = 0, strokes = 0, uploads = 0, textLayouts = 0, dropped = 0;
     size_t rasterBakes = 0, textureUploads = 0;
 };
+struct BeamAppearance {
+    float brightness = .55f;
+    float halo = .30f;
+    float spread = 1.75f;
+    float whiteHot = .10f;
+    float widthScale = .70f;
+};
+enum class BeamProfile { Uniform, Gameplay };
 // Optional GLES3 backend. CPU semantics can be built and tested without it.
 using ResourceReader = std::function<bool(const std::string &, std::vector<uint8_t> &)>;
 class Renderer {
   public:
-    Renderer();
+    explicit Renderer(BeamAppearance appearance = {}, BeamProfile profile = BeamProfile::Uniform);
     ~Renderer();
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;

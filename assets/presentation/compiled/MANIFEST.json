@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "compiler_signature": "a7aa020e381a9309e85305ab02634d7031d2d296fdfce79aa74db31679ecdc9d",
+  "compiler_signature": "2c2de49f33f5e1efa8aa2e2fbb65a1a6fa65d887a94a8ea74e9c538d6a413470",
   "scenes": [
     {
       "source": "bezels/Deflex.neongles",
@@ -105,9 +105,9 @@
     },
     {
       "source": "bezels/GoatUp.neongles",
-      "source_sha256": "74637397280f19bde40a128bff56793b7464b45c0365b4adf9a3674d1935cb40",
+      "source_sha256": "878dd43395975b268db4a7f0364b7a9b655ff85fc2b3b43ecb8e1c0ecf678a6d",
       "file": "bezels/GoatUp.neonb",
-      "sha256": "a80128277ad19ee6a1da28fe897d05185ee67b566663e6f171fb705e1c587379",
+      "sha256": "babfe93000c2b2edd183c8da3eaa95a2f4c7e7780c6f0798f52de580ebbed464",
       "resources": {
         "gles/shaders/1.frag": "e702b8f95e5282ea30c62c29b5d0e8b198f5a995c4dfb0c184f73f22d8fd9717",
         "gles/shaders/12.frag": "f1deadf012bff971437ceb26ec1d4149c225947dd1b659bebfc611219d2d23be",
@@ -540,9 +540,9 @@
     },
     {
       "source": "bezels/SuperOxWars.neongles",
-      "source_sha256": "18b10a77a8365c552c5830cfaa5b3a5bf6b9a55a4fb1de941d4d14335443d723",
+      "source_sha256": "69fd41830190a658e20c60ae65f7fb7b8c9ad49fa3f7827d98d7c7ac4b68b54d",
       "file": "bezels/SuperOxWars.neonb",
-      "sha256": "32004723878de7ae6ea6e988010d4af3ab4d2de4371b1623cfc6a56f4d5af6a5",
+      "sha256": "7286f638d9a61c4f4f96563c5386c7670926f07fb2ece4f85cd0d209e0094fbd",
       "resources": {
         "gles/shaders/11.frag": "719875f854eb80de7c2ad7c6045df484c77d2518b7b9ad0965e17a2ef66a9cf7",
         "gles/shaders/13.frag": "bdf3694a35f187a3aee72691abdb8268906b843c23d52eb0b2d87ebaddee9342",

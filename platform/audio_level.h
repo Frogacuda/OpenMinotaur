@@ -15,7 +15,9 @@ class AudioLevel {
         }
         level_.store(count ? float(std::sqrt(energy / count)) : 0.f, std::memory_order_relaxed);
     }
-    float value() const { return level_.load(std::memory_order_relaxed); }
+    float value() const {
+        return level_.load(std::memory_order_relaxed);
+    }
 
   private:
     std::atomic<float> level_{0};

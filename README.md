@@ -1,20 +1,83 @@
 # OpenMinotaur
 
-Version 0.9.6 — public beta, progressing toward feature-complete 1.0.
+OpenMinotaur is a free, open-source preservation and documentation project supporting
+the nine titles released by Llamasoft for iOS and subsequently de-listed. This project
+aims to lift the burden of ongoing support for these titles by reconstructing them as
+native C++ source that can be easily adapted to a wide range of target platforms, and
+to support them with a premium presentation and feature set through the optional iOX
+launcher.
 
-A portable C++ reconstruction of Llamasoft's nine Minotaur Project games over
-a shared Neon engine: Minotaur Rescue, Minotron: 2112, GoatUp, Caverns of Minos,
-Gridrunner, Five a Day, Super Ox Wars, Deflex and GoatUp 2. Gridrunner Classic
-has its own launcher entry.
+The original games and their assets are copyright Llamasoft Ltd, 2011-2013 and are
+included here with explicit permission from the author. The project's software license
+applies to this project's original features, and does not imply broader permission on
+behalf the original author.
 
-OpenMinotaur is the source project. The Android app is named **Minotaur Project**;
-its planned Play Store title is **Minotaur Project: Llamasoft iOS Archive**.
+There are three main components of OpenMinotaur:
 
-The collection includes the iOX launcher with animated app opening, native controller input, touch and
-mouse input, local scores, achievement tracking and configurable presentation.
-Original game assets are bundled with Llamasoft's permission; no import step is
-required. Runtime code uses C++17, SDL3 and OpenGL/OpenGL ES, without emulation
-or a binary-translation runtime.
+### Games
+
+The Minotaur Project consisted of nine original titles:
+
+- Minotaur Rescue
+- Minotron 2112
+- Deflex
+- GoatUp
+- Caverns of Minos
+- Gridrunner
+- Five a Day
+- Super Ox Wars
+- GoatUp 2
+
+These games were reconstructed in native C++ from the original iOS releases,
+with Android ports consulted where they helped identify missing function names.
+They use SDL3 for platform-independent input and output. Native controller
+support tuned for each game replaces the obsolete iCade controller path.
+Menus have been adapted so everything is navigable by
+controller or touch, and the port addresses a number of bugs. Fidelity to the
+original games remains the goal.
+
+### iOX Launcher Experience
+
+While standalone builds are supported, the recommended way to enjoy OpenMinotaur is
+through iOX, a polished, feature-rich compilation experience that includes all nine
+games and an attractive GUI to explore them. iOX features:
+
+- Nostalgic retro-mobile interface
+- Display settings including resolution and orientation
+- Screen filters for low res, CRT, and Scanlines
+- LiveSynth Bezels: Custom light synths that respond to your gameplay.
+- LiveWidgets: Bezel overlays with live gameplay stats in all nine titles.
+- In-game iOX menu for Display and Control settings.
+
+The iOX interface pays homage to the skeuomorphic design of the early 2010s, a cheeky
+parody that runs on a fictional Minorola device. It features smooth animations and
+transitions, an "app" for tracking achievements, settings menus, and informational
+screens. Menu sounds shift to harmonize with the ambient music patterns.
+
+The LiveSynth feature makes use of a light synth engine adapted, in part, from shaders
+used in Neon Engine titles from around the same time. Each game has a custom scene
+authored in NHML and driven by gameplay hooks. LiveSynth can also pull from the game's
+framebuffer and audio output.
+
+LiveWidgets are designed to help score-attack players better track and understand their
+gameplay. They expose hidden scoring mechanics, track power-ups and effect cooldowns
+and progress toward achievements. They are principally vector objects, drawn with our
+own vector beam simulation, and cached to raster at runtime for performance reasons.
+Widgets are stored using WidgetML for responsive placement and clear semantics.
+
+### Development
+
+A long-term goal for the project is to support not only the porting and playing of
+these games, but understanding and further development. OpenMinotaur unifies these
+titles under a shared reconstruction of the Neon Engine, with games as individual
+modules. It is my hope that, after launch, I can work toward
+building an SDK to support further development of games with this engine.
+
+In addition, I will be sharing tools used in the creation of LiveSynth and
+LiveWidgets for any developers who wish to use these features in their own projects.
+
+Version 0.9.8 is the public beta. The planned 1.0 feature set is in place.
+See the [release notes](RELEASE-NOTES.md) for changes since 0.9.5.
 
 ## Build
 
@@ -96,8 +159,8 @@ Platform and physical-device qualification is ongoing.
 
 ### Standalone games
 
-Set `MINO_STANDALONE_GAME` to build one game without iOX, collection title/
-Light Synth services, CRT/scanline filters or other games' assets:
+Set `MINO_STANDALONE_GAME` to build one game without iOX, the collection title,
+LiveSynth, LiveWidgets, CRT/scanline filters or other games' assets:
 
 ```sh
 cmake -S . -B build-minotron -DMINO_STANDALONE_GAME=minotron -DSDL3_SOURCE_DIR=/path/to/SDL3
@@ -151,8 +214,10 @@ Minotron remembers the last mode used to start a game. Without a saved choice,
 it defaults to Normal with a controller, or Simplified without one.
 
 iOX Options controls aspect, display orientation, filtering, wallpapers and
-controller mapping. Menu focus highlighting appears only with a controller or a
-desktop keyboard; touch-only devices retain normal menu artwork.
+controller mapping. LiveWidgets are on by default and can be toggled under
+**Options → Display**. The available letterbox space and the current game mode
+determine which widgets appear. A controller or desktop keyboard enables menu
+focus highlighting. Touch-only devices retain the normal menu artwork.
 Android phone/tablet-class touchscreen devices default to
 Native orientation: title and iOX follow the device orientation. On first launch,
 landscape with a connected controller instead defaults to Horizontal. The initial
@@ -161,7 +226,12 @@ orientation settings take precedence; desktop and TV-class devices retain the
 Horizontal default. The platform applies device mapping and orientation before
 modules receive input, so games work in their own coordinate systems.
 CRT 1 uses the lighter CRT Consumer S-Video filter; CRT 2 uses CRT Royale.
-Both use flat screens, with scanlines aligned to the screen rather than the game.
+Both use flat screens, with scanlines aligned to the screen.
+
+During a game, press **View / Select** on a controller or **F1** on Windows
+to open the in-game iOX menu. It pauses the game and gives access to **Display**
+and **Control** settings. Use View / Select again to resume or choose **Exit to iOX** to return
+to the launcher. The menu is available with LiveWidgets turned off.
 
 Settings, scores, achievements and saves use SDL's per-user application folder.
 `minotaur --version` prints the release version.
@@ -244,8 +314,8 @@ for world influence. Equal trigger pressure cancels. Minos keeps its face-button
 thrust control. Its pause menu offers phone, tablet and mirrored-tablet touch
 layouts, touch disabling when a controller is connected, and a tilt toggle when
 both tilt and a controller are available. A single visible toggle is centered.
-Controller remapping includes both triggers, Start and Select; existing mappings
-retain their assignments. GoatUp 2 touch controls retain their movement/jump
+Controller remapping includes both triggers and Start. View / Select opens the
+in-game iOX menu. GoatUp 2 touch controls retain their movement/jump
 roles until release and adjust their floating origin only for real return strokes,
 preventing a stationary or jittering hold from fading to zero movement.
 

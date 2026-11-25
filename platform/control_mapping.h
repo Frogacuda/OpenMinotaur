@@ -102,7 +102,8 @@ struct ControlMapping {
         return s.str();
     }
     static float value(const PhysicalPad &pad, int code) {
-        if (!pad.connected || !valid(code))
+        // Keep physical View / Select available to the host, including for old bindings.
+        if (!pad.connected || !valid(code) || code == SDL_GAMEPAD_BUTTON_BACK)
             return 0;
         if (code < 64)
             return pad.buttons[size_t(code)] ? 1.f : 0.f;
@@ -165,7 +166,7 @@ inline constexpr const char *kMappingPrompts[] = {"D-pad Up",
                                                   "Left trigger (LT)",
                                                   "Right trigger (RT)",
                                                   "Start",
-                                                  "Select / Back"};
+                                                  "Back action"};
 class MappingCapture {
   public:
     void begin(int player) {
@@ -195,7 +196,7 @@ class MappingCapture {
         cancelFrames_ = 0;
         int source = -1;
         for (int b = 0; b < SDL_GAMEPAD_BUTTON_COUNT; ++b)
-            if (raw.buttons[b]) {
+            if (b != SDL_GAMEPAD_BUTTON_BACK && raw.buttons[b]) {
                 source = b;
                 break;
             }

@@ -469,8 +469,11 @@ void AuthoringModel::addAuthoringControls(int mode) {
             choice(key,
                    "Layer " + std::to_string(n.stack) + " / node " + std::to_string(node) +
                        " / input " + std::to_string(input + 1) + " layer domain",
-                   {{0, "Automatic"}, {1, "Reference texture tile"}, {2, "Extended scene surface"},
-                    {3, "Extended U / reference V"}, {4, "Reference U / extended V"}},
+                   {{0, "Automatic"},
+                    {1, "Reference texture tile"},
+                    {2, "Extended scene surface"},
+                    {3, "Extended U / reference V"},
+                    {4, "Reference U / extended V"}},
                    0);
             list.back().maximum = 4;
             list.back().layer = n.stack;

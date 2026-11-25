@@ -153,9 +153,9 @@ void checkNode(const Value &node, int &count, int depth) {
                                "rect", "radial"}
                  .count(kind) != 0,
          "Unknown widget object kind: " + kind);
-    for (auto name : {"enabled", "visible", "x", "y", "size", "scale", "rotation", "color",
-                      "opacity", "fill", "font", "fontSize", "when", "value", "items", "where",
-                      "trackColor"})
+    for (auto name :
+         {"enabled", "visible", "x", "y", "size", "scale", "rotation", "color", "opacity", "fill",
+          "font", "fontSize", "when", "value", "items", "where", "trackColor"})
         if (node.object().count(name))
             expression(node.at(name));
     for (auto &p : node.at("inputs").object())
@@ -866,8 +866,8 @@ struct Runtime::Impl {
             draw.segments = int(n.at("segments").number(16));
             const auto track = eval(n.at("trackColor"), s, full + ".trackColor");
             for (size_t channel = 0; channel < draw.trackColor.size(); ++channel)
-                draw.trackColor[channel] = std::clamp(
-                    track.at(channel).number(draw.trackColor[channel]), 0., 1.);
+                draw.trackColor[channel] =
+                    std::clamp(track.at(channel).number(draw.trackColor[channel]), 0., 1.);
         }
         draw.bezelOnly = bezel;
         draw.lineWidth = n.at("lineWidth").number(1);
@@ -878,8 +878,8 @@ struct Runtime::Impl {
         draw.frame = eval(n.at("frame"), s, full + ".frame");
         draw.fit = n.at("fit").string("contain");
         draw.asset = format(n.at("asset").string(), s);
-        draw.font = kind == "text" ? eval(n.at("font"), s, full + ".font").string("neon-hud")
-                                    : "neon-hud";
+        draw.font =
+            kind == "text" ? eval(n.at("font"), s, full + ".font").string("neon-hud") : "neon-hud";
         draw.text = format(n.at("text").string(), s);
         if (!n.at("frames").array().empty()) {
             auto &frames = n.at("frames").array();

@@ -5,6 +5,7 @@
 #include "settings.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 namespace mino {
 inline bool portraitLauncher(Orientation orientation, int windowW, int windowH) {
@@ -27,10 +28,24 @@ inline const char *orientationHint(Orientation orientation, bool launcher, Nativ
 struct Rect {
     int x = 0, y = 0, w = 0, h = 0;
 };
+inline Rect minorolaAround(Rect opening) {
+    // Fit the baked 1360x1020 aperture inside the menu rectangle.
+    const bool upright = opening.h > opening.w;
+    const int apertureLong = upright ? opening.h : opening.w;
+    const int apertureShort = upright ? opening.w : opening.h;
+    const auto scale = std::min(int64_t(apertureLong) * 1020, int64_t(apertureShort) * 1360);
+    const int longSide = int(scale * 1920 / (1360 * 1020));
+    const int shortSide = int(scale * 1080 / (1360 * 1020));
+    const int w = upright ? shortSide : longSide;
+    const int h = upright ? longSide : shortSide;
+    return {opening.x + (opening.w - w) / 2, opening.y + (opening.h - h) / 2, w, h};
+}
 struct DisplayLayout {
     Rect view;
+    Rect minorolaFrame;
     int width = 2, height = 2;
     int turns = 0; // quarter-turns clockwise: -1, 0, +1
+    int minorolaTurns = 0;
     void windowToSurface(float wx, float wy, float *sx, float *sy) const {
         const float u = (wx - view.x) / std::max(1, view.w),
                     v = (wy - view.y) / std::max(1, view.h);
@@ -98,6 +113,32 @@ inline DisplayLayout displayLayout(int windowW, int windowH, NativeFormat native
     if (s.aspect == AspectMode::Fill) {
         vw = ww;
         vh = wh;
+    }
+    if (s.backdrop == Backdrop::Minorola && s.aspect == AspectMode::IPad) {
+        const bool uprightFrame = shownAspect < 1.f;
+        const int longSide = uprightFrame ? wh : ww;
+        const int shortSide = uprightFrame ? ww : wh;
+        if (int64_t(longSide) * 3 > int64_t(shortSide) * 4) {
+            if (int64_t(longSide) * 9 < int64_t(shortSide) * 16) {
+                result.minorolaFrame = minorolaAround({(ww - vw) / 2, (wh - vh) / 2, vw, vh});
+            } else {
+                // At 16:9 and wider (or the portrait equivalent), fit the full handset.
+                // Round the aperture insets down so the overlay covers pixel seams.
+                const int frameLong = int(int64_t(shortSide) * 16 / 9);
+                const int frameShort = shortSide;
+                const int fw = uprightFrame ? frameShort : frameLong;
+                const int fh = uprightFrame ? frameLong : frameShort;
+                result.minorolaFrame = {(ww - fw) / 2, (wh - fh) / 2, fw, fh};
+                const int longInset = int(int64_t(frameLong) * 280 / 1920);
+                const int shortInset = int(int64_t(frameShort) * 30 / 1080);
+                const int openingLong = frameLong - 2 * longInset;
+                const int openingShort = frameShort - 2 * shortInset;
+                vw = uprightFrame ? openingShort : openingLong;
+                vh = uprightFrame ? openingLong : openingShort;
+            }
+            // On a turned cabinet the receiver follows the portrait menu's top edge.
+            result.minorolaTurns = uprightFrame ? 1 : !landscape && result.turns > 0 ? 2 : 0;
+        }
     }
     if (s.matchViewportPixels) {
         result.width = result.turns != 0 ? vh : vw;

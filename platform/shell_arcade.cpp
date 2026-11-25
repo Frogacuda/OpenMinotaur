@@ -15,23 +15,48 @@ namespace {
 constexpr float kStep = 1.f / kAudioRate;
 constexpr float kSaucerSeconds = 3.25f;
 enum Clip {
-    Ting, Jelly, Jump, Pop, Saucer, SaucerShot, MinotronShot, Warp,
-    Zap, Spinner, Powerup, EnemyFire, Bonus, DeflexCSharp, DeflexG, DeflexBleep,
-    Thrust, Landing, ClipCount
+    Ting,
+    Jelly,
+    Jump,
+    Pop,
+    Saucer,
+    SaucerShot,
+    MinotronShot,
+    Warp,
+    Zap,
+    Spinner,
+    Powerup,
+    EnemyFire,
+    Bonus,
+    DeflexCSharp,
+    DeflexG,
+    DeflexBleep,
+    Thrust,
+    Landing,
+    ClipCount
 };
 struct Source {
     const char *game, *file;
 };
 constexpr std::array<Source, ClipCount> kSources{{
-    {"fiveaday", "ting2.wav"}, {"fiveaday", "jellyping.wav"},
-    {"goatup", "jump.wav"}, {"goatup", "pop.wav"},
-    {"minorescue", "bigsaucerloop.wav"}, {"minorescue", "saucershot.wav"},
-    {"minotron", "ltshot.wav"}, {"minotron", "warpoutstart.wav"},
-    {"gridrunner", "zap2.wav"}, {"gridrunner", "spinner_hit.wav"},
-    {"gridrunner", "powerupget.wav"}, {"superoxwars", "eshot.wav"},
-    {"superoxwars", "bonuspip.wav"}, {"deflex", "tone13.wav"},
-    {"deflex", "tone19.wav"}, {"deflex", "bleep.wav"},
-    {"minos", "thrust.wav"}, {"minos", "landingping.wav"},
+    {"fiveaday", "ting2.wav"},
+    {"fiveaday", "jellyping.wav"},
+    {"goatup", "jump.wav"},
+    {"goatup", "pop.wav"},
+    {"minorescue", "bigsaucerloop.wav"},
+    {"minorescue", "saucershot.wav"},
+    {"minotron", "ltshot.wav"},
+    {"minotron", "warpoutstart.wav"},
+    {"gridrunner", "zap2.wav"},
+    {"gridrunner", "spinner_hit.wav"},
+    {"gridrunner", "powerupget.wav"},
+    {"superoxwars", "eshot.wav"},
+    {"superoxwars", "bonuspip.wav"},
+    {"deflex", "tone13.wav"},
+    {"deflex", "tone19.wav"},
+    {"deflex", "bleep.wav"},
+    {"minos", "thrust.wav"},
+    {"minos", "landingping.wav"},
 }};
 struct Event {
     Clip clip = ClipCount;
@@ -45,22 +70,32 @@ struct Phrase {
 // Each row combines actions from one game. The shell schedules the phrases
 // independently, so their dry sounds and reverb tails can overlap.
 constexpr Phrase kPhrases[]{
-    {{{{Jelly, 0, .56f, .94f}, {Ting, 1.30f, .81f, .88f},
-       {Jelly, 2.49f, .60f, .94f}}}, .91f},
-    {{{{Jump, 0, .55f, .91f}, {Pop, .41f, .63f, .96f},
-       {Jump, 1.04f, .77f, .90f}, {Pop, 1.83f, .50f, .96f}}}, .89f},
-    {{{{Saucer, 0, .82f}, {SaucerShot, 1.31f, .24f, .93f},
-       {SaucerShot, 1.72f, .31f, .93f}}}, .91f, true},
-    {{{{MinotronShot, 0, .51f, .96f}, {MinotronShot, .24f, .57f, .96f},
-       {MinotronShot, .88f, .46f, .95f}, {Warp, 2.10f, 1.f}}}, 1.04f},
-    {{{{Zap, 0, .62f, .91f}, {Spinner, .37f, .65f, .93f},
-       {Powerup, 1.54f, .60f, .91f}}}, .77f},
-    {{{{EnemyFire, 0, .52f, .94f}, {EnemyFire, .28f, .65f, .94f},
-       {Bonus, 1.11f, .75f, .91f}, {Bonus, 1.34f, .48f, .91f}}}, .68f},
-    {{{{DeflexCSharp, 0, .65f, .997f}, {DeflexG, .68f, .63f, .999f},
-       {DeflexBleep, 1.56f, .46f, .93f}, {DeflexCSharp, 2.81f, .46f, .997f}}}, .78f},
-    {{{{Thrust, 0, .50f, .95f}, {Thrust, .52f, .33f, .95f},
-       {Landing, 1.72f, .62f}}}, .65f},
+    {{{{Jelly, 0, .56f, .94f}, {Ting, 1.30f, .81f, .88f}, {Jelly, 2.49f, .60f, .94f}}}, .91f},
+    {{{{Jump, 0, .55f, .91f},
+       {Pop, .41f, .63f, .96f},
+       {Jump, 1.04f, .77f, .90f},
+       {Pop, 1.83f, .50f, .96f}}},
+     .89f},
+    {{{{Saucer, 0, .82f}, {SaucerShot, 1.31f, .24f, .93f}, {SaucerShot, 1.72f, .31f, .93f}}},
+     .91f,
+     true},
+    {{{{MinotronShot, 0, .51f, .96f},
+       {MinotronShot, .24f, .57f, .96f},
+       {MinotronShot, .88f, .46f, .95f},
+       {Warp, 2.10f, 1.f}}},
+     1.04f},
+    {{{{Zap, 0, .62f, .91f}, {Spinner, .37f, .65f, .93f}, {Powerup, 1.54f, .60f, .91f}}}, .77f},
+    {{{{EnemyFire, 0, .52f, .94f},
+       {EnemyFire, .28f, .65f, .94f},
+       {Bonus, 1.11f, .75f, .91f},
+       {Bonus, 1.34f, .48f, .91f}}},
+     .68f},
+    {{{{DeflexCSharp, 0, .65f, .997f},
+       {DeflexG, .68f, .63f, .999f},
+       {DeflexBleep, 1.56f, .46f, .93f},
+       {DeflexCSharp, 2.81f, .46f, .997f}}},
+     .78f},
+    {{{{Thrust, 0, .50f, .95f}, {Thrust, .52f, .33f, .95f}, {Landing, 1.72f, .62f}}}, .65f},
 };
 float smooth(float x) {
     x = std::clamp(x, 0.f, 1.f);
@@ -71,8 +106,9 @@ float smooth(float x) {
 // Unequal lengths and damped returns give a diffuse stereo tail.
 class Room {
   public:
-    Room() : lines_{std::vector<float>(2351), std::vector<float>(2969),
-                    std::vector<float>(3529), std::vector<float>(4093)} {}
+    Room()
+        : lines_{std::vector<float>(2351), std::vector<float>(2969), std::vector<float>(3529),
+                 std::vector<float>(4093)} {}
 
     void mix(float inputL, float inputR, float &left, float &right) {
         std::array<float, 4> taps{};
@@ -82,8 +118,8 @@ class Room {
             taps[i] = damped_[i];
         }
         const auto [a, b, c, d] = taps;
-        const std::array<float, 4> feedback{a + b + c + d, a - b + c - d,
-                                           a + b - c - d, a - b - c + d};
+        const std::array<float, 4> feedback{a + b + c + d, a - b + c - d, a + b - c - d,
+                                            a - b - c + d};
         const std::array<float, 4> input{inputL, inputR, -.72f * inputL, -.72f * inputR};
         for (size_t i = 0; i < lines_.size(); ++i) {
             lines_[i][heads_[i]] = .34f * input[i] + .418f * feedback[i];
@@ -141,9 +177,8 @@ struct ShellArcade::State {
                 choices[count++] = int(i);
         if (count == 0 && last >= 0)
             choices[count++] = last;
-        auto slot = std::find_if(passing.begin(), passing.end(), [](const Passing &voice) {
-            return voice.phrase < 0;
-        });
+        auto slot = std::find_if(passing.begin(), passing.end(),
+                                 [](const Passing &voice) { return voice.phrase < 0; });
         if (count == 0 || slot == passing.end()) {
             untilNext = kAudioRate;
             return;
@@ -153,13 +188,14 @@ struct ShellArcade::State {
         const auto &phrase = kPhrases[last];
         const bool moves = phrase.alwaysMoves || unit() < .47f;
         const float drift = moves ? -side * (.43f + .53f * unit()) : 0.f;
-        *slot = {last, 0, duration(last), side * (.31f + .28f * unit()), drift,
-                 phrase.level * (.79f + .33f * unit())};
+        *slot = {last,           0,
+                 duration(last), side * (.31f + .28f * unit()),
+                 drift,          phrase.level * (.79f + .33f * unit())};
         // Short gaps let phrases overlap. Longer gaps give the pad room.
         const float chance = unit();
-        const float seconds = chance < .29f ? 1.3f + 1.1f * unit()
-                            : chance < .89f ? 2.5f + 2.f * unit()
-                                            : 4.6f + 1.4f * unit();
+        const float seconds = chance < .29f   ? 1.3f + 1.1f * unit()
+                              : chance < .89f ? 2.5f + 2.f * unit()
+                                              : 4.6f + 1.4f * unit();
         untilNext = int(seconds * kAudioRate);
     }
 
@@ -198,8 +234,8 @@ struct ShellArcade::State {
         const size_t index = size_t(position);
         const size_t next = index + 1 == pcm.size() ? 0 : index + 1;
         const float fade = loop ? smooth(time / 1.25f) * smooth((kSaucerSeconds - time) / 1.35f)
-                                : smooth(time / .008f) *
-                                      smooth((pcm.size() - 1 - position) / (.066f * source.audio.rate));
+                                : smooth(time / .008f) * smooth((pcm.size() - 1 - position) /
+                                                                (.066f * source.audio.rate));
         const float interpolated = pcm[index] + (pcm[next] - pcm[index]) * (position - index);
         return interpolated * (source.scale * fade * event.gain);
     }

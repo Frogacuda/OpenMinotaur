@@ -15,7 +15,9 @@ struct Clock {
 class Sequencer {
   public:
     void tick(float tempo);
-    const std::array<Clock, 4> &clocks() const { return clocks_; }
+    const std::array<Clock, 4> &clocks() const {
+        return clocks_;
+    }
 
   private:
     float phase_ = 0;

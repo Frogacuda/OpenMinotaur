@@ -4,6 +4,9 @@
 #include <memory>
 namespace mino {
 class ShellAudio;
+class Launcher;
+class Display;
+struct DisplaySettings;
 // Collection-only startup route. Game modules and direct launches bypass it.
 class CollectionTitle final : public Core {
   public:
@@ -24,6 +27,8 @@ class CollectionTitle final : public Core {
     bool back() override;
     void shutdown() override;
     void abandonGraphics();
+    bool handoffActive() const;
+    void presentHandoff(Launcher &, const Display &, const DisplaySettings &);
     uint64_t framePeriodNs() const;
 
   private:

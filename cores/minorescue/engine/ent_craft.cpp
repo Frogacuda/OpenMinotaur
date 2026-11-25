@@ -173,8 +173,7 @@ void spaceCraft::damage() {
         size = 0.04f;
         blowUp(unsigned(neonRand()), 0x100);
         size = 0.02f;
-        if (!g->demo)
-            g->lives[joy]--;
+        g->loseShip(joy);
         if (g->lives[joy] > 0) {
             reSpawn();
             fc = 120;
@@ -380,20 +379,23 @@ void spaceCraft::doAutoPilot() {
 // Rescues shorten the firing interval. Both the interval and relative shot speed
 // depend on distance from the centre, not ship velocity (original owner +0x54).
 // A black hole fixes the cadence's weapon level at 10; shot power stays unchanged.
+int spaceCraftGun::minimumInterval(const spaceWars &game) {
+    return game.sunOn ? 3 : 5;
+}
+
+int spaceCraftGun::shotInterval(const spaceCraft &ship, float distance) {
+    const int weapon = ship.game->blackHole ? 10 : ship.weapon;
+    const int intervalFactor = std::max(5, 30 - 2 * weapon);
+    return int(float(minimumInterval(*ship.game)) + distance * float(intervalFactor));
+}
+
 void spaceCraftGun::run() {
-    craft *c = static_cast<craft *>(owner);
-    spaceWars *g = c->game;
-    int base = g->sunOn ? 3 : 5;
     timer--;
-    int w = static_cast<spaceCraft *>(c)->weapon;
-    if (g->blackHole)
-        w = 10;
     if (timer > 0)
         return;
-    int r = 30 - 2 * w;
-    float f = r < 5 ? 5.0f : float(r);
-    float distance = float(c->pos.length());
-    timer = int(float(base) + distance * f);
+    auto &ship = *static_cast<spaceCraft *>(owner);
+    const float distance = float(ship.pos.length());
+    timer = shotInterval(ship, distance);
     speed = distance * -0.5f + 0.5f;
     shoot();
 }

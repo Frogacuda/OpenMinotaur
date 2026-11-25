@@ -6,11 +6,14 @@
 #include <algorithm>
 
 namespace mino {
-void Launcher::returnHome() {
+void Launcher::returnHome(bool entrance) {
     cancelAppLaunch();
     externalLaunch_ = false;
     navigation_.home();
-    homeEntrance_.start();
+    if (entrance)
+        homeEntrance_.start();
+    else
+        homeEntrance_.finish();
     request_ = {};
     pause(false);
 }
@@ -22,8 +25,29 @@ void Launcher::open(Page destination, int initialFocus) {
 }
 void Launcher::close() {
     pause(false);
+    const bool app = page() == Page::Options || page() == Page::Achievements ||
+                     page() == Page::About || page() == Page::Gridrunner;
+    const bool returning = !gameOptions_ && app && navigation_.depth() == 1 && captureAppPage();
     if (!navigation_.back())
         navigation_.home();
+    if (returning) {
+        launchPage_ = Page::Home;
+        launchFocus_ = focus();
+        appLaunch_.start(true);
+    }
+}
+void Launcher::openGameOptions(bool controls) {
+    returnHome(false);
+    gameOptions_ = true;
+    optionsScreen_.tab = controls ? iox::options::controlsTab : iox::options::screenTab;
+    open(Page::Options, iox::options::firstRow);
+}
+
+void Launcher::closeGameOptions() {
+    if (gameOptions_) {
+        returnHome(false);
+        gameOptions_ = false;
+    }
 }
 void Launcher::selectGame(const std::string &id) {
     for (size_t i = 0; i < kGameCatalog.size(); ++i)
@@ -334,7 +358,7 @@ void Launcher::activate() {
              (page() != pageBefore || focus() != focusBefore || appLaunch_.active() ||
               request_.action != Action::None))
         audio_->play(iox::isOptionsScreen(pageBefore) ? ShellAudio::Cue::Kick
-                                                     : ShellAudio::Cue::Confirm);
+                                                      : ShellAudio::Cue::Confirm);
 }
 void Launcher::activateDialog() {
     if (page() == Page::Quit && focus() == 1)

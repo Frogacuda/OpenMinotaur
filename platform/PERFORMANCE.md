@@ -12,4 +12,10 @@ The collection submits offscreen effect work before touching the window buffer. 
 
 Uniform locations are cached for each linked presentation program and refreshed when graphics resources are recreated. Generated static textures and vector objects retain their source caches. Fixed scenes are prepared offline and include only their required resource closure in the player bundle.
 
+Recovered scenes with matching color-only targets can promote a completed scratch texture to the layer output. Feedback still samples the previous layer during the draw. Each promotion avoids a full-target copy draw. GoatUp uses this for its feedback and tunnel layers, reducing the scene from ten draws to eight per refresh. Super Ox Wars presents the finished layer directly, avoiding four copy draws and a separate editor inspection capture per refresh. An unused vector target is cleared only when switching away from drawn vectors.
+
+Run the graphics checker with `--layer-copy-audit` to count layer-copy draws in
+each shipped bezel, including nested scenes. The audit samples warmed LQ scenes
+and reports the peak per-refresh copy count.
+
 The general Neon SDK retains state preservation and exclusion-area preservation by default. See [the runtime SDK](../modules/neon_background/SDK.md) for its explicit exclusive-pass and whole-output-clear options.

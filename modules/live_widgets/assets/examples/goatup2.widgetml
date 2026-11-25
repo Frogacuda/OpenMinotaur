@@ -1,0 +1,728 @@
+{
+  "widgetML": 1,
+  "region": "bezel",
+  "templates": {
+    "frameBeam": {
+      "kind": "vector",
+      "size": [2, 17],
+      "points": [
+        [0, 0],
+        [0, 16]
+      ],
+      "lineWidth": 1.9,
+      "color": [0.32, 0.65, 0.82, 1],
+      "opacity": 0.6
+    },
+    "bezelFrame": {
+      "kind": "group",
+      "inputs": {
+        "width": 304,
+        "height": 88
+      },
+      "size": [
+        ["get", "width"],
+        ["get", "height"]
+      ],
+      "children": [
+        {
+          "id": "shadow",
+          "kind": "rect",
+          "color": [0, 0, 0, 0.35]
+        },
+        {
+          "id": "top",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "width"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "right",
+          "use": "frameBeam",
+          "x": [
+            "-",
+            ["get", "width"],
+            2
+          ],
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "height"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        },
+        {
+          "id": "bottom",
+          "use": "frameBeam",
+          "x": 2,
+          "y": [
+            "-",
+            ["get", "height"],
+            2
+          ],
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "width"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": -90
+        },
+        {
+          "id": "left",
+          "use": "frameBeam",
+          "x": 2,
+          "y": 2,
+          "scale": [
+            1,
+            [
+              "/",
+              [
+                "-",
+                ["get", "height"],
+                4
+              ],
+              16
+            ]
+          ],
+          "rotation": 0
+        }
+      ]
+    },
+    "cooldown": {
+      "kind": "group",
+      "size": [310, 118],
+      "inputs": {
+        "label": "",
+        "fill": 0,
+        "accent": [0.42, 0.88, 1, 1],
+        "timeText": ""
+      },
+      "children": [
+        {
+          "id": "frame",
+          "use": "bezelFrame",
+          "inputs": {
+            "width": 310,
+            "height": 118
+          }
+        },
+        {
+          "id": "label",
+          "kind": "text",
+          "text": "{label}",
+          "x": 17,
+          "y": 14,
+          "size": [276, 30],
+          "fontSize": 20,
+          "color": [1, 0.87, 0.34, 1],
+          "font": "vectrex-menu",
+          "align": "left"
+        },
+        {
+          "id": "time",
+          "kind": "text",
+          "text": "{timeText}",
+          "x": 17,
+          "y": 64,
+          "size": [155, 36],
+          "fontSize": 26,
+          "color": [0.92, 0.96, 1, 1],
+          "font": "neon-hud",
+          "align": "left"
+        },
+        {
+          "id": "gauge",
+          "kind": "radial",
+          "x": 230,
+          "y": 49,
+          "size": [57, 57],
+          "segments": 24,
+          "fill": ["get", "fill"],
+          "color": ["get", "accent"],
+          "trackColor": [0.15, 0.2, 0.23, 0.62]
+        }
+      ]
+    },
+    "portraitLayout": {
+      "kind": "group",
+      "children": [
+        {
+          "id": "stats",
+          "kind": "group",
+          "placement": {
+            "origin": "screen-bottom-left"
+          },
+          "x": [
+            "*",
+            28,
+            [
+              "coalesce",
+              ["read", "railScale"],
+              1
+            ]
+          ],
+          "y": [
+            "-",
+            [
+              "-",
+              0,
+              [
+                "+",
+                [
+                  "coalesce",
+                  ["read", "portraitInset"],
+                  0
+                ],
+                [
+                  "*",
+                  138,
+                  [
+                    "*",
+                    0.9,
+                    [
+                      "coalesce",
+                      ["read", "railScale"],
+                      1
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            [
+              "*",
+              28,
+              [
+                "coalesce",
+                ["read", "railScale"],
+                1
+              ]
+            ]
+          ],
+          "children": [
+            {
+              "id": "counters",
+              "use": "counters"
+            }
+          ],
+          "scale": [
+            "*",
+            0.9,
+            [
+              "coalesce",
+              ["read", "railScale"],
+              1
+            ]
+          ]
+        },
+        {
+          "id": "portrait-cooldowns",
+          "kind": "group",
+          "placement": {
+            "origin": "screen-bottom-right"
+          },
+          "x": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "*",
+                28,
+                [
+                  "coalesce",
+                  ["read", "railScale"],
+                  1
+                ]
+              ],
+              [
+                "*",
+                310,
+                [
+                  "*",
+                  0.86,
+                  [
+                    "coalesce",
+                    ["read", "railScale"],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "y": [
+            "-",
+            0,
+            [
+              "+",
+              [
+                "+",
+                [
+                  "coalesce",
+                  ["read", "portraitInset"],
+                  0
+                ],
+                [
+                  "*",
+                  118,
+                  [
+                    "*",
+                    0.86,
+                    [
+                      "coalesce",
+                      ["read", "railScale"],
+                      1
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "*",
+                28,
+                [
+                  "coalesce",
+                  ["read", "railScale"],
+                  1
+                ]
+              ]
+            ]
+          ],
+          "children": [
+            {
+              "id": "invincible",
+              "kind": "group",
+              "use": "cooldown",
+              "x": 0,
+              "y": 0,
+              "inputs": {
+                "label": "Invincible",
+                "fill": ["read", "invincibleFill"],
+                "accent": [0.42, 0.88, 1, 1],
+                "timeText": ["read", "invincibleTime"]
+              },
+              "visible": [
+                ">",
+                ["read", "invincibleFill"],
+                0
+              ]
+            },
+            {
+              "id": "unlimited",
+              "kind": "group",
+              "use": "cooldown",
+              "x": [
+                "if",
+                [
+                  ">",
+                  ["read", "invincibleFill"],
+                  0
+                ],
+                -324,
+                0
+              ],
+              "y": 0,
+              "inputs": {
+                "label": "Unlimited Fart",
+                "fill": ["read", "unlimitedFill"],
+                "accent": [1, 0.61, 0.32, 1],
+                "timeText": ["read", "unlimitedTime"]
+              },
+              "visible": [
+                ">",
+                ["read", "unlimitedFill"],
+                0
+              ]
+            },
+            {
+              "id": "notice",
+              "kind": "group",
+              "x": [
+                "if",
+                [
+                  ">",
+                  ["read", "invincibleFill"],
+                  0
+                ],
+                -324,
+                0
+              ],
+              "y": 21,
+              "size": [310, 97],
+              "visible": ["read", "blocked"],
+              "children": [
+                {
+                  "id": "frame",
+                  "use": "bezelFrame",
+                  "inputs": {
+                    "width": 310,
+                    "height": 97
+                  }
+                },
+                {
+                  "id": "label",
+                  "kind": "text",
+                  "text": "Fart Disabled",
+                  "x": 17,
+                  "y": 16,
+                  "size": [276, 31],
+                  "fontSize": 21,
+                  "color": [1, 0.87, 0.34, 1],
+                  "font": "vectrex-menu",
+                  "align": "left"
+                },
+                {
+                  "id": "hint",
+                  "kind": "text",
+                  "text": "Find Vindaloo",
+                  "x": 17,
+                  "y": 51,
+                  "size": [276, 31],
+                  "fontSize": 21,
+                  "color": [1, 0.61, 0.32, 1],
+                  "font": "neon-hud",
+                  "align": "left"
+                }
+              ]
+            }
+          ],
+          "scale": [
+            "*",
+            0.86,
+            [
+              "coalesce",
+              ["read", "railScale"],
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    "counters": {
+      "kind": "group",
+      "size": [392, 138],
+      "children": [
+        {
+          "id": "frame",
+          "use": "bezelFrame",
+          "inputs": {
+            "width": 392,
+            "height": 138
+          }
+        },
+        {
+          "id": "label-0",
+          "kind": "text",
+          "text": "Objects",
+          "x": 18,
+          "y": 14,
+          "size": [202, 34],
+          "fontSize": 22,
+          "color": [1, 0.87, 0.34, 1],
+          "font": "vectrex-menu",
+          "align": "left"
+        },
+        {
+          "id": "value-0",
+          "kind": "text",
+          "text": "{objects}",
+          "x": 237,
+          "y": 12,
+          "size": [135, 37],
+          "fontSize": [
+            "coalesce",
+            ["read", "countSize"],
+            27
+          ],
+          "color": [0.42, 0.88, 1, 1],
+          "font": "neon-hud",
+          "align": "right"
+        },
+        {
+          "id": "label-1",
+          "kind": "text",
+          "text": "Minotaurs",
+          "x": 18,
+          "y": 53,
+          "size": [202, 34],
+          "fontSize": 22,
+          "color": [1, 0.87, 0.34, 1],
+          "font": "vectrex-menu",
+          "align": "left"
+        },
+        {
+          "id": "value-1",
+          "kind": "text",
+          "text": "{minotaurs}",
+          "x": 237,
+          "y": 51,
+          "size": [135, 37],
+          "fontSize": [
+            "coalesce",
+            ["read", "countSize"],
+            27
+          ],
+          "color": [0.42, 0.88, 1, 1],
+          "font": "neon-hud",
+          "align": "right"
+        },
+        {
+          "id": "label-2",
+          "kind": "text",
+          "text": "Tail Size",
+          "x": 18,
+          "y": 92,
+          "size": [202, 34],
+          "fontSize": 22,
+          "color": [1, 0.87, 0.34, 1],
+          "font": "vectrex-menu",
+          "align": "left"
+        },
+        {
+          "id": "value-2",
+          "kind": "text",
+          "text": "{tail}",
+          "x": 237,
+          "y": 90,
+          "size": [135, 37],
+          "fontSize": [
+            "coalesce",
+            ["read", "countSize"],
+            27
+          ],
+          "color": [0.42, 0.88, 1, 1],
+          "font": "neon-hud",
+          "align": "right"
+        }
+      ],
+      "inputs": {
+        "objects": ["read", "objects"],
+        "minotaurs": ["read", "minotaurs"],
+        "tail": ["read", "tail"]
+      }
+    }
+  },
+  "root": {
+    "id": "goatup2",
+    "kind": "group",
+    "children": [
+      {
+        "id": "stats",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-top-right"
+        },
+        "x": [
+          "-",
+          0,
+          [
+            "+",
+            [
+              "coalesce",
+              ["read", "landscapeInset"],
+              0
+            ],
+            [
+              "*",
+              420,
+              [
+                "coalesce",
+                ["read", "railScale"],
+                1
+              ]
+            ]
+          ]
+        ],
+        "y": [
+          "*",
+          28,
+          [
+            "coalesce",
+            ["read", "railScale"],
+            1
+          ]
+        ],
+        "children": [
+          {
+            "id": "counters",
+            "use": "counters"
+          }
+        ],
+        "scale": [
+          "coalesce",
+          ["read", "railScale"],
+          1
+        ]
+      },
+      {
+        "id": "landscape-cooldowns",
+        "kind": "group",
+        "placement": {
+          "origin": "screen-bottom-right"
+        },
+        "x": [
+          "-",
+          0,
+          [
+            "+",
+            [
+              "coalesce",
+              ["read", "landscapeInset"],
+              0
+            ],
+            [
+              "*",
+              338,
+              [
+                "coalesce",
+                ["read", "railScale"],
+                1
+              ]
+            ]
+          ]
+        ],
+        "y": [
+          "-",
+          0,
+          [
+            "*",
+            146,
+            [
+              "coalesce",
+              ["read", "railScale"],
+              1
+            ]
+          ]
+        ],
+        "children": [
+          {
+            "id": "invincible",
+            "kind": "group",
+            "use": "cooldown",
+            "x": 0,
+            "y": 0,
+            "inputs": {
+              "label": "Invincible",
+              "fill": ["read", "invincibleFill"],
+              "accent": [0.42, 0.88, 1, 1],
+              "timeText": ["read", "invincibleTime"]
+            },
+            "visible": [
+              ">",
+              ["read", "invincibleFill"],
+              0
+            ]
+          },
+          {
+            "id": "unlimited",
+            "kind": "group",
+            "use": "cooldown",
+            "x": 0,
+            "y": [
+              "if",
+              [
+                ">",
+                ["read", "invincibleFill"],
+                0
+              ],
+              -132,
+              0
+            ],
+            "inputs": {
+              "label": "Unlimited Fart",
+              "fill": ["read", "unlimitedFill"],
+              "accent": [1, 0.61, 0.32, 1],
+              "timeText": ["read", "unlimitedTime"]
+            },
+            "visible": [
+              ">",
+              ["read", "unlimitedFill"],
+              0
+            ]
+          },
+          {
+            "id": "notice",
+            "kind": "group",
+            "x": 0,
+            "y": [
+              "if",
+              [
+                ">",
+                ["read", "invincibleFill"],
+                0
+              ],
+              -111,
+              21
+            ],
+            "size": [310, 97],
+            "visible": ["read", "blocked"],
+            "children": [
+              {
+                "id": "frame",
+                "use": "bezelFrame",
+                "inputs": {
+                  "width": 310,
+                  "height": 97
+                }
+              },
+              {
+                "id": "label",
+                "kind": "text",
+                "text": "Fart Disabled",
+                "x": 17,
+                "y": 16,
+                "size": [276, 31],
+                "fontSize": 21,
+                "color": [1, 0.87, 0.34, 1],
+                "font": "vectrex-menu",
+                "align": "left"
+              },
+              {
+                "id": "hint",
+                "kind": "text",
+                "text": "Find Vindaloo",
+                "x": 17,
+                "y": 51,
+                "size": [276, 31],
+                "fontSize": 21,
+                "color": [1, 0.61, 0.32, 1],
+                "font": "neon-hud",
+                "align": "left"
+              }
+            ]
+          }
+        ],
+        "scale": [
+          "coalesce",
+          ["read", "railScale"],
+          1
+        ]
+      }
+    ]
+  }
+}

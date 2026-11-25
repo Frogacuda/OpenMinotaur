@@ -32,7 +32,9 @@ class SceneAuthoring {
     virtual void sceneName(int, const std::string &) = 0;
     virtual std::vector<std::pair<int, std::string>> layers(int) const = 0;
     virtual std::string validateAuthoring(int) = 0;
-    virtual std::string prepareMaterialEdit(int, const std::string &) { return {}; }
+    virtual std::string prepareMaterialEdit(int, const std::string &) {
+        return {};
+    }
     virtual void writeEdits(std::ostream &) const = 0;
     virtual void readEdits(std::istream &) = 0;
 };

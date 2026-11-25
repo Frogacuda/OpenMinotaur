@@ -474,8 +474,12 @@ std::string ComponentScene::validate() const {
                 return "Non-finite component parameter.";
         for (auto f : componentFields(c.kind)) {
             if (c.shader == 94 || c.shader == 95) {
-                if (f.field == C1) f.maximum = 4;
-                if (f.field == C4 || f.field == C5) { f.minimum = -4; f.maximum = 4; }
+                if (f.field == C1)
+                    f.maximum = 4;
+                if (f.field == C4 || f.field == C5) {
+                    f.minimum = -4;
+                    f.maximum = 4;
+                }
             }
             if (c.values[f.field] < f.minimum || c.values[f.field] > f.maximum)
                 return "Component parameter outside supported range.";

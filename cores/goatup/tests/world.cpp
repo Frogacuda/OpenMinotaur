@@ -532,6 +532,24 @@ void donkeyZone() {
     world.denizens.hit(0, 1, {});
     check(world.game.climbSpeed == speed * .5f && world.kidState.statusKind == 0,
           "Speed pickup applies native response and local status");
+    const auto slowdown = size_t(goatup::WidgetEffect::SlowDown);
+    check(world.actors.slowDownRemaining == 1 && world.actors.effectOrder[slowdown] > 0,
+          "Slow Down starts with a full meter and records its activation");
+    world.game.climbSpeed += world.actors.slowDownDeficit * .5f;
+    world.actors.updateSlowDownMeter();
+    check(std::abs(world.actors.slowDownRemaining - .5f) < 1e-6f,
+          "Slow Down drains with speed recovery");
+    world.game.targetClimbSpeed += .001f;
+    world.actors.updateSlowDownMeter();
+    check(std::abs(world.actors.slowDownRemaining - .5f) < 1e-6f,
+          "A higher target speed does not refill the meter");
+    world.game.climbSpeed = world.game.targetClimbSpeed;
+    world.actors.updateSlowDownMeter();
+    world.game.climbSpeed = speed;
+    world.game.targetClimbSpeed = .003f;
+    world.actors.updateSlowDownMeter();
+    check(world.actors.slowDownRemaining == 0,
+          "The meter expires at target speed and stays expired");
     world.denizens.reset();
     world.denizens.create({goatup::PlatformBirth::Kind::Goody2049, &p, 0, 89, -1, 0, -.05f});
     world.denizens.tick();
@@ -541,6 +559,9 @@ void donkeyZone() {
     world.denizens.hit(0, 2, {});
     check(world.actors.hazardGrace == 350 && world.actors.hazardWarning == 262,
           "Goody protects the player with native warning timing");
+    check(world.actors.effectOrder[size_t(goatup::WidgetEffect::Protection)] >
+              world.actors.effectOrder[slowdown],
+          "Later pickups have a newer cooldown order");
     world.denizens.reset();
     world.game.gameOver = false;
     world.denizens.create({goatup::PlatformBirth::Kind::Baddy2049, &p, 0, 85, -1, .001});

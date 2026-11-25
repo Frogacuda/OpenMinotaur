@@ -35,7 +35,9 @@ class bull; // only ever an entity in practice (the parameter type of wasShot)
 int *extractScore(int *buf, int n, int value, int suffix);
 
 // Float lerp used by particles: a + (b - a) * t.
-inline float lerp(float a, float b, float t) { return a + (b - a) * t; }
+inline float lerp(float a, float b, float t) {
+    return a + (b - a) * t;
+}
 
 // --------------------------------------------------------- controlBlock ----
 
@@ -61,10 +63,17 @@ class controlBlock : public neon::input::TouchState<vec2d> {
     void addEntity(entity *e, entity **list);
     void joyWatchdog();
     int collide(entity *a, entity *list, bool bounce);
-    int touch(entity *a, entity *list) { return collide(a, list, false); }
+    int touch(entity *a, entity *list) {
+        return collide(a, list, false);
+    }
 
     // save data (the shell owns the buffer; see MinotronSave)
-    int &sd(int off) { return *reinterpret_cast<int *>(saveData + off); }
+    int &sd(int off) {
+        return *reinterpret_cast<int *>(saveData + off);
+    }
+    int sd(int off) const {
+        return *reinterpret_cast<const int *>(saveData + off);
+    }
 
     int bgLayer = -1;                 // 0x08 cellGrid background layer (-1 none)
     float fbColour[4] = {0, 0, 0, 0}; // 0x0c feedback tint (Mixer shader 1)
@@ -236,6 +245,9 @@ class theGame : public controlBlock {
     int &best(int mode, int levelIndex, int k) {
         return sd(((mode * 100 + levelIndex) * 8) + k * 4);
     }
+    int best(int mode, int levelIndex, int k) const {
+        return sd(((mode * 100 + levelIndex) * 8) + k * 4);
+    }
 
     bool gridConfigured = false;
     bool isPad = false; // 0x2ed iPad (4 players)
@@ -301,6 +313,9 @@ class theGame : public controlBlock {
     colour gcol[16];
     int restarts = 0; // 0x118c restarts this level
     int bombsCollected = 0, pickupBonusIndex = 0;
+    static constexpr int pickupHistorySize = 5;
+    int pickupsThisLevel = 0, pickupHistoryCount = 0;
+    int pickupHistory[pickupHistorySize] = {};
     int f1198[4] = {}; // 0x1198
     int deathsThisRun = 0, rescuedAllBeforeKills = 0, bonusPickupChain = 0;
     bool movementTouchStarted = false; // 0x11b4 a movement touch went down (aiDroid)

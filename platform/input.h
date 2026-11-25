@@ -16,6 +16,9 @@ class Input {
     void init();
     void shutdown();
     bool enableMotion(bool enabled);
+    bool motionEnabled() const {
+        return accelerometer_ != nullptr;
+    }
     MotionState motion(SDL_Window *window) const;
     MotionState rawMotion() const;
     bool calibrateTilt() {

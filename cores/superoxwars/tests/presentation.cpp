@@ -1,5 +1,6 @@
 #include "world.h"
 #include "superoxwars_presentation.h"
+#include "superoxwars_widgets.h"
 #include "scene.h"
 #include "ground.h"
 #include "air_enemy.h"
@@ -50,6 +51,40 @@ int main() {
                       std::get<double>(values.values.at("world.tilt")) == -.75 &&
                       values.session == 4,
                   "Read-only bezel snapshot");
+        }
+        for (int area = 0; area < Scene::SupportedAreas; ++area) {
+            World world;
+            Scene scene(world);
+            scene.start(area);
+            while (!scene.bossPhase &&
+                   scene.terrain.worldRow < int(original::RowsLength[size_t(area)]))
+                scene.terrain.scroll(1.f);
+            const auto &expected = WidgetCourses[size_t(area)];
+            check(scene.bossPhase && scene.terrain.worldRow == expected.bossRow &&
+                      world.blueTotal == expected.blue && world.redTotal == expected.red,
+                  "Baked widget totals match native terrain generation through the boss rows");
+        }
+        {
+            World world;
+            Scene scene(world);
+            scene.start(0);
+            Records records;
+            world.polarity = -.5f;
+            world.blueTotal = 7;
+            world.blueRemaining = 4;
+            scene.terrain.worldRow = 121;
+            auto *follower = new Follower(world, 28);
+            follower->lifetime = .75f;
+            world.add(Domain::Decor, follower);
+            const auto sample = widgetSnapshot(world, scene, records, 4, false);
+            check(sample.gameplay && std::get<int64_t>(sample.values.at("blueCleared")) == 3 &&
+                      std::get<int64_t>(sample.values.at("blueTotal")) == 17 &&
+                      std::get<double>(sample.values.at("areaProgress")) == .5 &&
+                      sample.collections.at("followers").front().value == 7500,
+                  "Widget state combines baked totals with live progress and follower timers");
+            world.player->state = Ship::State::Hit;
+            check(widgetSnapshot(world, scene, records, 4, false).collections.empty(),
+                  "Follower slots clear on ship loss");
         }
         auto contact = std::make_unique<World>();
         Entity source(*contact);

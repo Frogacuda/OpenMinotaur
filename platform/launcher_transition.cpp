@@ -36,7 +36,7 @@ bool LauncherTransition::prepare(Launcher &launcher, int width, int height,
         return false;
     width_ = width;
     height_ = height;
-    source_.configure(width, height, launcher.nativeFormat(), settings);
+    launcher.configureDisplay(source_, width, height, settings);
     if (!source_.error().empty()) {
         source_.shutdown();
         return false;
@@ -135,18 +135,25 @@ bool LauncherTransition::playRendered(Display &target, SDL_Window *window, bool 
                                       const FrameObserver &observer) {
     return pending() && play(target, window, quit, observer);
 }
+bool LauncherTransition::playReturn(Display &target, SDL_Window *window, bool &quit,
+                                    const FrameObserver &observer) {
+    return pending() && play(target, window, quit, observer, true);
+}
 bool LauncherTransition::play(Display &target, SDL_Window *window, bool &quit,
-                              const FrameObserver &observer) {
+                              const FrameObserver &observer, bool reverse) {
     const auto context = SDL_GL_GetCurrentContext();
     const auto start = SDL_GetTicksNS();
-    bool first = true;
+    bool first = true, completed = false;
     do {
-        const float p = first ? 0.f
-                              : float(std::min(1.0, double(SDL_GetTicksNS() - start) / 1e9 /
-                                                        iox::AppLaunch::seconds));
-        first = false;
+        const float elapsed = first ? 0.f
+                                    : float(std::min(1.0, double(SDL_GetTicksNS() - start) / 1e9 /
+                                                              iox::AppLaunch::seconds));
+        const float p = reverse ? 1 - elapsed : elapsed;
         // Reuse normal fitting, output rotation, CRT/filter and bezel composition.
-        target.present(framebuffer_);
+        // On return, keep the outgoing game frame frozen throughout the shrink.
+        if (first || !reverse)
+            target.present(framebuffer_);
+        first = false;
         launcher_->resize(source_.surface());
         launcher_->externalLaunchProgress(p);
         source_.beginFrame();
@@ -179,7 +186,7 @@ bool LauncherTransition::play(Display &target, SDL_Window *window, bool &quit,
         glUniform1f(glGetUniformLocation(program_, "uAlpha"), iox::AppLaunch::imageProgress(p));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         if (observer)
-            observer(p);
+            observer(elapsed);
         SDL_GL_SwapWindow(window);
         SDL_PumpEvents();
         SDL_Event event;
@@ -202,14 +209,15 @@ bool LauncherTransition::play(Display &target, SDL_Window *window, bool &quit,
         const bool background =
             SDL_PeepEvents(&event, 1, SDL_PEEKEVENT, SDL_EVENT_WILL_ENTER_BACKGROUND,
                            SDL_EVENT_DID_ENTER_BACKGROUND) > 0;
-        if (p >= 1 || quit || background || width != width_ || height != height_)
+        completed = elapsed >= 1;
+        if (completed || quit || background || width != width_ || height != height_)
             break;
         SDL_Delay(1);
     } while (true);
     launcher_->externalLaunchProgress(-1);
     launcher_->resize(target.surface());
     cancel();
-    return true;
+    return !reverse || completed;
 }
 void LauncherTransition::cancel() {
     if (launcher_)

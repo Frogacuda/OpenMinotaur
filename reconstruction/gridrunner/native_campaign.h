@@ -81,7 +81,9 @@ class Campaign final : public HeadWorld {
     void achievement(int32_t) override;
     LevelProgram program;
     Ship *currentShip() const;
-    const std::vector<CollectedPickup> &recentPickups() const { return recentPickups_; }
+    const std::vector<CollectedPickup> &recentPickups() const {
+        return recentPickups_;
+    }
     void makePod(Vec2, bool) override;
     void score(int32_t) override;
     void sound(int32_t) override;
